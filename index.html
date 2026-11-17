@@ -485,6 +485,53 @@
         let authGameChoice = 'quarto';
         let authModeChoice = 1;
 
+        function setGameType(type) {
+            currentGame = type;
+            const btnQ = document.getElementById('game-btn-quarto');
+            const btnT = document.getElementById('game-btn-twixt');
+            const btnM = document.getElementById('game-btn-muhle');
+            const btnC = document.getElementById('game-btn-connect4');
+            const deckSettings = document.getElementById('deck-mode-settings');
+            const deckPresets = document.getElementById('deck-presets-container');
+
+            [btnQ, btnT, btnM, btnC].forEach(b => {
+                if (b) b.className = "p-3 rounded-2xl border text-center transition flex flex-col items-center space-y-1 bg-slate-900 border-slate-800 text-slate-300 hover:border-cyan-700";
+            });
+
+            if (type === 'quarto') {
+                btnQ.className = "p-3 rounded-2xl border text-center transition flex flex-col items-center space-y-1 bg-cyan-600/30 border-cyan-500 text-cyan-100 shadow-md";
+                document.getElementById('mode-subtitle').innerText = `${numDecks} Deck(s) Quarto`;
+                document.getElementById('header-game-icon').className = "fa-solid fa-cube text-white text-lg";
+                deckSettings.classList.remove('hidden');
+                deckPresets.classList.remove('hidden');
+            } else if (type === 'twixt') {
+                btnT.className = "p-3 rounded-2xl border text-center transition flex flex-col items-center space-y-1 bg-cyan-600/30 border-cyan-500 text-cyan-100 shadow-md";
+                document.getElementById('mode-subtitle').innerText = 'Twixt Connection';
+                document.getElementById('header-game-icon').className = "fa-solid fa-bridge text-white text-lg";
+                deckSettings.classList.add('hidden');
+                deckPresets.classList.add('hidden');
+            } else if (type === 'muhle') {
+                btnM.className = "p-3 rounded-2xl border text-center transition flex flex-col items-center space-y-1 bg-cyan-600/30 border-cyan-500 text-cyan-100 shadow-md";
+                document.getElementById('mode-subtitle').innerText = `${numDecks} Deck(s) Mühle`;
+                document.getElementById('header-game-icon').className = "fa-solid fa-chess-board text-white text-lg";
+                deckSettings.classList.remove('hidden');
+                deckPresets.classList.remove('hidden');
+            } else if (type === 'connect4') {
+                btnC.className = "p-3 rounded-2xl border text-center transition flex flex-col items-center space-y-1 bg-cyan-600/30 border-cyan-500 text-cyan-100 shadow-md";
+                document.getElementById('mode-subtitle').innerText = `${numDecks} Deck(s) 4gewinnt`;
+                document.getElementById('header-game-icon').className = "fa-solid fa-grip text-white text-lg";
+                deckSettings.classList.remove('hidden');
+                deckPresets.classList.remove('hidden');
+            }
+
+            loadActiveGameScene();
+        }
+
+        function openAuthModalFromMenu() {
+            closeMasterMenu();
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
         function initApp() {
             initSpeech();
             init3D();

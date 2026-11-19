@@ -3,39 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intelligames - 3D Strategy Arena</title>
-    <!-- Tailwind CSS -->
+    <title>Intelligames 3D Arena</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Three.js and OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        cyber: { 50: '#fdfdfd', 500: '#10b981', 650: '#059669', 900: '#064e3b' },
-                        neon: { cyan: '#22d3ee', purple: '#c084fc', amber: '#fbbf24' }
-                    }
-                }
-            }
-        }
-    </script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #030712; color: #f3f4f6; overflow: hidden; }
-        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
-        .ui-layer { position: relative; z-index: 10; pointer-events: none; }
+        body { font-family: 'Inter', sans-serif; background-color: #030712; color: #f3f4f6; overflow: hidden; margin: 0; padding: 0; }
+        #canvas-container { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1; pointer-events: auto; }
+        .ui-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
         .interactive { pointer-events: auto; }
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .glow-cyan { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+        .glass-panel { background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glow-cyan { box-shadow: 0 0 25px rgba(34, 211, 238, 0.35); }
     </style>
 </head>
-<body class="h-full flex flex-col">
+<body class="h-full flex flex-col m-0 p-0 overflow-hidden">
 
     <!-- 3D Canvas Container -->
     <div id="canvas-container"></div>
@@ -44,293 +30,500 @@
     <div class="ui-layer h-full w-full flex flex-col justify-between pointer-events-none select-none">
 
         <!-- AUTH & GAME SELECTION GATEWAY -->
-        <div id="auth-screen" class="absolute inset-0 z-50 flex items-center justify-center bg-gray-950/90 backdrop-blur-md interactive">
-            <div class="glass-panel p-8 rounded-2xl w-full max-w-xl shadow-2xl border border-cyan-500/30 flex flex-col space-y-6">
-                <div class="text-center">
-                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-                        <i class="fa-solid fa-cube mr-2"></i> INTELLIGAMES 3D
-                    </h1>
-                    <p class="text-gray-400 text-sm mt-1">Advanced 3D Multi-Deck Abstract Strategy Arena</p>
+        <div id="auth-screen" class="absolute inset-0 z-50 flex items-center justify-center bg-gray-950/92 backdrop-blur-md interactive p-4">
+            <div class="glass-panel p-8 rounded-2xl w-full max-w-md shadow-2xl border border-cyan-500/40 space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg glow-cyan">
+                        <i class="fa-solid fa-cube text-3xl text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-wide">Intelligames 3D</h1>
+                    <p class="text-xs text-cyan-300">Next-Gen Multi-Board Strategy Arena</p>
                 </div>
 
+                <!-- Tabs -->
                 <div class="flex border-b border-gray-800">
-                    <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 pb-3 text-cyan-400 font-semibold border-b-2 border-cyan-400 transition">Login</button>
-                    <button onclick="switchAuthTab('register')" id="tab-register" class="flex-1 pb-3 text-gray-400 font-medium hover:text-gray-200 transition">Register</button>
+                    <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 pb-2 text-xs font-bold text-cyan-400 border-b-2 border-cyan-400 transition">Log In</button>
+                    <button onclick="switchAuthTab('register')" id="tab-register" class="flex-1 pb-2 text-xs font-semibold text-gray-400 border-b-2 border-transparent transition">Register</button>
                 </div>
 
-                <!-- Form Area -->
+                <!-- Form -->
                 <div id="auth-form-container" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Username / Player ID</label>
-                        <input type="text" id="auth-username" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-400" placeholder="Enter player name...">
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Username / Player ID</label>
+                        <input type="text" id="auth-user" placeholder="e.g. MasterGamer" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500 transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Password</label>
-                        <input type="password" id="auth-password" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-400" placeholder="••••••••">
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Security PIN / Password</label>
+                        <input type="password" id="auth-pass" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500 transition">
                     </div>
 
-                    <!-- Game Selection -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Select Game</label>
-                        <select id="auth-game-select" onchange="onAuthGameChange()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-400">
-                            <option value="quarto">Quarto (4-Trait Strategy)</option>
-                            <option value="twixt">Twixt (Bridge Connection)</option>
-                            <option value="muhle">Mühle (Nine Men's Morris)</option>
-                            <option value="fourgewinnt">4gewinnt (Connect 4)</option>
-                        </select>
-                    </div>
+                    <div id="auth-error-msg" class="text-xs text-rose-400 font-semibold hidden text-center bg-rose-950/50 border border-rose-500/30 py-2 px-3 rounded-xl"></div>
 
-                    <!-- Mode Selection -->
-                    <div id="auth-deck-selector-container">
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Game Configuration (Decks/Boards)</label>
-                        <select id="auth-deck-select" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-400">
-                            <option value="1">1 Deck (Standard Flat Board)</option>
-                            <option value="2">2 Decks (Double Vertical Stack)</option>
-                            <option value="3">3 Decks (Star Trek 3D Triple Stack)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Opponent Mode</label>
-                        <select id="auth-opponent-mode" onchange="onAuthOpponentChange()" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-400">
-                            <option value="pvp">Two Player (Local / Hotseat)</option>
-                            <option value="pve">Single Player vs AI</option>
-                        </select>
-                    </div>
-
-                    <div id="auth-ai-difficulty-wrapper" class="hidden">
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">AI Difficulty</label>
-                        <select id="auth-ai-difficulty" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-400">
-                            <option value="easy">Easy (Casual)</option>
-                            <option value="medium" selected>Medium (Standard)</option>
-                            <option value="hard">Hard (Grandmaster AI)</option>
-                        </select>
-                    </div>
-
-                    <button onclick="handleAuthSubmit()" id="auth-submit-btn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-lg shadow-lg transition transform active:scale-95">
-                        Launch Into Intelligames Arena
+                    <button id="auth-submit-btn" onclick="handleAuthentication()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
+                        Log In
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- TOP BAR: HEADER & CONTROLS -->
-        <header class="w-full p-4 flex justify-between items-center interactive bg-gray-900/80 backdrop-blur border-b border-gray-800">
-            <div class="flex items-center space-x-4">
-                <button onclick="openMasterMenu()" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-cyan-400 font-semibold border border-cyan-500/30 transition flex items-center space-x-2">
-                    <i class="fa-solid fa-bars"></i>
-                    <span>Master Menu</span>
+        <!-- POST-LOGIN GAME SELECTION LOBBY MODAL -->
+        <div id="game-lobby-modal" class="absolute inset-0 z-50 flex items-center justify-center bg-gray-950/90 backdrop-blur-md hidden interactive p-4">
+            <div class="glass-panel p-8 rounded-2xl w-full max-w-md shadow-2xl border border-cyan-500/40 space-y-6">
+                <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-white tracking-wide">Select Your Match</h2>
+                        <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-0.5">Configure game, mode, and difficulty</p>
+                    </div>
+                    <button onclick="logoutUser()" class="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-gray-300 rounded-xl text-xs border border-gray-800 transition" title="Log Out">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Log Out
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-cyan-300 mb-1.5">Choose Game</label>
+                        <select id="select-game" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="quarto">Quarto 3D (Logic & Geometry)</option>
+                            <option value="startrek">Star Trek Tri-D Chess (3D Multi-Level)</option>
+                            <option value="twixt">Twixt 3D (Bridging Links)</option>
+                            <option value="muhle">Mühle 3D (Nine Men's Morris)</option>
+                            <option value="fourgewinnt">4gewinnt 3D (Connect 4)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-cyan-300 mb-1.5">Game Mode</label>
+                        <select id="select-mode" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="pvp">Two Player (PvP)</option>
+                            <option value="pve">Vs Computer (PvE)</option>
+                        </select>
+                    </div>
+
+                    <div id="ai-difficulty-container" class="hidden">
+                        <label class="block text-xs font-medium text-purple-300 mb-1.5">AI Difficulty Level</label>
+                        <select id="select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+                            <option value="easy">Easy (Casual)</option>
+                            <option value="medium" selected>Medium (Tactical)</option>
+                            <option value="hard">Hard (Grandmaster)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2 space-y-2.5">
+                    <button onclick="launchSelectedGame()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
+                        <i class="fa-solid fa-play mr-1.5"></i> Launch 3D Arena
+                    </button>
+                    <button id="lobby-master-btn" onclick="openMasterMenuFromLobby()" class="hidden w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 font-semibold rounded-xl text-xs transition">
+                        <i class="fa-solid fa-user-shield mr-1.5"></i> Manage Users (Master Admin)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP NAVIGATION & STATUS BAR -->
+        <header class="w-full p-4 flex items-center justify-between interactive">
+            <div class="flex items-center space-x-3 glass-panel px-4 py-2 rounded-2xl shadow-xl">
+                <button onclick="openMasterMenu()" class="text-cyan-400 hover:text-cyan-300 transition" title="Master Menu">
+                    <i class="fa-solid fa-bars text-lg"></i>
                 </button>
-                <div>
-                    <h2 id="current-game-title" class="text-lg font-bold text-white tracking-wide">Quarto 3D Arena</h2>
-                    <p id="current-player-display" class="text-xs text-cyan-400 font-medium">Logged in: Player 1</p>
-                </div>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <h2 id="current-game-title" class="text-sm font-bold text-white tracking-wide">Quarto 3D Arena</h2>
+                <span class="text-xs text-gray-400 hidden sm:inline" id="user-display-badge">| Logged in</span>
             </div>
 
-            <!-- Viewpoint Presets & Deck Controls -->
-            <div class="flex items-center space-x-2 bg-gray-950/60 p-1.5 rounded-xl border border-gray-800">
-                <button onclick="setCameraView('3d')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-bold text-gray-200 transition">3D View</button>
-                <button onclick="setCameraView('d1')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-bold text-cyan-400 transition">Deck 1</button>
-                <button onclick="setCameraView('d2')" id="btn-view-d2" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-bold text-purple-400 transition">Deck 2</button>
-                <button onclick="setCameraView('d3')" id="btn-view-d3" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-bold text-amber-400 transition">Deck 3</button>
-            </div>
-
-            <div class="flex items-center space-x-3">
-                <div class="text-right">
-                    <div id="score-display" class="text-sm font-bold text-white">P1: 0 | P2: 0</div>
-                    <div id="turn-status" class="text-xs text-cyan-300 animate-pulse">Choose piece for opponent</div>
-                </div>
-                <button onclick="openInstructions()" class="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300 flex items-center justify-center border border-gray-700" title="Instructions & Rules">
-                    <i class="fa-solid fa-circle-question"></i>
+            <!-- Score & Turn Indicator -->
+            <div class="glass-panel px-4 py-2 rounded-2xl flex items-center space-x-4 shadow-xl">
+                <div class="text-xs font-semibold text-cyan-300" id="score-display">P1: 0 | P2: 0</div>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <div id="turn-status" class="text-xs font-bold text-white">Player 1's turn: Choose piece for opponent</div>
+                <div class="h-4 w-px bg-gray-700"></div>
+                <button onclick="openInstructionsModal()" class="text-gray-400 hover:text-white transition" title="Rules & Instructions">
+                    <i class="fa-solid fa-circle-question text-base"></i>
                 </button>
             </div>
         </header>
 
-        <!-- MAIN INTERACTIVE ARENA -->
-        <main class="flex-1 flex justify-between p-4 pointer-events-none">
-            
-            <!-- LEFT PANEL: RACK / PIECES & MOVE HISTORY -->
-            <div class="w-80 flex flex-col space-y-4 pointer-events-auto">
-                <div class="glass-panel p-4 rounded-xl flex-1 flex flex-col max-h-[50vh] shadow-xl border border-gray-800">
-                    <h3 class="text-sm font-bold text-cyan-400 mb-2 flex items-center justify-between">
-                        <span><i class="fa-solid fa-chess-rook mr-1.5"></i> Available Pieces / Rack</span>
-                        <span id="piece-count-badge" class="text-xs bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-800">16 remaining</span>
-                    </h3>
-                    <div id="rack-container" class="grid grid-cols-4 gap-2 overflow-y-auto p-1 flex-1 bg-gray-950/40 rounded-lg border border-gray-800/80">
-                        <!-- Populated dynamically -->
-                    </div>
-                    <div class="mt-3">
-                        <button onclick="confirmTurnAction()" id="confirm-turn-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow transition disabled:opacity-50 disabled:cursor-not-allowed">
-                            Confirm Move / End Turn
-                        </button>
-                    </div>
-                </div>
+        <!-- FLOATING ACTION CHAT & CONTROLS -->
+        <div class="w-full p-4 flex justify-between items-end pointer-events-none">
+            <!-- Chat Toggle Button -->
+            <button onclick="toggleChatWindow()" class="interactive glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-cyan-500/50 transition">
+                <i class="fa-solid fa-comments text-cyan-400"></i>
+                <span class="text-xs font-semibold text-gray-200">Player Chat</span>
+            </button>
+        </div>
 
-                <!-- Move History Log -->
-                <div class="glass-panel p-4 rounded-xl h-44 flex flex-col shadow-xl border border-gray-800">
-                    <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-400"></i> Move History
-                    </h3>
-                    <div id="move-history-list" class="flex-1 overflow-y-auto space-y-1.5 text-xs text-gray-400 font-mono pr-1">
-                        <div class="text-gray-600 italic">Game started. Make your first move...</div>
-                    </div>
-                </div>
+        <!-- PLAYER CHAT MODAL / DRAWER -->
+        <div id="chat-window" class="absolute bottom-16 left-4 w-80 max-w-full glass-panel rounded-2xl shadow-2xl border border-cyan-500/30 flex flex-col hidden interactive z-40 overflow-hidden">
+            <div class="p-3 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between">
+                <span class="text-xs font-bold text-cyan-400 flex items-center">
+                    <i class="fa-solid fa-message mr-1.5"></i> Player Match Chat
+                </span>
+                <button onclick="toggleChatWindow()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
-            <!-- RIGHT PANEL: CHAT & SCORE SYNC -->
-            <div class="w-80 flex flex-col space-y-4 pointer-events-auto">
-                <div class="glass-panel p-4 rounded-xl flex-1 flex flex-col h-full shadow-xl border border-gray-800">
-                    <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 flex items-center justify-between">
-                        <span><i class="fa-solid fa-comments mr-1.5 text-cyan-400"></i> Player Chat</span>
-                        <button onclick="clearChat()" class="text-[10px] text-gray-500 hover:text-gray-300">Clear</button>
-                    </h3>
-                    <div id="chat-messages" class="flex-1 overflow-y-auto space-y-2 text-xs p-2 bg-gray-950/50 rounded-lg border border-gray-800/80 mb-3">
-                        <!-- Chat messages populated dynamically -->
-                    </div>
-                    <div class="flex space-x-2">
-                        <input type="text" id="chat-input" onkeypress="handleChatKey(event)" placeholder="Type message..." class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
-                        <button onclick="sendChatMessage()" class="px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
+            <div id="chat-messages" class="p-3 h-48 overflow-y-auto space-y-2 text-xs text-gray-300 flex flex-col">
+                <div class="text-gray-500 italic text-[11px]">System: Welcome to Intelligames 3D. Chat history is saved locally.</div>
             </div>
-
-        </main>
-
-        <!-- FOOTER STATUS -->
-        <footer class="w-full p-3 text-center text-xs text-gray-500 interactive bg-gray-950/80 border-t border-gray-800 flex justify-between px-6">
-            <div>Intelligames 3D Arena v3.2 &bull; Multi-Deck Strategy</div>
-            <div id="cloud-sync-status" class="text-emerald-400"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Scores Synced to Cloud Drive</div>
-        </footer>
+            <div class="p-2.5 border-t border-gray-800 bg-gray-900/50 flex space-x-2">
+                <input type="text" id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMessage()" class="flex-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                <button onclick="sendChatMessage()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">Send</button>
+            </div>
+        </div>
 
     </div>
 
     <!-- MASTER MENU MODAL -->
-    <div id="master-menu-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-cyan-500/30 space-y-5">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> Master Menu & Settings</h3>
+    <div id="master-menu-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-cyan-500/40 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center">
+                    <i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> Master Game Menu
+                </h3>
                 <button onclick="closeMasterMenu()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <div class="space-y-4 text-sm">
+
+            <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Switch Game</label>
-                    <select id="menu-game-select" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white">
-                        <option value="quarto">Quarto</option>
-                        <option value="twixt">Twixt</option>
-                        <option value="muhle">Mühle (Nine Men's Morris)</option>
-                        <option value="fourgewinnt">4gewinnt (Connect 4)</option>
+                    <label class="block font-medium text-gray-300 mb-1">Switch Game Type</label>
+                    <select id="menu-select-game" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                        <option value="quarto">Quarto 3D (Logic & Geometry)</option>
+                        <option value="startrek">Star Trek Tri-D Chess (3D Multi-Level)</option>
+                        <option value="twixt">Twixt 3D (Bridging Links)</option>
+                        <option value="muhle">Mühle 3D (Nine Men's Morris)</option>
+                        <option value="fourgewinnt">4gewinnt 3D (Connect 4)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Game Configuration (Decks)</label>
-                    <select id="menu-deck-select" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white">
-                        <option value="1">1 Deck (Flat)</option>
-                        <option value="2">2 Decks (Double Stack)</option>
-                        <option value="3">3 Decks (Triple Stack)</option>
+                    <label class="block font-medium text-gray-300 mb-1">Game Mode</label>
+                    <select id="menu-select-mode" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                        <option value="pvp">Two Player (PvP)</option>
+                        <option value="pve">Vs Computer (PvE)</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Opponent Mode</label>
-                    <select id="menu-opponent-mode" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white">
-                        <option value="pvp">Two Player (PVP)</option>
-                        <option value="pve">Single Player vs AI</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">AI Difficulty</label>
-                    <select id="menu-ai-difficulty" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white">
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
+                <div id="menu-ai-difficulty-container" class="hidden">
+                    <label class="block font-medium text-purple-300 mb-1">AI Difficulty Level</label>
+                    <select id="menu-select-ai-difficulty" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                        <option value="easy">Easy (Casual)</option>
+                        <option value="medium" selected>Medium (Tactical)</option>
+                        <option value="hard">Hard (Grandmaster)</option>
                     </select>
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-3 pt-3 border-t border-gray-800">
-                <button onclick="closeMasterMenu()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold">Cancel</button>
-                <button onclick="applyMasterMenuChanges()" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold shadow">Apply & Restart Game</button>
+            <!-- MASTER ADMIN USER MANAGEMENT SECTION -->
+            <div id="master-user-admin-section" class="hidden border-t border-gray-800 pt-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-amber-400 flex items-center">
+                        <i class="fa-solid fa-user-shield mr-1.5"></i> Master User Management
+                    </h4>
+                    <span class="text-[10px] text-gray-400">Admin Privileges Active</span>
+                </div>
+
+                <!-- Add / Edit User Form -->
+                <div class="bg-gray-950/70 p-3 rounded-xl border border-gray-800 space-y-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input type="text" id="admin-username" placeholder="Username" class="px-2.5 py-1.5 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+                        <input type="text" id="admin-password" placeholder="PIN / Password" class="px-2.5 py-1.5 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+                        <select id="admin-role" class="px-2.5 py-1.5 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+                            <option value="player">Player</option>
+                            <option value="master">Master</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="adminSaveUser()" id="admin-save-btn" class="flex-1 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold rounded-lg text-xs transition">
+                            <i class="fa-solid fa-user-plus mr-1"></i> Add User
+                        </button>
+                        <button onclick="adminCancelEdit()" id="admin-cancel-btn" class="hidden px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg text-xs transition">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Registered Users List -->
+                <div id="admin-users-list" class="max-h-40 overflow-y-auto space-y-1.5 pr-1"></div>
+            </div>
+
+            <div class="flex space-x-3 pt-2">
+                <button onclick="applyMasterMenuChanges()" class="flex-1 py-2.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-xs shadow transition">
+                    Apply & Restart Game
+                </button>
+                <button onclick="logoutUser()" class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
+                    Log Out
+                </button>
             </div>
         </div>
     </div>
 
     <!-- INSTRUCTIONS MODAL -->
-    <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-cyan-500/30 space-y-4">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-book text-cyan-400 mr-2"></i> Game Rules & Multi-Deck Guide</h3>
-                <button onclick="closeInstructions()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-cyan-500/40 space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center">
+                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Game Rules & Guide
+                </h3>
+                <button onclick="closeInstructionsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
-            <div id="instructions-content" class="text-xs text-gray-300 space-y-3 leading-relaxed">
-                <!-- Dynamically updated based on active game -->
+            <div class="space-y-3 text-xs text-gray-300 leading-relaxed">
+                <h4 class="font-bold text-cyan-300 text-sm">Quarto 3D Gameplay</h4>
+                <p>Quarto is played with 16 unique pieces possessing 4 distinct binary attributes: <strong>Tall/Short, Dark/Light, Square/Round, and Solid/Hollow</strong>.</p>
+                <p><strong>Core Rule:</strong> You do not choose which piece to place for yourself! Instead, <em>you select a piece from around the board and hand it to your opponent</em> to place on the board. Win by aligning 4 pieces sharing at least one common characteristic.</p>
+                
+                <div class="border-t border-gray-800 pt-2"></div>
+
+                <h4 class="font-bold text-purple-300 text-sm">Star Trek Tri-Dimensional Chess</h4>
+                <p>Played across three primary 4x4 main boards stacked vertically plus four movable 2x2 attack boards suspended at the corners.</p>
+                <ul class="list-disc pl-5 space-y-1 text-gray-300">
+                    <li><strong>Movement:</strong> Pieces move along standard chess trajectories projected vertically across the stacked levels.</li>
+                    <li><strong>Attack Boards:</strong> Click any piece to highlight it, then click a destination square on any level or attack board to move or capture.</li>
+                    <li><strong>Objective:</strong> Checkmate the opponent's King across the tri-dimensional grid!</li>
+                </ul>
             </div>
 
-            <div class="flex justify-end pt-3 border-t border-gray-800">
-                <button onclick="closeInstructions()" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold">Got It</button>
+            <button onclick="closeInstructionsModal()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
+                Got It, Let's Play!
+            </button>
+        </div>
+    </div>
+
+    <!-- POST-GAME CELEBRATION & OPTIONS MODAL -->
+    <div id="post-game-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl border border-cyan-500/40 space-y-4">
+            <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-purple-500 rounded-full flex items-center justify-center mx-auto shadow-lg glow-cyan">
+                <i class="fa-solid fa-trophy text-2xl text-white"></i>
+            </div>
+            <div>
+                <h3 id="post-game-title" class="text-xl font-extrabold text-white">Player 1 Wins!</h3>
+                <p id="post-game-subtitle" class="text-xs text-cyan-300 mt-1">Magnificent Quarto victory!</p>
+            </div>
+            
+            <div class="space-y-2 pt-2">
+                <button onclick="restartMatch()" class="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-lg text-xs shadow transition">
+                    <i class="fa-solid fa-rotate-right mr-1.5"></i> Restart Match
+                </button>
+                <button onclick="returnToNewGameSetup()" class="w-full py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded-lg text-xs border border-gray-700 transition">
+                    <i class="fa-solid fa-gamepad mr-1.5"></i> Play New Game
+                </button>
+                <button onclick="changeGameModeDirectly()" class="w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-cyan-400 font-semibold rounded-lg text-xs border border-cyan-500/30 transition">
+                    <i class="fa-solid fa-sliders mr-1.5"></i> Change Game
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- WIN MODAL -->
-    <div id="win-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden">
-        <div class="glass-panel p-8 rounded-2xl w-full max-w-md text-center space-y-5 border border-cyan-500/50 glow-cyan">
-            <div class="text-5xl text-amber-400"><i class="fa-solid fa-trophy"></i></div>
-            <h2 id="win-title" class="text-2xl font-extrabold text-white">Victory!</h2>
-            <p id="win-message" class="text-sm text-gray-300">Player 1 successfully completed a winning line across the 3D decks!</p>
-            <button onclick="restartGame()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-lg shadow-lg">Play Again</button>
-        </div>
-    </div>
-
-    <!-- SCRIPT LOGIC -->
+    <!-- APPLICATION LOGIC SCRIPT -->
     <script>
         // Global State
-        let currentAuthUser = null;
+        let scene, camera, renderer, controls;
         let activeGame = 'quarto';
-        let gameMode = '1'; // '1', '2', '3' decks
         let gameModeType = 'pvp'; // 'pvp' or 'pve'
         let aiDifficulty = 'medium';
-        
-        let scene, camera, renderer, controls;
-        let raycaster = new THREE.Raycaster();
-        let mouse = new THREE.Vector2();
+        let currentUser = null;
+        let currentUserRole = 'player';
+        let authMode = 'login'; // 'login' or 'register'
+        let editingUsername = null;
 
         let boardSquareMeshes = [];
         let pieceMeshes = [];
-        let twixtPegMeshes = [];
-        let boards = [];
+        let perimeterPieceMeshes = [];
+        let floatingPieceMesh = null;
         let pieces = [];
-        let gamePhase = 'choose_for_opponent'; // 'choose_for_opponent', 'place_piece'
-        let selectedPiece = null;
         let selectedRackPieceId = null;
+        let selectedChessPiece = null;
         let currentPlayer = 1;
         let gameOver = false;
         let scores = { p1: 0, p2: 0 };
-        let moveHistory = [];
         let chatMessages = [];
+        let winningPieces = [];
 
         window.onload = function() {
             if (typeof THREE === 'undefined') {
                 console.error("Three.js not loaded.");
                 return;
             }
+            ensureMasterAccountExists();
             init3D();
             loadChatHistory();
+            checkExistingSession();
         };
 
+        function getUsersRegistry() {
+            try {
+                const raw = localStorage.getItem('intelligames_users_db');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveUsersRegistry(users) {
+            localStorage.setItem('intelligames_users_db', JSON.stringify(users));
+        }
+
+        function ensureMasterAccountExists() {
+            let users = getUsersRegistry();
+            if (!users.some(u => u.username.toLowerCase() === 'master')) {
+                users.push({ username: 'master', password: 'master123', role: 'master' });
+                saveUsersRegistry(users);
+            }
+        }
+
+        function checkExistingSession() {
+            const savedUser = localStorage.getItem('intelligames_user');
+            if (savedUser) {
+                const users = getUsersRegistry();
+                const found = users.find(u => u.username.toLowerCase() === savedUser.toLowerCase());
+                if (found) {
+                    currentUser = found.username;
+                    currentUserRole = found.role || 'player';
+                    const roleBadge = currentUserRole === 'master' ? ' [MASTER]' : '';
+                    document.getElementById('user-display-badge').innerText = `| Logged in: ${currentUser}${roleBadge}`;
+                    document.getElementById('auth-screen').style.display = 'none';
+                    openGameLobby();
+                    return;
+                } else {
+                    localStorage.removeItem('intelligames_user');
+                }
+            }
+        }
+
+        function openGameLobby() {
+            const roleBadge = currentUserRole === 'master' ? ' [MASTER]' : '';
+            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Choose your game & settings`;
+            const masterBtn = document.getElementById('lobby-master-btn');
+            if (currentUserRole === 'master') {
+                masterBtn.classList.remove('hidden');
+            } else {
+                masterBtn.classList.add('hidden');
+            }
+            document.getElementById('game-lobby-modal').classList.remove('hidden');
+        }
+
+        function launchSelectedGame() {
+            activeGame = document.getElementById('select-game').value;
+            gameModeType = document.getElementById('select-mode').value;
+            aiDifficulty = document.getElementById('select-ai-difficulty').value;
+
+            document.getElementById('game-lobby-modal').classList.add('hidden');
+            initGameArena();
+            const diffInfo = gameModeType === 'pve' ? `, AI: ${aiDifficulty.toUpperCase()}` : '';
+            addChatSystemMessage(`${currentUser} launched ${activeGame.toUpperCase()} (${gameModeType.toUpperCase()}${diffInfo}).`);
+        }
+
+        function openMasterMenuFromLobby() {
+            openMasterMenu();
+        }
+
+        function switchAuthTab(tab) {
+            authMode = tab;
+            const loginTab = document.getElementById('tab-login');
+            const regTab = document.getElementById('tab-register');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const errBox = document.getElementById('auth-error-msg');
+            errBox.classList.add('hidden');
+
+            if (tab === 'login') {
+                loginTab.className = "flex-1 pb-2 text-xs font-bold text-cyan-400 border-b-2 border-cyan-400 transition";
+                regTab.className = "flex-1 pb-2 text-xs font-semibold text-gray-400 border-b-2 border-transparent transition";
+                submitBtn.innerText = "Log In";
+            } else {
+                regTab.className = "flex-1 pb-2 text-xs font-bold text-cyan-400 border-b-2 border-cyan-400 transition";
+                loginTab.className = "flex-1 pb-2 text-xs font-semibold text-gray-400 border-b-2 border-transparent transition";
+                submitBtn.innerText = "Register Account";
+            }
+        }
+
+        function showAuthError(msg) {
+            const errBox = document.getElementById('auth-error-msg');
+            errBox.innerText = msg;
+            errBox.classList.remove('hidden');
+        }
+
+        function handleAuthentication() {
+            const user = document.getElementById('auth-user').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            const errBox = document.getElementById('auth-error-msg');
+            errBox.classList.add('hidden');
+
+            if (!user || !pass) {
+                showAuthError("Please enter both username and password/PIN.");
+                return;
+            }
+
+            let users = getUsersRegistry();
+
+            if (authMode === 'register') {
+                if (users.some(u => u.username.toLowerCase() === user.toLowerCase())) {
+                    showAuthError("Username is already registered. Please choose another or Log In.");
+                    return;
+                }
+                const newRole = user.toLowerCase() === 'master' ? 'master' : 'player';
+                users.push({ username: user, password: pass, role: newRole });
+                saveUsersRegistry(users);
+
+                switchAuthTab('login');
+                showAuthError("Registration successful! You can now log in with your credentials.");
+                errBox.className = "text-xs text-emerald-400 font-semibold text-center bg-emerald-950/50 border border-emerald-500/30 py-2 px-3 rounded-xl";
+                return;
+            }
+
+            // Login Mode: Must be registered first
+            const matchedUser = users.find(u => u.username.toLowerCase() === user.toLowerCase());
+            if (!matchedUser) {
+                showAuthError("Account not found! Please register an account before logging in.");
+                return;
+            }
+            if (matchedUser.password !== pass) {
+                showAuthError("Incorrect password / PIN. Please try again.");
+                return;
+            }
+
+            currentUser = matchedUser.username;
+            currentUserRole = matchedUser.role || 'player';
+            localStorage.setItem('intelligames_user', currentUser);
+
+            const roleBadge = currentUserRole === 'master' ? ' [MASTER]' : '';
+            document.getElementById('user-display-badge').innerText = `| Logged in: ${currentUser}${roleBadge}`;
+            document.getElementById('auth-screen').style.display = 'none';
+
+            openGameLobby();
+            addChatSystemMessage(`Welcome ${currentUser}${roleBadge}! Signed in.`);
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('intelligames_user');
+            currentUser = null;
+            currentUserRole = 'player';
+            document.getElementById('master-menu-modal').classList.add('hidden');
+            document.getElementById('game-lobby-modal').classList.add('hidden');
+            document.getElementById('auth-screen').style.display = 'flex';
+            switchAuthTab('login');
+        }
+
+        function showToast(msg) {
+            const statusEl = document.getElementById('turn-status');
+            if (statusEl) {
+                const prev = statusEl.innerText;
+                statusEl.innerText = msg;
+                statusEl.classList.add('text-amber-400');
+                setTimeout(() => {
+                    statusEl.classList.remove('text-amber-400');
+                    if (statusEl.innerText === msg) statusEl.innerText = prev;
+                }, 2500);
+            }
+        }
+
+        // --- 3D ENGINE INITIALIZATION ---
         function init3D() {
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x030712, 0.02);
+            scene.background = new THREE.Color(0x030712);
 
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 18, 22);
+            camera.position.set(0, 12, 14);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
@@ -339,21 +532,34 @@
             controls.dampingFactor = 0.05;
             controls.maxPolarAngle = Math.PI / 2 - 0.05;
 
-            // Lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
 
             const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            dirLight.position.set(10, 25, 15);
+            dirLight.position.set(10, 20, 15);
             dirLight.castShadow = true;
             scene.add(dirLight);
 
-            const neonBlue = new THREE.PointLight(0x22d3ee, 2, 50);
-            neonBlue.position.set(0, 10, 0);
-            scene.add(neonBlue);
+            const pointLight = new THREE.PointLight(0x22d3ee, 1, 30);
+            pointLight.position.set(0, 10, 0);
+            scene.add(pointLight);
 
             window.addEventListener('resize', onWindowResize);
-            renderer.domElement.addEventListener('click', onCanvasClick);
+            window.addEventListener('pointerdown', onPointerDown);
+
+            const modeSelect = document.getElementById('select-mode');
+            if (modeSelect) {
+                modeSelect.addEventListener('change', (e) => {
+                    document.getElementById('ai-difficulty-container').classList.toggle('hidden', e.target.value !== 'pve');
+                });
+            }
+
+            const menuModeSelect = document.getElementById('menu-select-mode');
+            if (menuModeSelect) {
+                menuModeSelect.addEventListener('change', (e) => {
+                    document.getElementById('menu-ai-difficulty-container').classList.toggle('hidden', e.target.value !== 'pve');
+                });
+            }
 
             animate();
         }
@@ -367,209 +573,576 @@
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
+            
+            if (floatingPieceMesh) {
+                floatingPieceMesh.rotation.y += 0.015;
+                floatingPieceMesh.position.y = 4.5 + Math.sin(Date.now() * 0.003) * 0.3;
+            }
+
+            if (gameOver && winningPieces.length > 0) {
+                const time = Date.now() * 0.005;
+                winningPieces.forEach((mesh, idx) => {
+                    mesh.position.y += Math.sin(time + idx) * 0.02;
+                    mesh.rotation.y += 0.03;
+                });
+            }
+
             renderer.render(scene, camera);
         }
 
-        // AUTH & GATEWAY
-        function switchAuthTab(tab) {
-            const loginTab = document.getElementById('tab-login');
-            const regTab = document.getElementById('tab-register');
-            if (tab === 'login') {
-                loginTab.className = "flex-1 pb-3 text-cyan-400 font-semibold border-b-2 border-cyan-400 transition";
-                regTab.className = "flex-1 pb-3 text-gray-400 font-medium hover:text-gray-200 transition";
-            } else {
-                regTab.className = "flex-1 pb-3 text-cyan-400 font-semibold border-b-2 border-cyan-400 transition";
-                loginTab.className = "flex-1 pb-3 text-gray-400 font-medium hover:text-gray-200 transition";
-            }
-        }
-
-        function onAuthGameChange() {
-            const game = document.getElementById('auth-game-select').value;
-            const deckSelect = document.getElementById('auth-deck-select');
-            if (game === 'twixt' || game === 'muhle') {
-                deckSelect.value = '1';
-            }
-        }
-
-        function onAuthOpponentChange() {
-            const mode = document.getElementById('auth-opponent-mode').value;
-            const aiWrapper = document.getElementById('auth-ai-difficulty-wrapper');
-            if (mode === 'pve') {
-                aiWrapper.classList.remove('hidden');
-            } else {
-                aiWrapper.classList.add('hidden');
-            }
-        }
-
-        function handleAuthSubmit() {
-            const usernameInput = document.getElementById('auth-username').value.trim();
-            if (!usernameInput) {
-                alert("Please enter a valid username.");
-                return;
-            }
-            currentAuthUser = usernameInput;
-            activeGame = document.getElementById('auth-game-select').value;
-            gameMode = document.getElementById('auth-deck-select').value;
-            gameModeType = document.getElementById('auth-opponent-mode').value;
-            aiDifficulty = document.getElementById('auth-ai-difficulty').value;
-
-            document.getElementById('current-player-display').innerText = `Logged in: ${currentAuthUser}`;
-            document.getElementById('auth-screen').style.display = 'none';
-
-            initGameArena();
-        }
-
-        // GAME INITIALIZATION & 3D GENERATION
+        // --- GAME ARENA SETUP ---
         function initGameArena() {
-            // Clean up old meshes
             boardSquareMeshes.forEach(m => scene.remove(m));
             pieceMeshes.forEach(m => scene.remove(m));
-            twixtPegMeshes.forEach(m => scene.remove(m));
+            perimeterPieceMeshes.forEach(m => scene.remove(m));
+            if (floatingPieceMesh) { scene.remove(floatingPieceMesh); floatingPieceMesh = null; }
             boardSquareMeshes = [];
             pieceMeshes = [];
-            twixtPegMeshes = [];
+            perimeterPieceMeshes = [];
+            winningPieces = [];
+            gameOver = false;
+            currentPlayer = 1;
+            selectedRackPieceId = null;
+            selectedChessPiece = null;
+            document.getElementById('post-game-modal').classList.add('hidden');
 
-            const titles = { quarto: "Quarto 3D Arena", twixt: "Twixt 3D Arena", muhle: "Mühle 3D Arena", fourgewinnt: "4gewinnt 3D Arena" };
-            document.getElementById('current-game-title').innerText = titles[activeGame] || "Intelligames Arena";
+            const titles = { 
+                quarto: "Quarto 3D", 
+                startrek: "Star Trek Tri-D Chess",
+                twixt: "Twixt 3D", 
+                muhle: "Mühle 3D", 
+                fourgewinnt: "4gewinnt 3D" 
+            };
+            document.getElementById('current-game-title').innerText = titles[activeGame] || "Intelligames";
 
-            // Update Deck visibility buttons
-            const d2Btn = document.getElementById('btn-view-d2');
-            const d3Btn = document.getElementById('btn-view-d3');
-            if (gameMode === '1') {
-                d2Btn.style.display = 'none';
-                d3Btn.style.display = 'none';
-            } else if (gameMode === '2') {
-                d2Btn.style.display = 'block';
-                d3Btn.style.display = 'none';
+            if (activeGame === 'startrek') {
+                camera.position.set(0, 14, 16);
+                controls.target.set(0, 2.5, 0);
+                buildStarTrekChessArena();
+                updateScoreDisplay();
+                document.getElementById('turn-status').innerText = `Starfleet (White) Turn: Select a piece`;
             } else {
-                d2Btn.style.display = 'block';
-                d3Btn.style.display = 'block';
+                camera.position.set(0, 12, 14);
+                controls.target.set(0, 0, 0);
+                buildBoardMeshes();
+                initializePiecesData();
+                buildPerimeterPieces();
+                updateScoreDisplay();
+                document.getElementById('turn-status').innerText = `Player 1's turn: Choose piece for opponent`;
             }
-
-            build3DBoardsAndPieces();
-            updateRackUI();
-            updateScoreDisplay();
-            addChatSystemMessage(`Game started (${activeGame.toUpperCase()} - ${gameMode} Deck(s), Mode: ${gameModeType.toUpperCase()}).`);
         }
 
-        function build3DBoardsAndPieces() {
-            const deckCount = parseInt(gameMode);
-            const boardSize = activeGame === 'quarto' ? 4 : (activeGame === 'muhle' || activeGame === 'fourgewinnt' ? 4 : 8);
+        function buildBoardMeshes() {
+            const gridSize = 4;
+            const spacing = 1.3;
 
-            for (let d = 0; d < deckCount; d++) {
-                const yOffset = d * 5;
-                const boardGeo = new THREE.BoxInfoGeometry ? null : new THREE.BoxGeometry(boardSize * 1.5, 0.2, boardSize * 1.5);
-                const boardMat = new THREE.MeshStandardMaterial({ 
-                    color: d === 0 ? 0x1e293b : (d === 1 ? 0x334155 : 0x475569), 
-                    roughness: 0.3, 
-                    metalness: 0.8 
-                });
-                const boardMesh = new THREE.Mesh(new THREE.BoxGeometry(boardSize * 1.6, 0.2, boardSize * 1.6), boardMat);
-                boardMesh.position.set(0, yOffset - 0.2, 0);
-                boardMesh.receiveShadow = true;
-                scene.add(boardMesh);
-                boardSquareMeshes.push(boardMesh);
+            const plateGeo = new THREE.BoxGeometry(5.8, 0.2, 5.8);
+            const plateMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4, metalness: 0.8 });
+            const plate = new THREE.Mesh(plateGeo, plateMat);
+            plate.position.set(0, -0.2, 0);
+            plate.receiveShadow = true;
+            scene.add(plate);
+            boardSquareMeshes.push(plate);
 
-                // Create squares / nodes for interaction
-                for (let x = 0; x < boardSize; x++) {
-                    for (let z = 0; z < boardSize; z++) {
-                        const sqGeo = new THREE.BoxGeometry(1.3, 0.1, 1.3);
-                        const sqMat = new THREE.MeshStandardMaterial({ 
-                            color: (x + z) % 2 === 0 ? 0x0f172a : 0x1e293b,
-                            roughness: 0.5
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const sqGeo = new THREE.BoxGeometry(1.2, 0.08, 1.2);
+                    const sqMat = new THREE.MeshStandardMaterial({ 
+                        color: (r + c) % 2 === 0 ? 0x1f2937 : 0x374151,
+                        roughness: 0.3
+                    });
+                    const sqMesh = new THREE.Mesh(sqGeo, sqMat);
+                    
+                    const posX = (c - 1.5) * spacing;
+                    const posZ = (r - 1.5) * spacing;
+                    sqMesh.position.set(posX, 0, posZ);
+                    sqMesh.receiveShadow = true;
+                    sqMesh.userData = { type: 'board_square', deck: 0, x: r, z: c };
+                    
+                    scene.add(sqMesh);
+                    boardSquareMeshes.push(sqMesh);
+                }
+            }
+        }
+
+        // --- STAR TREK TRI-DIMENSIONAL CHESS ARENA ---
+        function buildStarTrekChessArena() {
+            const spacing = 1.05;
+            // Central support column
+            const pillarGeo = new THREE.CylinderGeometry(0.15, 0.25, 6.2, 16);
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.8, roughness: 0.2 });
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            pillar.position.set(0, 2.8, 0);
+            scene.add(pillar);
+            boardSquareMeshes.push(pillar);
+
+            // 3 Main 4x4 Boards stepped in Z and Y
+            const mainBoards = [
+                { id: 'main_0', y: 0.5, zOffset: 2.2 },
+                { id: 'main_1', y: 2.6, zOffset: 0.0 },
+                { id: 'main_2', y: 4.7, zOffset: -2.2 }
+            ];
+
+            mainBoards.forEach((b, bIdx) => {
+                const frameGeo = new THREE.BoxGeometry(4.4, 0.12, 4.4);
+                const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7, roughness: 0.3 });
+                const frame = new THREE.Mesh(frameGeo, frameMat);
+                frame.position.set(0, b.y - 0.08, b.zOffset);
+                scene.add(frame);
+                boardSquareMeshes.push(frame);
+
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 4; c++) {
+                        const sqGeo = new THREE.BoxGeometry(0.98, 0.08, 0.98);
+                        const isLight = (r + c) % 2 === 0;
+                        const sqMat = new THREE.MeshStandardMaterial({
+                            color: isLight ? 0x94a3b8 : 0x1e293b,
+                            transparent: true,
+                            opacity: 0.88,
+                            roughness: 0.25
                         });
                         const sqMesh = new THREE.Mesh(sqGeo, sqMat);
-                        const posX = (x - boardSize / 2 + 0.5) * 1.5;
-                        const posZ = (z - boardSize / 2 + 0.5) * 1.5;
-                        sqMesh.position.set(posX, yOffset, posZ);
-                        sqMesh.userData = { type: 'board_square', deck: d, x: x, z: z };
+                        const posX = (c - 1.5) * spacing;
+                        const posZ = b.zOffset + (r - 1.5) * spacing;
+                        sqMesh.position.set(posX, b.y, posZ);
+                        sqMesh.userData = { type: 'chess_square', boardId: b.id, r, c };
                         scene.add(sqMesh);
                         boardSquareMeshes.push(sqMesh);
                     }
                 }
-            }
+            });
 
-            // Initialize game pieces / state
-            if (activeGame === 'quarto') {
-                pieces = [];
-                for (let i = 0; i < 16; i++) {
-                    pieces.push({
-                        id: i,
-                        tall: (i & 8) !== 0,
-                        dark: (i & 4) !== 0,
-                        square: (i & 2) !== 0,
-                        hollow: (i & 1) !== 0,
-                        placed: false,
-                        position: null
-                    });
+            // 4 Movable 2x2 Attack Boards
+            const attackBoards = [
+                { id: 'atk_0', xOffset: -2.4, y: 1.55, zOffset: 3.3 },
+                { id: 'atk_1', xOffset: 2.4, y: 1.55, zOffset: 3.3 },
+                { id: 'atk_2', xOffset: -2.4, y: 5.75, zOffset: -3.3 },
+                { id: 'atk_3', xOffset: 2.4, y: 5.75, zOffset: -3.3 }
+            ];
+
+            attackBoards.forEach(ab => {
+                for (let r = 0; r < 2; r++) {
+                    for (let c = 0; c < 2; c++) {
+                        const sqGeo = new THREE.BoxGeometry(0.95, 0.08, 0.95);
+                        const isLight = (r + c) % 2 === 0;
+                        const sqMat = new THREE.MeshStandardMaterial({
+                            color: isLight ? 0x38bdf8 : 0x0284c7,
+                            transparent: true,
+                            opacity: 0.85
+                        });
+                        const sqMesh = new THREE.Mesh(sqGeo, sqMat);
+                        const posX = ab.xOffset + (c - 0.5) * spacing;
+                        const posZ = ab.zOffset + (r - 0.5) * spacing;
+                        sqMesh.position.set(posX, ab.y, posZ);
+                        sqMesh.userData = { type: 'chess_square', boardId: ab.id, r, c };
+                        scene.add(sqMesh);
+                        boardSquareMeshes.push(sqMesh);
+                    }
                 }
-            }
+            });
+
+            spawnStarTrekChessPieces();
         }
 
-        // RACK UI & SELECTION
-        function updateRackUI() {
-            const rackContainer = document.getElementById('rack-container');
-            rackContainer.innerHTML = '';
+        function spawnStarTrekChessPieces() {
+            pieces = [];
+            let idCounter = 1;
 
-            if (activeGame === 'quarto') {
-                const unplaced = pieces.filter(p => !p.placed);
-                document.getElementById('piece-count-badge.innerText') = `${unplaced.length} remaining`;
-                
-                unplaced.forEach(p => {
-                    const btn = document.createElement('button');
-                    const isSelected = selectedRackPieceId === p.id;
-                    btn.className = `p-2 rounded-lg border flex flex-col items-center justify-center transition ${isSelected ? 'border-cyan-400 bg-cyan-950/60 scale-105 shadow-lg glow-cyan' : 'border-gray-800 bg-gray-900 hover:border-gray-600'}`;
-                    btn.innerHTML = `
-                        <div class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold ${p.dark ? 'bg-amber-800 text-amber-200' : 'bg-amber-100 text-amber-900'}">
-                            ${p.square ? '■' : '●'}
-                        </div>
-                        <span class="text-[9px] text-gray-400 mt-1">${p.tall ? 'Tall' : 'Short'} ${p.hollow ? 'Hol' : 'Sol'}</span>
-                    `;
-                    btn.onclick = () => selectRackPiece(p.id);
-                    rackContainer.appendChild(btn);
+            const placePiece = (team, role, boardId, r, c) => {
+                const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'chess_square' && m.userData.boardId === boardId && m.userData.r === r && m.userData.c === c);
+                if (!sqMesh) return;
+
+                const group = new THREE.Group();
+                const isWhite = team === 1;
+                const mat = new THREE.MeshStandardMaterial({
+                    color: isWhite ? 0xf8fafc : 0x991b1b,
+                    metalness: 0.6,
+                    roughness: 0.2
                 });
-            }
-        }
 
-        function selectRackPiece(id) {
-            if (gamePhase !== 'choose_for_opponent') return;
-            selectedRackPieceId = id;
-            updateRackUI();
-            document.getElementById('turn-status').innerText = `Piece selected. Give to opponent & click board square to place.`;
-        }
-
-        function confirmTurnAction() {
-            if (gamePhase === 'place_piece') {
-                // Confirm placement
-                gamePhase = 'choose_for_opponent';
-                currentPlayer = currentPlayer === 1 ? 2 : 1;
-                document.getElementById('turn-status').innerText = `Player ${currentPlayer}'s turn: Choose piece for opponent.`;
-                if (gameModeType === 'pve' && currentPlayer === 2) {
-                    triggerAITurn();
+                let height = 0.75;
+                if (role === 'king') {
+                    height = 1.15;
+                    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.34, height, 20), mat);
+                    const crown = new THREE.Mesh(new THREE.OctahedronGeometry(0.22), mat);
+                    crown.position.y = height / 2 + 0.15;
+                    group.add(body, crown);
+                } else if (role === 'queen') {
+                    height = 1.05;
+                    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, height, 20), mat);
+                    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), mat);
+                    orb.position.y = height / 2 + 0.12;
+                    group.add(body, orb);
+                } else if (role === 'rook') {
+                    height = 0.85;
+                    const body = new THREE.Mesh(new THREE.BoxGeometry(0.48, height, 0.48), mat);
+                    group.add(body);
+                } else if (role === 'bishop' || role === 'knight') {
+                    height = 0.9;
+                    const body = new THREE.Mesh(new THREE.ConeGeometry(0.3, height, 16), mat);
+                    group.add(body);
+                } else {
+                    height = 0.65;
+                    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, height, 16), mat);
+                    group.add(body);
                 }
-            }
+
+                group.position.copy(sqMesh.position);
+                group.position.y += height / 2 + 0.05;
+                group.userData = { type: 'chess_piece', pieceId: idCounter, team, role, boardId, r, c, height };
+                scene.add(group);
+                pieceMeshes.push(group);
+
+                pieces.push({ id: idCounter++, team, role, boardId, r, c, mesh: group });
+            };
+
+            // Starfleet (Player 1 - Lower & Attack Boards 0/1)
+            placePiece(1, 'rook', 'atk_0', 1, 0);
+            placePiece(1, 'knight', 'atk_0', 1, 1);
+            placePiece(1, 'pawn', 'atk_0', 0, 0);
+            placePiece(1, 'pawn', 'atk_0', 0, 1);
+
+            placePiece(1, 'bishop', 'atk_1', 1, 0);
+            placePiece(1, 'rook', 'atk_1', 1, 1);
+            placePiece(1, 'pawn', 'atk_1', 0, 0);
+            placePiece(1, 'pawn', 'atk_1', 0, 1);
+
+            placePiece(1, 'queen', 'main_0', 3, 1);
+            placePiece(1, 'king', 'main_0', 3, 2);
+            placePiece(1, 'pawn', 'main_0', 2, 0);
+            placePiece(1, 'pawn', 'main_0', 2, 1);
+            placePiece(1, 'pawn', 'main_0', 2, 2);
+            placePiece(1, 'pawn', 'main_0', 2, 3);
+
+            // Klingon / Opponent (Player 2 - Upper & Attack Boards 2/3)
+            placePiece(2, 'rook', 'atk_2', 0, 0);
+            placePiece(2, 'knight', 'atk_2', 0, 1);
+            placePiece(2, 'pawn', 'atk_2', 1, 0);
+            placePiece(2, 'pawn', 'atk_2', 1, 1);
+
+            placePiece(2, 'bishop', 'atk_3', 0, 0);
+            placePiece(2, 'rook', 'atk_3', 0, 1);
+            placePiece(2, 'pawn', 'atk_3', 1, 0);
+            placePiece(2, 'pawn', 'atk_3', 1, 1);
+
+            placePiece(2, 'queen', 'main_2', 0, 1);
+            placePiece(2, 'king', 'main_2', 0, 2);
+            placePiece(2, 'pawn', 'main_2', 1, 0);
+            placePiece(2, 'pawn', 'main_2', 1, 1);
+            placePiece(2, 'pawn', 'main_2', 1, 2);
+            placePiece(2, 'pawn', 'main_2', 1, 3);
         }
 
-        // MOUSE RAYCASTING & PLACEMENT
-        function onCanvasClick(event) {
+        function initializePiecesData() {
+            pieces = [];
+            let idCounter = 1;
+            const bools = [true, false];
+            bools.forEach(tall => {
+                bools.forEach(dark => {
+                    bools.forEach(square => {
+                        bools.forEach(hollow => {
+                            pieces.push({
+                                id: idCounter++,
+                                tall,
+                                dark,
+                                square,
+                                hollow,
+                                placed: false,
+                                position: null
+                            });
+                        });
+                    });
+                });
+            });
+        }
+
+        function buildPerimeterPieces() {
+            perimeterPieceMeshes.forEach(m => scene.remove(m));
+            perimeterPieceMeshes = [];
+
+            const unplaced = pieces.filter(p => !p.placed);
+            const total = unplaced.length;
+            if (total === 0) return;
+
+            const radius = 5.4;
+            unplaced.forEach((p, idx) => {
+                const angle = (idx / total) * Math.PI * 2;
+                const posX = Math.cos(angle) * radius;
+                const posZ = Math.sin(angle) * radius;
+
+                const height = p.tall ? 1.0 : 0.6;
+                let pieceGroup = new THREE.Group();
+
+                const pMat = new THREE.MeshStandardMaterial({
+                    color: p.dark ? 0x78350f : 0xfef3c7,
+                    roughness: 0.2,
+                    metalness: 0.5,
+                    emissive: selectedRackPieceId === p.id ? 0x22d3ee : 0x000000,
+                    emissiveIntensity: 0.8
+                });
+
+                if (p.square) {
+                    const boxGeo = new THREE.BoxGeometry(0.6, height, 0.6);
+                    const boxMesh = new THREE.Mesh(boxGeo, pMat);
+                    boxMesh.castShadow = true;
+                    pieceGroup.add(boxMesh);
+
+                    if (p.hollow) {
+                        const holeGeo = new THREE.CylinderGeometry(0.18, 0.18, height + 0.1, 16);
+                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                        pieceGroup.add(holeMesh);
+                    }
+                } else {
+                    const cylGeo = new THREE.CylinderGeometry(0.32, 0.32, height, 32);
+                    const cylMesh = new THREE.Mesh(cylGeo, pMat);
+                    cylMesh.castShadow = true;
+                    pieceGroup.add(cylMesh);
+
+                    if (p.hollow) {
+                        const holeGeo = new THREE.CylinderGeometry(0.14, 0.14, height + 0.1, 16);
+                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                        pieceGroup.add(holeMesh);
+                    }
+                }
+
+                pieceGroup.position.set(posX, height / 2, posZ);
+                pieceGroup.userData = { type: 'perimeter_piece', pieceId: p.id };
+                scene.add(pieceGroup);
+                perimeterPieceMeshes.push(pieceGroup);
+            });
+        }
+
+        // --- RAYCASTING & INTERACTION ---
+        function onPointerDown(event) {
+            if (gameOver) return;
+            // Ignore clicks if clicking UI panels
+            if (event.target.closest('.interactive') || event.target.tagName === 'BUTTON' || event.target.tagName === 'SELECT' || event.target.tagName === 'INPUT') return;
+
+            const mouse = new THREE.Vector2();
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+            const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(boardSquareMeshes);
 
-            if (intersects.length > 0) {
-                const hit = intersects[0].object;
-                if (hit.userData && hit.userData.type === 'board_square') {
-                    handleBoardSquareClick(hit.userData.deck, hit.userData.x, hit.userData.z, hit);
+            if (activeGame === 'startrek') {
+                const chessHits = raycaster.intersectObjects(pieceMeshes, true);
+                if (chessHits.length > 0) {
+                    let obj = chessHits[0].object;
+                    while (obj.parent && !obj.userData.pieceId) obj = obj.parent;
+                    if (obj.userData && obj.userData.type === 'chess_piece') {
+                        handleChessPieceClick(obj.userData.pieceId);
+                        return;
+                    }
                 }
+
+                const sqHits = raycaster.intersectObjects(boardSquareMeshes, false);
+                if (sqHits.length > 0) {
+                    const sq = sqHits[0].object;
+                    if (sq.userData && sq.userData.type === 'chess_square') {
+                        handleChessSquareClick(sq.userData.boardId, sq.userData.r, sq.userData.c, sq);
+                    }
+                }
+                return;
+            }
+
+            // Check perimeter pieces (Quarto & standard games)
+            const perimeterHits = raycaster.intersectObjects(perimeterPieceMeshes, true);
+            if (perimeterHits.length > 0) {
+                let obj = perimeterHits[0].object;
+                while (obj.parent && !obj.userData.pieceId) {
+                    obj = obj.parent;
+                }
+                if (obj.userData.pieceId) {
+                    selectPerimeterPiece(obj.userData.pieceId);
+                }
+                return;
+            }
+
+            // Check board squares
+            const squareHits = raycaster.intersectObjects(boardSquareMeshes, false);
+            if (squareHits.length > 0) {
+                const sq = squareHits[0].object;
+                if (sq.userData && sq.userData.type === 'board_square') {
+                    handleBoardSquareClick(sq.userData.deck, sq.userData.x, sq.userData.z, sq);
+                }
+            }
+        }
+
+        function handleChessPieceClick(pieceId) {
+            const clickedPiece = pieces.find(p => p.id === pieceId);
+            if (!clickedPiece) return;
+
+            if (clickedPiece.team === currentPlayer) {
+                // Highlight selected friendly piece
+                pieceMeshes.forEach(m => m.children.forEach(c => { if (c.material) c.material.emissive = new THREE.Color(0x000000); }));
+                selectedChessPiece = clickedPiece;
+                clickedPiece.mesh.children.forEach(c => {
+                    if (c.material) {
+                        c.material.emissive = new THREE.Color(0x22d3ee);
+                        c.material.emissiveIntensity = 0.7;
+                    }
+                });
+                document.getElementById('turn-status').innerText = `${currentPlayer === 1 ? 'Starfleet' : 'Opponent'}: Selected ${clickedPiece.role.toUpperCase()}. Tap destination square.`;
+            } else if (selectedChessPiece) {
+                // Capture enemy piece
+                const targetSq = boardSquareMeshes.find(m => m.userData && m.userData.type === 'chess_square' && m.userData.boardId === clickedPiece.boardId && m.userData.r === clickedPiece.r && m.userData.c === clickedPiece.c);
+                if (targetSq) {
+                    handleChessSquareClick(clickedPiece.boardId, clickedPiece.r, clickedPiece.c, targetSq);
+                }
+            } else {
+                showToast(`Select one of ${currentPlayer === 1 ? 'Starfleet (White)' : 'Opponent (Red)'}'s pieces!`);
+            }
+        }
+
+        function handleChessSquareClick(boardId, r, c, sqMesh) {
+            if (!selectedChessPiece) {
+                showToast("Click one of your pieces first to move it.");
+                return;
+            }
+
+            const occupant = pieces.find(p => p.boardId === boardId && p.r === r && p.c === c);
+            if (occupant && occupant.team === currentPlayer) {
+                handleChessPieceClick(occupant.id);
+                return;
+            }
+
+            // Capture if enemy piece occupies destination
+            let capturedKing = false;
+            if (occupant && occupant.team !== currentPlayer) {
+                if (occupant.role === 'king') capturedKing = true;
+                scene.remove(occupant.mesh);
+                pieceMeshes = pieceMeshes.filter(m => m !== occupant.mesh);
+                pieces = pieces.filter(p => p.id !== occupant.id);
+                addChatSystemMessage(`${currentPlayer === 1 ? 'Starfleet' : 'Opponent'} captured ${occupant.role.toUpperCase()}!`);
+            }
+
+            // Move piece
+            selectedChessPiece.boardId = boardId;
+            selectedChessPiece.r = r;
+            selectedChessPiece.c = c;
+            selectedChessPiece.mesh.position.copy(sqMesh.position);
+            selectedChessPiece.mesh.position.y += selectedChessPiece.mesh.userData.height / 2 + 0.05;
+            selectedChessPiece.mesh.children.forEach(ch => { if (ch.material) ch.material.emissive = new THREE.Color(0x000000); });
+
+            if (capturedKing) {
+                gameOver = true;
+                scores[`p${currentPlayer}`]++;
+                updateScoreDisplay();
+                winningPieces = [selectedChessPiece.mesh];
+                const winnerLabel = currentPlayer === 1 ? 'Starfleet (Player 1)' : 'Opponent (Player 2)';
+                document.getElementById('turn-status').innerText = `${winnerLabel} Wins Tri-D Chess!`;
+                setTimeout(() => {
+                    showPostGameModal(`${winnerLabel} Wins!`, `Checkmate! The opposing King was captured in Tri-D space.`);
+                }, 400);
+                return;
+            }
+
+            selectedChessPiece = null;
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            document.getElementById('turn-status').innerText = `${currentPlayer === 1 ? 'Starfleet (White)' : 'Opponent (Red)'} Turn: Select a piece`;
+
+            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+                setTimeout(triggerChessAITurn, 850);
+            }
+        }
+
+        function triggerChessAITurn() {
+            if (gameOver || activeGame !== 'startrek') return;
+            const aiPieces = pieces.filter(p => p.team === 2);
+            if (aiPieces.length === 0) return;
+
+            const chosen = aiPieces[Math.floor(Math.random() * aiPieces.length)];
+            selectedChessPiece = chosen;
+
+            // Prioritize capturing if available, otherwise random valid square
+            const allSquares = boardSquareMeshes.filter(m => m.userData && m.userData.type === 'chess_square');
+            const enemyTargets = pieces.filter(p => p.team === 1);
+            let targetSq = null;
+
+            if (enemyTargets.length > 0 && Math.random() < 0.35) {
+                const victim = enemyTargets[Math.floor(Math.random() * enemyTargets.length)];
+                targetSq = allSquares.find(s => s.userData.boardId === victim.boardId && s.userData.r === victim.r && s.userData.c === victim.c);
+            }
+
+            if (!targetSq) {
+                const openSquares = allSquares.filter(s => !pieces.some(p => p.team === 2 && p.boardId === s.userData.boardId && p.r === s.userData.r && p.c === s.userData.c));
+                if (openSquares.length > 0) {
+                    targetSq = openSquares[Math.floor(Math.random() * openSquares.length)];
+                }
+            }
+
+            if (targetSq) {
+                handleChessSquareClick(targetSq.userData.boardId, targetSq.userData.r, targetSq.userData.c, targetSq);
+            }
+        }
+
+        function selectPerimeterPiece(id) {
+            selectedRackPieceId = id;
+            buildPerimeterPieces();
+
+            if (floatingPieceMesh) {
+                scene.remove(floatingPieceMesh);
+                floatingPieceMesh = null;
+            }
+
+            const p = pieces.find(item => item.id === id);
+            if (p) {
+                const height = p.tall ? 2.2 : 1.2;
+                const radius = 0.45;
+                floatingPieceMesh = new THREE.Group();
+
+                const pMat = new THREE.MeshStandardMaterial({ 
+                    color: p.dark ? 0x78350f : 0xfef3c7, 
+                    roughness: 0.2,
+                    metalness: 0.5,
+                    emissive: 0x22d3ee,
+                    emissiveIntensity: 0.7
+                });
+
+                if (p.square) {
+                    const boxGeo = new THREE.BoxGeometry(0.85, height, 0.85);
+                    const boxMesh = new THREE.Mesh(boxGeo, pMat);
+                    floatingPieceMesh.add(boxMesh);
+                    if (p.hollow) {
+                        const holeGeo = new THREE.CylinderGeometry(0.25, 0.25, height + 0.1, 16);
+                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                        floatingPieceMesh.add(holeMesh);
+                    }
+                } else {
+                    const cylGeo = new THREE.CylinderGeometry(radius, radius, height, 32);
+                    const cylMesh = new THREE.Mesh(cylGeo, pMat);
+                    floatingPieceMesh.add(cylMesh);
+                    if (p.hollow) {
+                        const holeGeo = new THREE.CylinderGeometry(0.2, 0.2, height + 0.1, 16);
+                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                        floatingPieceMesh.add(holeMesh);
+                    }
+                }
+
+                floatingPieceMesh.position.set(0, 4.5, 0);
+                scene.add(floatingPieceMesh);
+
+                document.getElementById('turn-status').innerText = `Selected Piece #${id}. Tap board square to place!`;
             }
         }
 
         function handleBoardSquareClick(deck, x, z, squareMesh) {
+            if (gameOver) return;
             if (activeGame === 'quarto') {
                 if (selectedRackPieceId === null) {
-                    alert("Please select a piece from the rack first!");
+                    showToast("Click one of the available pieces around the board first!");
+                    return;
+                }
+
+                // Verify square is empty
+                const existing = pieces.find(p => p.placed && p.position.deck === deck && p.position.x === x && p.position.z === z);
+                if (existing) {
+                    showToast("This square is already occupied!");
                     return;
                 }
 
@@ -579,193 +1152,381 @@
                 piece.placed = true;
                 piece.position = { deck, x, z };
 
-                // Render 3D Piece on Board
-                const pGeo = piece.square ? new THREE.BoxGeometry(0.8, piece.tall ? 1.6 : 0.8, 0.8) : new THREE.CylinderGeometry(0.4, 0.4, piece.tall ? 1.6 : 0.8, 16);
-                const pMat = new THREE.MeshStandardMaterial({ color: piece.dark ? 0x78350f : 0xfef3c7, roughness: 0.4 });
-                const pMesh = new THREE.Mesh(pGeo, pMat);
-                pMesh.position.copy(squareMesh.position);
-                pMesh.position.y += (piece.tall ? 0.8 : 0.4) + 0.1;
-                scene.add(pMesh);
-                pieceMeshes.push(pMesh);
+                if (floatingPieceMesh) {
+                    scene.remove(floatingPieceMesh);
+                    floatingPieceMesh = null;
+                }
 
-                addMoveHistory(`P${currentPlayer} placed piece #${piece.id} on Deck ${deck+1} (${x},${z})`);
-                
-                // Check Quarto win
-                if (checkQuartoWin()) {
-                    triggerWin(currentPlayer);
+                const height = piece.tall ? 2.2 : 1.2;
+                const pMat = new THREE.MeshStandardMaterial({ 
+                    color: piece.dark ? 0x78350f : 0xfef3c7, 
+                    roughness: 0.2, 
+                    metalness: 0.5 
+                });
+
+                const pGroup = new THREE.Group();
+                if (piece.square) {
+                    const boxGeo = new THREE.BoxGeometry(0.8, height, 0.8);
+                    const boxMesh = new THREE.Mesh(boxGeo, pMat);
+                    boxMesh.castShadow = true;
+                    pGroup.add(boxMesh);
+                    if (piece.hollow) {
+                        const holeGeo = new THREE.CylinderGeometry(0.24, 0.24, height + 0.1, 16);
+                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                        pGroup.add(holeMesh);
+                    }
+                } else {
+                    const cylGeo = new THREE.CylinderGeometry(0.4, 0.4, height, 32);
+                    const cylMesh = new THREE.Mesh(cylGeo, pMat);
+                    cylMesh.castShadow = true;
+                    pGroup.add(cylMesh);
+                    if (piece.hollow) {
+                        const holeGeo = new THREE.CylinderGeometry(0.18, 0.18, height + 0.1, 16);
+                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                        pGroup.add(holeMesh);
+                    }
+                }
+
+                pGroup.position.copy(squareMesh.position);
+                pGroup.position.y += (height / 2) + 0.1;
+                pGroup.userData = { pieceId: piece.id };
+                scene.add(pGroup);
+                pieceMeshes.push(pGroup);
+
+                // Check Quarto Win Condition
+                const winLine = checkQuartoWinWithLine(deck, x, z);
+                if (winLine.win) {
+                    gameOver = true;
+                    scores[`p${currentPlayer}`]++;
+                    updateScoreDisplay();
+                    document.getElementById('turn-status').innerText = `Player ${currentPlayer} Wins Quarto!`;
+                    addChatSystemMessage(`Player ${currentPlayer} wins the match in Quarto!`);
+
+                    winningPieces = pieceMeshes.filter(m => winLine.winningIds.includes(m.userData.pieceId));
+                    winningPieces.forEach(m => {
+                        m.children.forEach(c => {
+                            if (c.material) {
+                                c.material.emissive = new THREE.Color(0x22d3ee);
+                                c.material.emissiveIntensity = 0.9;
+                            }
+                        });
+                    });
+
+                    setTimeout(() => {
+                        showPostGameModal(`Player ${currentPlayer} Wins!`, `A winning Quarto line was completed.`);
+                    }, 400);
                     return;
                 }
-
+                
                 selectedRackPieceId = null;
-                gamePhase = 'choose_for_opponent';
-                updateRackUI();
+                buildPerimeterPieces();
                 
                 currentPlayer = currentPlayer === 1 ? 2 : 1;
-                document.getElementById('turn-status').innerText = `Player ${currentPlayer}'s turn: Choose piece for opponent.`;
+                document.getElementById('turn-status').innerText = `Player ${currentPlayer}'s turn: Choose next piece around board`;
 
                 if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
-                    setTimeout(triggerAITurn, 800);
+                    setTimeout(triggerAITurn, 900);
                 }
             }
         }
 
-        // WIN DETECTION (QUARTO)
-        function checkQuartoWin() {
-            // Simplified win check across decks
-            const deckCount = parseInt(gameMode);
-            for (let d = 0; d < deckCount; d++) {
-                // Check rows, cols, diagonals on deck d
-                // In full implementation, checks 4-in-a-row matching any bitwise trait
+        function checkQuartoWinWithLine(deck, x, z) {
+            const size = 4;
+
+            const getPieceAt = (d, r, c) => {
+                return pieces.find(p => p.placed && p.position.deck === d && p.position.x === r && p.position.z === c) || null;
+            };
+
+            const testLine = (pList) => {
+                if (pList.length < 4 || pList.some(p => p === null)) return { win: false, ids: [] };
+                if (pList.every(p => p.tall) || pList.every(p => !p.tall)) return { win: true, ids: pList.map(p => p.id) };
+                if (pList.every(p => p.dark) || pList.every(p => !p.dark)) return { win: true, ids: pList.map(p => p.id) };
+                if (pList.every(p => p.square) || pList.every(p => !p.square)) return { win: true, ids: pList.map(p => p.id) };
+                if (pList.every(p => p.hollow) || pList.every(p => !p.hollow)) return { win: true, ids: pList.map(p => p.id) };
+                return { win: false, ids: [] };
+            };
+
+            // Row
+            let rowP = [];
+            for (let c = 0; c < size; c++) rowP.push(getPieceAt(deck, x, c));
+            let res = testLine(rowP);
+            if (res.win) return { win: true, winningIds: res.ids };
+
+            // Col
+            let colP = [];
+            for (let r = 0; r < size; r++) colP.push(getPieceAt(deck, r, z));
+            res = testLine(colP);
+            if (res.win) return { win: true, winningIds: res.ids };
+
+            // Diagonals
+            if (x === z) {
+                let diag1 = [getPieceAt(deck, 0, 0), getPieceAt(deck, 1, 1), getPieceAt(deck, 2, 2), getPieceAt(deck, 3, 3)];
+                res = testLine(diag1);
+                if (res.win) return { win: true, winningIds: res.ids };
             }
-            return false;
+            if (x + z === size - 1) {
+                let diag2 = [getPieceAt(deck, 0, 3), getPieceAt(deck, 1, 2), getPieceAt(deck, 2, 1), getPieceAt(deck, 3, 0)];
+                res = testLine(diag2);
+                if (res.win) return { win: true, winningIds: res.ids };
+            }
+
+            return { win: false, winningIds: [] };
         }
 
-        function triggerWin(winner) {
-            gameOver = true;
-            scores[`p${winner}`]++;
-            updateScoreDisplay();
-            document.getElementById('win-title').innerText = `Player ${winner} Wins!`;
-            document.getElementById('win-message').innerText = `${currentAuthUser || 'Player ' + winner} successfully completed a Quarto line!`;
-            document.getElementById('win-modal').classList.remove('hidden');
-        }
-
-        function updateScoreDisplay() {
-            document.getElementById('score-display').innerText = `P1: ${scores.p1} | P2: ${scores.p2}`;
-        }
-
-        // AI TURN LOGIC
+        // --- AI OPPONENT LOGIC ---
         function triggerAITurn() {
             if (gameOver) return;
             const unplaced = pieces.filter(p => !p.placed);
             if (unplaced.length === 0) return;
 
-            // AI picks random piece for opponent / random empty square
             const randomPiece = unplaced[Math.floor(Math.random() * unplaced.length)];
-            selectedRackPieceId = randomPiece.id;
-            updateRackUI();
+            selectPerimeterPiece(randomPiece.id);
 
-            // Find empty square on deck 0
-            const boardSize = 4;
-            const emptySquares = boardSquareMeshes.filter(m => m.userData && m.userData.type === 'board_square' && m.userData.deck === 0);
-            if (emptySquares.length > 0) {
-                const targetSq = emptySquares[Math.floor(Math.random() * emptySquares.length)];
-                setTimeout(() => {
-                    handleBoardSquareClick(targetSq.userData.deck, targetSq.userData.x, targetSq.userData.z, targetSq);
-                }, 600);
+            setTimeout(() => {
+                let emptySquares = [];
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 4; c++) {
+                        const occ = pieces.find(p => p.placed && p.position.deck === 0 && p.position.x === r && p.position.z === c);
+                        if (!occ) {
+                            emptySquares.push({ deck: 0, x: r, z: c });
+                        }
+                    }
+                }
+
+                if (emptySquares.length > 0) {
+                    const targetSq = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+                    const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'board_square' && m.userData.deck === targetSq.deck && m.userData.x === targetSq.x && m.userData.z === targetSq.z);
+                    if (sqMesh) {
+                        handleBoardSquareClick(targetSq.deck, targetSq.x, targetSq.z, sqMesh);
+                    }
+                }
+            }, 800);
+        }
+
+        // --- UI & MODAL HELPERS ---
+        function updateScoreDisplay() {
+            document.getElementById('score-display').innerText = `P1: ${scores.p1} | P2: ${scores.p2}`;
+        }
+
+        function toggleChatWindow() {
+            const chatWin = document.getElementById('chat-window');
+            chatWin.classList.toggle('hidden');
+        }
+
+        function openMasterMenu() {
+            document.getElementById('menu-select-game').value = activeGame;
+            document.getElementById('menu-select-mode').value = gameModeType;
+            document.getElementById('menu-select-ai-difficulty').value = aiDifficulty;
+            document.getElementById('menu-ai-difficulty-container').classList.toggle('hidden', gameModeType !== 'pve');
+
+            const adminSection = document.getElementById('master-user-admin-section');
+            if (currentUserRole === 'master') {
+                adminSection.classList.remove('hidden');
+                renderAdminUsersList();
+            } else {
+                adminSection.classList.add('hidden');
             }
+            document.getElementById('master-menu-modal').classList.remove('hidden');
         }
 
-        // CHAT & HISTORY
-        function addMoveHistory(text) {
-            const list = document.getElementById('move-history-list');
-            const item = document.createElement('div');
-            item.className = "text-gray-300";
-            item.innerText = `> ${text}`;
-            list.prepend(item);
-            moveHistory.push(text);
+        function closeMasterMenu() {
+            adminCancelEdit();
+            document.getElementById('master-menu-modal').classList.add('hidden');
         }
 
-        function addChatSystemMessage(text) {
-            chatMessages.push({ sender: 'System', text });
-            renderChat();
+        // --- MASTER ADMIN USER CRUD OPERATIONS ---
+        function renderAdminUsersList() {
+            const listEl = document.getElementById('admin-users-list');
+            const users = getUsersRegistry();
+            listEl.innerHTML = '';
+
+            users.forEach(u => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between bg-gray-900/90 px-3 py-2 rounded-lg border border-gray-800 text-xs";
+                const roleTag = u.role === 'master' 
+                    ? `<span class="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-[10px] font-bold ml-1.5">MASTER</span>` 
+                    : `<span class="px-1.5 py-0.5 bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 rounded text-[10px] ml-1.5">PLAYER</span>`;
+
+                row.innerHTML = `
+                    <div class="truncate pr-2">
+                        <span class="font-bold text-white">${u.username}</span>${roleTag}
+                        <span class="text-gray-500 text-[10px] ml-2">PIN: ${u.password}</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5 shrink-0">
+                        <button onclick="adminEditUser('${u.username.replace(/'/g, "\\'")}')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-400 rounded transition" title="Edit User">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="adminDeleteUser('${u.username.replace(/'/g, "\\'")}')" class="px-2 py-1 bg-gray-800 hover:bg-rose-900/60 text-rose-400 rounded transition" title="Delete User">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        function adminSaveUser() {
+            if (currentUserRole !== 'master') return;
+            const uInput = document.getElementById('admin-username');
+            const pInput = document.getElementById('admin-password');
+            const rInput = document.getElementById('admin-role');
+
+            const username = uInput.value.trim();
+            const password = pInput.value.trim();
+            const role = rInput.value;
+
+            if (!username || !password) {
+                showToast("Enter both username and password.");
+                return;
+            }
+
+            let users = getUsersRegistry();
+
+            if (editingUsername) {
+                const idx = users.findIndex(u => u.username.toLowerCase() === editingUsername.toLowerCase());
+                if (idx !== -1) {
+                    users[idx] = { username, password, role };
+                    saveUsersRegistry(users);
+                    addChatSystemMessage(`Master updated user "${username}".`);
+                }
+                adminCancelEdit();
+            } else {
+                if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                    showToast("User already exists!");
+                    return;
+                }
+                users.push({ username, password, role });
+                saveUsersRegistry(users);
+                uInput.value = '';
+                pInput.value = '';
+                rInput.value = 'player';
+                addChatSystemMessage(`Master added new user "${username}".`);
+            }
+
+            renderAdminUsersList();
+        }
+
+        function adminEditUser(username) {
+            if (currentUserRole !== 'master') return;
+            const users = getUsersRegistry();
+            const target = users.find(u => u.username === username);
+            if (!target) return;
+
+            editingUsername = target.username;
+            document.getElementById('admin-username').value = target.username;
+            document.getElementById('admin-password').value = target.password;
+            document.getElementById('admin-role').value = target.role || 'player';
+
+            document.getElementById('admin-save-btn').innerHTML = `<i class="fa-solid fa-check mr-1"></i> Update User`;
+            document.getElementById('admin-cancel-btn').classList.remove('hidden');
+        }
+
+        function adminCancelEdit() {
+            editingUsername = null;
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-role').value = 'player';
+            document.getElementById('admin-save-btn').innerHTML = `<i class="fa-solid fa-user-plus mr-1"></i> Add User`;
+            document.getElementById('admin-cancel-btn').classList.add('hidden');
+        }
+
+        function adminDeleteUser(username) {
+            if (currentUserRole !== 'master') return;
+            if (username.toLowerCase() === currentUser.toLowerCase()) {
+                showToast("You cannot delete your own active master account.");
+                return;
+            }
+            let users = getUsersRegistry();
+            users = users.filter(u => u.username !== username);
+            saveUsersRegistry(users);
+            if (editingUsername === username) adminCancelEdit();
+            renderAdminUsersList();
+            addChatSystemMessage(`Master removed user "${username}".`);
+        }
+
+        function applyMasterMenuChanges() {
+            activeGame = document.getElementById('menu-select-game').value;
+            gameModeType = document.getElementById('menu-select-mode').value;
+            aiDifficulty = document.getElementById('menu-select-ai-difficulty').value;
+            closeMasterMenu();
+            document.getElementById('game-lobby-modal').classList.add('hidden');
+            initGameArena();
+            const diffInfo = gameModeType === 'pve' ? `, AI: ${aiDifficulty.toUpperCase()}` : '';
+            addChatSystemMessage(`Game reconfigured to ${activeGame.toUpperCase()} (Mode: ${gameModeType.toUpperCase()}${diffInfo}).`);
+        }
+
+        function openInstructionsModal() {
+            document.getElementById('instructions-modal').classList.remove('hidden');
+        }
+
+        function closeInstructionsModal() {
+            document.getElementById('instructions-modal').classList.add('hidden');
+        }
+
+        function showPostGameModal(title, subtitle) {
+            document.getElementById('post-game-title').innerText = title;
+            document.getElementById('post-game-subtitle').innerText = subtitle;
+            document.getElementById('post-game-modal').classList.remove('hidden');
+        }
+
+        function restartMatch() {
+            initGameArena();
+        }
+
+        function returnToNewGameSetup() {
+            document.getElementById('post-game-modal').classList.add('hidden');
+            openGameLobby();
+        }
+
+        function changeGameModeDirectly() {
+            document.getElementById('post-game-modal').classList.add('hidden');
+            openMasterMenu();
         }
 
         function sendChatMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
-
-            chatMessages.push({ sender: currentAuthUser || 'Player', text });
+            
+            appendChatMessage(currentUser || 'Player', text);
             input.value = '';
-            renderChat();
-            saveChatHistory();
         }
 
-        function handleChatKey(e) {
-            if (e.key === 'Enter') sendChatMessage();
-        }
-
-        function renderChat() {
+        function appendChatMessage(sender, text) {
             const container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            chatMessages.forEach(m => {
-                const div = document.createElement('div');
-                div.innerHTML = `<span class="font-bold text-cyan-400">${m.sender}:</span> <span class="text-gray-200">${m.text}</span>`;
-                container.appendChild(div);
-            });
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="font-bold text-cyan-400">${sender}:</span> ${text}`;
+            container.appendChild(div);
             container.scrollTop = container.scrollHeight;
-        }
 
-        function clearChat() {
-            chatMessages = [];
-            renderChat();
-            localStorage.removeItem('intelligames_chat');
-        }
-
-        function saveChatHistory() {
+            chatMessages.push({ sender, text });
             localStorage.setItem('intelligames_chat', JSON.stringify(chatMessages));
+        }
+
+        function addChatSystemMessage(text) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = "text-gray-500 italic text-[11px]";
+            div.innerText = `System: ${text}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
 
         function loadChatHistory() {
             const saved = localStorage.getItem('intelligames_chat');
             if (saved) {
-                try { chatMessages = JSON.parse(saved); renderChat(); } catch(e){}
+                try {
+                    chatMessages = JSON.parse(saved);
+                    chatMessages.forEach(m => {
+                        const container = document.getElementById('chat-messages');
+                        const div = document.createElement('div');
+                        div.innerHTML = `<span class="font-bold text-cyan-400">${m.sender}:</span> ${m.text}`;
+                        container.appendChild(div);
+                    });
+                } catch(e) {}
             }
-        }
-
-        // MODALS & VIEWPORT CONTROLS
-        function openMasterMenu() {
-            document.getElementById('master-menu-modal').classList.remove('hidden');
-        }
-        function closeMasterMenu() {
-            document.getElementById('master-menu-modal').classList.add('hidden');
-        }
-        function applyMasterMenuChanges() {
-            activeGame = document.getElementById('menu-game-select').value;
-            gameMode = document.getElementById('menu-deck-select').value;
-            gameModeType = document.getElementById('menu-opponent-mode').value;
-            aiDifficulty = document.getElementById('menu-ai-difficulty').value;
-            closeMasterMenu();
-            initGameArena();
-        }
-
-        function openInstructions() {
-            const content = document.getElementById('instructions-content');
-            content.innerHTML = `
-                <h4 class="font-bold text-cyan-400 text-sm mb-1">Quarto 3D Multi-Deck Rules</h4>
-                <p>Quarto features 16 unique pieces combining 4 binary attributes: Height, Color, Shape, and Top. The objective is to place the 4th piece in a row sharing at least one common trait.</p>
-                <h4 class="font-bold text-purple-400 text-sm mt-3 mb-1">Multi-Deck (2 or 3 Boards) Play</h4>
-                <p>In Double or Triple deck modes, winning lines can be formed horizontally across a deck, vertically down columns across stacked decks, or diagonally through 3D space.</p>
-                <h4 class="font-bold text-amber-400 text-sm mt-3 mb-1">Turn Mechanics</h4>
-                <p>You choose which piece your opponent must play next. Your opponent places that piece onto any available square on any active deck and confirms their move.</p>
-            `;
-            document.getElementById('instructions-modal').classList.remove('hidden');
-        }
-        function closeInstructions() {
-            document.getElementById('instructions-modal').classList.add('hidden');
-        }
-
-        function restartGame() {
-            document.getElementById('win-modal').classList.add('hidden');
-            gameOver = false;
-            initGameArena();
-        }
-
-        function setCameraView(view) {
-            if (view === '3d') {
-                camera.position.set(0, 18, 22);
-                controls.target.set(0, 2.5, 0);
-            } else if (view === 'd1') {
-                camera.position.set(0, 8, 10);
-                controls.target.set(0, 0, 0);
-            } else if (view === 'd2') {
-                camera.position.set(0, 13, 10);
-                controls.target.set(0, 5, 0);
-            } else if (view === 'd3') {
-                camera.position.set(0, 18, 10);
-                controls.target.set(0, 10, 0);
-            }
-            controls.update();
         }
     </script>
 </body>

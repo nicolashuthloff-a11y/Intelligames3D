@@ -144,31 +144,120 @@
         </header>
 
         <!-- FLOATING ACTION CHAT & CONTROLS -->
-        <div class="w-full p-4 flex justify-between items-end pointer-events-none">
-            <!-- Chat Toggle Button -->
-            <button onclick="toggleChatWindow()" class="interactive glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-cyan-500/50 transition">
-                <i class="fa-solid fa-comments text-cyan-400"></i>
-                <span class="text-xs font-semibold text-gray-200">Player Chat</span>
-            </button>
+        <div class="w-full p-4 flex flex-wrap gap-2 justify-between items-end pointer-events-none">
+            <div class="flex flex-wrap gap-2 pointer-events-auto">
+                <!-- Chat Toggle Button -->
+                <button onclick="toggleChatWindow()" class="interactive glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-cyan-500/50 transition">
+                    <i class="fa-solid fa-comments text-cyan-400"></i>
+                    <span class="text-xs font-semibold text-gray-200">Player Chat</span>
+                </button>
+                <!-- Move History Toggle Button -->
+                <button onclick="toggleMoveHistoryWindow()" class="interactive glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-purple-500/50 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-purple-400"></i>
+                    <span class="text-xs font-semibold text-gray-200">Move History (<span id="move-count-badge">0</span>)</span>
+                </button>
+                <!-- Sessions & Favored Players Button -->
+                <button onclick="openSessionsHub()" class="interactive glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-amber-500/50 transition">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span class="text-xs font-semibold text-gray-200">Sessions & Invites</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MOVE HISTORY DRAWER -->
+        <div id="move-history-window" class="absolute bottom-16 right-4 w-80 max-w-full glass-panel rounded-2xl shadow-2xl border border-purple-500/30 flex flex-col hidden interactive z-40 overflow-hidden">
+            <div class="p-3 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between">
+                <span class="text-xs font-bold text-purple-400 flex items-center">
+                    <i class="fa-solid fa-list-ol mr-1.5"></i> Match Move History
+                </span>
+                <button onclick="toggleMoveHistoryWindow()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="move-history-list" class="p-3 h-52 overflow-y-auto space-y-1.5 text-xs text-gray-300 flex flex-col">
+                <div class="text-gray-500 italic text-[11px]">No moves recorded yet in this match.</div>
+            </div>
         </div>
 
         <!-- PLAYER CHAT MODAL / DRAWER -->
         <div id="chat-window" class="absolute bottom-16 left-4 w-80 max-w-full glass-panel rounded-2xl shadow-2xl border border-cyan-500/30 flex flex-col hidden interactive z-40 overflow-hidden">
             <div class="p-3 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between">
                 <span class="text-xs font-bold text-cyan-400 flex items-center">
-                    <i class="fa-solid fa-message mr-1.5"></i> Player Match Chat
+                    <i class="fa-solid fa-comments mr-1.5"></i> Player Chat
                 </span>
                 <button onclick="toggleChatWindow()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="chat-messages" class="p-3 h-48 overflow-y-auto space-y-2 text-xs text-gray-300 flex flex-col">
-                <div class="text-gray-500 italic text-[11px]">System: Welcome to Intelligames 3D. Chat history is saved locally.</div>
+            <div id="chat-messages" class="p-3 h-44 overflow-y-auto space-y-1.5 text-xs text-gray-300 flex flex-col">
+                <div class="text-gray-500 italic text-[11px]">System: Chat initialized.</div>
             </div>
-            <div class="p-2.5 border-t border-gray-800 bg-gray-900/50 flex space-x-2">
-                <input type="text" id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMessage()" class="flex-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                <button onclick="sendChatMessage()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">Send</button>
+            <div class="p-2 bg-gray-900/90 border-t border-gray-800 flex space-x-2">
+                <input type="text" id="chat-input" onkeypress="if(event.key==='Enter') sendChatMessage()" placeholder="Type a message..." class="flex-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                <button onclick="sendChatMessage()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
         </div>
+    </div>
 
+    <!-- SESSIONS, FAVORED PLAYERS & INVITES MODAL -->
+    <div id="sessions-hub-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-amber-500/40 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center">
+                    <i class="fa-solid fa-users-gear text-amber-400 mr-2"></i> Game Sessions, Favored Players & Invites
+                </h3>
+                <button onclick="closeSessionsHub()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <!-- Left Column: Favored Players & Inviting -->
+                <div class="space-y-3 bg-gray-950/60 p-4 rounded-xl border border-gray-800">
+                    <h4 class="font-bold text-amber-300 flex items-center justify-between">
+                        <span><i class="fa-solid fa-star mr-1.5"></i> Players & Favorites</span>
+                        <span class="text-[10px] text-gray-400">Star to favorite</span>
+                    </h4>
+                    <div id="favored-players-list" class="max-h-48 overflow-y-auto space-y-1.5 pr-1"></div>
+
+                    <div class="border-t border-gray-800 pt-3 space-y-2">
+                        <label class="block font-semibold text-cyan-300">Send Game Invite</label>
+                        <select id="invite-target-player" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
+                            <option value="">-- Select Player --</option>
+                        </select>
+                        <select id="invite-game-type" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
+                            <option value="quarto">Quarto 3D</option>
+                            <option value="startrek">Star Trek Tri-D Chess</option>
+                            <option value="twixt">Twixt 3D</option>
+                            <option value="muhle">Mühle 3D</option>
+                            <option value="fourgewinnt">4gewinnt 3D</option>
+                        </select>
+                        <button onclick="sendGameInvite()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-gray-950 font-bold rounded-lg transition">
+                            <i class="fa-solid fa-paper-plane mr-1"></i> Send Session Invite
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Start New Session & Active Sessions/Invites -->
+                <div class="space-y-3 bg-gray-950/60 p-4 rounded-xl border border-gray-800">
+                    <h4 class="font-bold text-cyan-300"><i class="fa-solid fa-plus-circle mr-1.5"></i> Start New Game Session</h4>
+                    <div class="space-y-2">
+                        <input type="text" id="new-session-name" placeholder="Session Name (e.g. Friday Cup)" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-cyan-500">
+                        <select id="new-session-game" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
+                            <option value="quarto">Quarto 3D</option>
+                            <option value="startrek">Star Trek Tri-D Chess</option>
+                            <option value="twixt">Twixt 3D</option>
+                            <option value="muhle">Mühle 3D</option>
+                            <option value="fourgewinnt">4gewinnt 3D</option>
+                        </select>
+                        <button onclick="createNewGameSession()" class="w-full py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-lg transition">
+                            <i class="fa-solid fa-rocket mr-1"></i> Launch & Save Session
+                        </button>
+                    </div>
+
+                    <div class="border-t border-gray-800 pt-3 space-y-2">
+                        <h4 class="font-bold text-purple-300">Active Sessions & Invites</h4>
+                        <div id="active-sessions-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- MASTER MENU MODAL -->
@@ -255,29 +344,24 @@
 
     <!-- INSTRUCTIONS MODAL -->
     <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-cyan-500/40 space-y-4 max-h-[85vh] overflow-y-auto">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-cyan-500/40 space-y-4 max-h-[88vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-gray-800 pb-3">
                 <h3 class="text-base font-bold text-white flex items-center">
-                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Game Rules & Guide
+                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Complete Rules & Strategy Guide
                 </h3>
                 <button onclick="closeInstructionsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <div class="space-y-3 text-xs text-gray-300 leading-relaxed">
-                <h4 class="font-bold text-cyan-300 text-sm">Quarto 3D Gameplay</h4>
-                <p>Quarto is played with 16 unique pieces possessing 4 distinct binary attributes: <strong>Tall/Short, Dark/Light, Square/Round, and Solid/Hollow</strong>.</p>
-                <p><strong>Core Rule:</strong> You do not choose which piece to place for yourself! Instead, <em>you select a piece from around the board and hand it to your opponent</em> to place on the board. Win by aligning 4 pieces sharing at least one common characteristic.</p>
-                
-                <div class="border-t border-gray-800 pt-2"></div>
 
-                <h4 class="font-bold text-purple-300 text-sm">Star Trek Tri-Dimensional Chess</h4>
-                <p>Played across three primary 4x4 main boards stacked vertically plus four movable 2x2 attack boards suspended at the corners.</p>
-                <ul class="list-disc pl-5 space-y-1 text-gray-300">
-                    <li><strong>Movement:</strong> Pieces move along standard chess trajectories projected vertically across the stacked levels.</li>
-                    <li><strong>Attack Boards:</strong> Click any piece to highlight it, then click a destination square on any level or attack board to move or capture.</li>
-                    <li><strong>Objective:</strong> Checkmate the opponent's King across the tri-dimensional grid!</li>
-                </ul>
+            <!-- Game Rule Tabs -->
+            <div class="flex flex-wrap gap-1.5 border-b border-gray-800 pb-2.5">
+                <button onclick="selectInstructionTab('quarto')" id="rule-tab-quarto" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">Quarto 3D</button>
+                <button onclick="selectInstructionTab('startrek')" id="rule-tab-startrek" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Star Trek Chess</button>
+                <button onclick="selectInstructionTab('twixt')" id="rule-tab-twixt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Twixt 3D</button>
+                <button onclick="selectInstructionTab('muhle')" id="rule-tab-muhle" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mühle 3D</button>
+                <button onclick="selectInstructionTab('fourgewinnt')" id="rule-tab-fourgewinnt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">4gewinnt 3D</button>
             </div>
+            
+            <div id="instruction-content-box" class="space-y-3 text-xs text-gray-300 leading-relaxed"></div>
 
             <button onclick="closeInstructionsModal()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
                 Got It, Let's Play!
@@ -330,10 +414,13 @@
         let selectedRackPieceId = null;
         let selectedChessPiece = null;
         let currentPlayer = 1;
+        let quartoPhase = 'pick_for_opponent'; // 'pick_for_opponent' or 'place_piece'
         let gameOver = false;
         let scores = { p1: 0, p2: 0 };
         let chatMessages = [];
+        let moveHistory = [];
         let winningPieces = [];
+        let activeSessionName = 'Quick Match';
 
         window.onload = function() {
             if (typeof THREE === 'undefined') {
@@ -343,6 +430,7 @@
             ensureMasterAccountExists();
             init3D();
             loadChatHistory();
+            selectInstructionTab('quarto');
             checkExistingSession();
         };
 
@@ -402,6 +490,7 @@
             activeGame = document.getElementById('select-game').value;
             gameModeType = document.getElementById('select-mode').value;
             aiDifficulty = document.getElementById('select-ai-difficulty').value;
+            activeSessionName = `${activeGame.toUpperCase()} Session`;
 
             document.getElementById('game-lobby-modal').classList.add('hidden');
             initGameArena();
@@ -600,8 +689,11 @@
             pieceMeshes = [];
             perimeterPieceMeshes = [];
             winningPieces = [];
+            moveHistory = [];
+            renderMoveHistory();
             gameOver = false;
             currentPlayer = 1;
+            quartoPhase = 'pick_for_opponent';
             selectedRackPieceId = null;
             selectedChessPiece = null;
             document.getElementById('post-game-modal').classList.add('hidden');
@@ -628,37 +720,37 @@
                 initializePiecesData();
                 buildPerimeterPieces();
                 updateScoreDisplay();
-                document.getElementById('turn-status').innerText = `Player 1's turn: Choose piece for opponent`;
+                if (activeGame === 'quarto') {
+                    document.getElementById('turn-status').innerText = `Team 1: Pick a piece around the board for Team 2 to place`;
+                } else {
+                    document.getElementById('turn-status').innerText = `Player 1's turn: Select piece & place on board`;
+                }
             }
         }
 
         function buildBoardMeshes() {
-            const gridSize = 4;
-            const spacing = 1.3;
+            const spacing = 1.45;
+            const baseGeo = new THREE.BoxGeometry(6.4, 0.25, 6.4);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7, roughness: 0.3 });
+            const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+            baseMesh.position.set(0, -0.15, 0);
+            baseMesh.receiveShadow = true;
+            scene.add(baseMesh);
+            boardSquareMeshes.push(baseMesh);
 
-            const plateGeo = new THREE.BoxGeometry(5.8, 0.2, 5.8);
-            const plateMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4, metalness: 0.8 });
-            const plate = new THREE.Mesh(plateGeo, plateMat);
-            plate.position.set(0, -0.2, 0);
-            plate.receiveShadow = true;
-            scene.add(plate);
-            boardSquareMeshes.push(plate);
-
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    const sqGeo = new THREE.BoxGeometry(1.2, 0.08, 1.2);
-                    const sqMat = new THREE.MeshStandardMaterial({ 
-                        color: (r + c) % 2 === 0 ? 0x1f2937 : 0x374151,
-                        roughness: 0.3
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const sqGeo = new THREE.BoxGeometry(1.32, 0.14, 1.32);
+                    const isDark = (r + c) % 2 === 1;
+                    const sqMat = new THREE.MeshStandardMaterial({
+                        color: isDark ? 0x1e293b : 0x334155,
+                        roughness: 0.3,
+                        metalness: 0.4
                     });
                     const sqMesh = new THREE.Mesh(sqGeo, sqMat);
-                    
-                    const posX = (c - 1.5) * spacing;
-                    const posZ = (r - 1.5) * spacing;
-                    sqMesh.position.set(posX, 0, posZ);
+                    sqMesh.position.set((r - 1.5) * spacing, 0.05, (c - 1.5) * spacing);
                     sqMesh.receiveShadow = true;
                     sqMesh.userData = { type: 'board_square', deck: 0, x: r, z: c };
-                    
                     scene.add(sqMesh);
                     boardSquareMeshes.push(sqMesh);
                 }
@@ -1020,6 +1112,11 @@
             }
 
             // Move piece
+            const prevLoc = `${selectedChessPiece.boardId.toUpperCase()} (${selectedChessPiece.r + 1},${selectedChessPiece.c + 1})`;
+            const nextLoc = `${boardId.toUpperCase()} (${r + 1},${c + 1})`;
+            const teamName = currentPlayer === 1 ? 'Starfleet' : 'Opponent';
+            recordMove(`${teamName}: ${selectedChessPiece.role.toUpperCase()} ${prevLoc} → ${nextLoc}${occupant ? ' [Captured ' + occupant.role.toUpperCase() + ']' : ''}`);
+
             selectedChessPiece.boardId = boardId;
             selectedChessPiece.r = r;
             selectedChessPiece.c = c;
@@ -1080,6 +1177,11 @@
         }
 
         function selectPerimeterPiece(id) {
+            if (activeGame === 'quarto' && quartoPhase === 'place_piece') {
+                showToast(`Team ${currentPlayer} must place the floating piece on the board first!`);
+                return;
+            }
+
             selectedRackPieceId = id;
             buildPerimeterPieces();
 
@@ -1127,116 +1229,150 @@
                 floatingPieceMesh.position.set(0, 4.5, 0);
                 scene.add(floatingPieceMesh);
 
-                document.getElementById('turn-status').innerText = `Selected Piece #${id}. Tap board square to place!`;
+                if (activeGame === 'quarto') {
+                    const giverTeam = currentPlayer;
+                    const placerTeam = currentPlayer === 1 ? 2 : 1;
+                    const traits = `${p.tall ? 'Tall' : 'Short'}/${p.dark ? 'Dark' : 'Light'}/${p.square ? 'Square' : 'Round'}/${p.hollow ? 'Hollow' : 'Solid'}`;
+                    recordMove(`Team ${giverTeam} selected Piece #${id} (${traits}) for Team ${placerTeam}`);
+                    currentPlayer = placerTeam;
+                    quartoPhase = 'place_piece';
+                    document.getElementById('turn-status').innerText = `Team ${currentPlayer}: Place Piece #${id} on a board square!`;
+
+                    if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+                        setTimeout(triggerAIPlaceQuartoPiece, 900);
+                    }
+                } else {
+                    document.getElementById('turn-status').innerText = `Player ${currentPlayer}: Selected Piece #${id}. Tap square to place!`;
+                }
             }
         }
 
         function handleBoardSquareClick(deck, x, z, squareMesh) {
             if (gameOver) return;
             if (activeGame === 'quarto') {
-                if (selectedRackPieceId === null) {
-                    showToast("Click one of the available pieces around the board first!");
+                if (quartoPhase !== 'place_piece' || selectedRackPieceId === null) {
+                    showToast(`Team ${currentPlayer}: First pick a piece from around the board for the other team!`);
                     return;
                 }
+            } else if (selectedRackPieceId === null) {
+                showToast("Click one of the available pieces around the board first!");
+                return;
+            }
 
-                // Verify square is empty
-                const existing = pieces.find(p => p.placed && p.position.deck === deck && p.position.x === x && p.position.z === z);
-                if (existing) {
-                    showToast("This square is already occupied!");
-                    return;
+            // Verify square is empty
+            const existing = pieces.find(p => p.placed && p.position.deck === deck && p.position.x === x && p.position.z === z);
+            if (existing) {
+                showToast("This square is already occupied!");
+                return;
+            }
+
+            const piece = pieces.find(p => p.id === selectedRackPieceId);
+            if (!piece || piece.placed) return;
+
+            piece.placed = true;
+            piece.position = { deck, x, z };
+
+            if (floatingPieceMesh) {
+                scene.remove(floatingPieceMesh);
+                floatingPieceMesh = null;
+            }
+
+            const height = piece.tall ? 2.2 : 1.2;
+            const pMat = new THREE.MeshStandardMaterial({ 
+                color: activeGame === 'quarto'
+                    ? (piece.dark ? 0x78350f : 0xfef3c7)
+                    : (currentPlayer === 1 ? 0x22d3ee : 0xc084fc), 
+                roughness: 0.2, 
+                metalness: 0.5 
+            });
+
+            const pGroup = new THREE.Group();
+            if (piece.square) {
+                const boxGeo = new THREE.BoxGeometry(0.8, height, 0.8);
+                const boxMesh = new THREE.Mesh(boxGeo, pMat);
+                boxMesh.castShadow = true;
+                pGroup.add(boxMesh);
+                if (piece.hollow) {
+                    const holeGeo = new THREE.CylinderGeometry(0.24, 0.24, height + 0.1, 16);
+                    const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                    const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                    pGroup.add(holeMesh);
                 }
-
-                const piece = pieces.find(p => p.id === selectedRackPieceId);
-                if (!piece || piece.placed) return;
-
-                piece.placed = true;
-                piece.position = { deck, x, z };
-
-                if (floatingPieceMesh) {
-                    scene.remove(floatingPieceMesh);
-                    floatingPieceMesh = null;
+            } else {
+                const cylGeo = new THREE.CylinderGeometry(0.4, 0.4, height, 32);
+                const cylMesh = new THREE.Mesh(cylGeo, pMat);
+                cylMesh.castShadow = true;
+                pGroup.add(cylMesh);
+                if (piece.hollow) {
+                    const holeGeo = new THREE.CylinderGeometry(0.18, 0.18, height + 0.1, 16);
+                    const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
+                    const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+                    pGroup.add(holeMesh);
                 }
+            }
 
-                const height = piece.tall ? 2.2 : 1.2;
-                const pMat = new THREE.MeshStandardMaterial({ 
-                    color: piece.dark ? 0x78350f : 0xfef3c7, 
-                    roughness: 0.2, 
-                    metalness: 0.5 
+            pGroup.position.copy(squareMesh.position);
+            pGroup.position.y += (height / 2) + 0.1;
+            pGroup.userData = { pieceId: piece.id, owner: currentPlayer };
+            scene.add(pGroup);
+            pieceMeshes.push(pGroup);
+
+            recordMove(`${activeGame === 'quarto' ? 'Team' : 'Player'} ${currentPlayer} placed Piece #${piece.id} at Row ${x + 1}, Col ${z + 1}`);
+
+            // Check Win Condition
+            const winLine = activeGame === 'quarto'
+                ? checkQuartoWinWithLine(deck, x, z)
+                : checkLineFourWin(currentPlayer, x, z);
+
+            if (winLine.win) {
+                gameOver = true;
+                scores[`p${currentPlayer}`]++;
+                updateScoreDisplay();
+                const label = activeGame === 'quarto' ? `Team ${currentPlayer}` : `Player ${currentPlayer}`;
+                document.getElementById('turn-status').innerText = `${label} Wins ${activeGame.toUpperCase()}!`;
+                addChatSystemMessage(`${label} wins the match!`);
+
+                winningPieces = pieceMeshes.filter(m => winLine.winningIds.includes(m.userData.pieceId));
+                winningPieces.forEach(m => {
+                    m.children.forEach(c => {
+                        if (c.material) {
+                            c.material.emissive = new THREE.Color(0x22d3ee);
+                            c.material.emissiveIntensity = 0.9;
+                        }
+                    });
                 });
 
-                const pGroup = new THREE.Group();
-                if (piece.square) {
-                    const boxGeo = new THREE.BoxGeometry(0.8, height, 0.8);
-                    const boxMesh = new THREE.Mesh(boxGeo, pMat);
-                    boxMesh.castShadow = true;
-                    pGroup.add(boxMesh);
-                    if (piece.hollow) {
-                        const holeGeo = new THREE.CylinderGeometry(0.24, 0.24, height + 0.1, 16);
-                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
-                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
-                        pGroup.add(holeMesh);
-                    }
-                } else {
-                    const cylGeo = new THREE.CylinderGeometry(0.4, 0.4, height, 32);
-                    const cylMesh = new THREE.Mesh(cylGeo, pMat);
-                    cylMesh.castShadow = true;
-                    pGroup.add(cylMesh);
-                    if (piece.hollow) {
-                        const holeGeo = new THREE.CylinderGeometry(0.18, 0.18, height + 0.1, 16);
-                        const holeMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
-                        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
-                        pGroup.add(holeMesh);
-                    }
-                }
+                setTimeout(() => {
+                    showPostGameModal(`${label} Wins!`, `A winning 4-in-a-row alignment was completed.`);
+                }, 400);
+                return;
+            }
 
-                pGroup.position.copy(squareMesh.position);
-                pGroup.position.y += (height / 2) + 0.1;
-                pGroup.userData = { pieceId: piece.id };
-                scene.add(pGroup);
-                pieceMeshes.push(pGroup);
+            selectedRackPieceId = null;
+            buildPerimeterPieces();
 
-                // Check Quarto Win Condition
-                const winLine = checkQuartoWinWithLine(deck, x, z);
-                if (winLine.win) {
-                    gameOver = true;
-                    scores[`p${currentPlayer}`]++;
-                    updateScoreDisplay();
-                    document.getElementById('turn-status').innerText = `Player ${currentPlayer} Wins Quarto!`;
-                    addChatSystemMessage(`Player ${currentPlayer} wins the match in Quarto!`);
-
-                    winningPieces = pieceMeshes.filter(m => winLine.winningIds.includes(m.userData.pieceId));
-                    winningPieces.forEach(m => {
-                        m.children.forEach(c => {
-                            if (c.material) {
-                                c.material.emissive = new THREE.Color(0x22d3ee);
-                                c.material.emissiveIntensity = 0.9;
-                            }
-                        });
-                    });
-
-                    setTimeout(() => {
-                        showPostGameModal(`Player ${currentPlayer} Wins!`, `A winning Quarto line was completed.`);
-                    }, 400);
-                    return;
-                }
-                
-                selectedRackPieceId = null;
-                buildPerimeterPieces();
-                
-                currentPlayer = currentPlayer === 1 ? 2 : 1;
-                document.getElementById('turn-status').innerText = `Player ${currentPlayer}'s turn: Choose next piece around board`;
+            if (activeGame === 'quarto') {
+                // Same team who just placed now picks a piece for the opposing team!
+                quartoPhase = 'pick_for_opponent';
+                const nextOpponent = currentPlayer === 1 ? 2 : 1;
+                document.getElementById('turn-status').innerText = `Team ${currentPlayer}: Pick a piece around the board for Team ${nextOpponent}`;
 
                 if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
-                    setTimeout(triggerAITurn, 900);
+                    setTimeout(triggerAIPickQuartoPieceForOpponent, 850);
+                }
+            } else {
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                document.getElementById('turn-status').innerText = `Player ${currentPlayer}'s turn: Select piece & place`;
+                if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+                    setTimeout(triggerStandardAITurn, 850);
                 }
             }
         }
 
         function checkQuartoWinWithLine(deck, x, z) {
             const size = 4;
-
-            const getPieceAt = (d, r, c) => {
-                return pieces.find(p => p.placed && p.position.deck === d && p.position.x === r && p.position.z === c) || null;
+            const getPieceAt = (r, c) => {
+                return pieces.find(p => p.placed && p.position.deck === deck && p.position.x === r && p.position.z === c) || null;
             };
 
             const testLine = (pList) => {
@@ -1248,26 +1384,21 @@
                 return { win: false, ids: [] };
             };
 
-            // Row
-            let rowP = [];
-            for (let c = 0; c < size; c++) rowP.push(getPieceAt(deck, x, c));
+            let rowP = [0, 1, 2, 3].map(c => getPieceAt(x, c));
             let res = testLine(rowP);
             if (res.win) return { win: true, winningIds: res.ids };
 
-            // Col
-            let colP = [];
-            for (let r = 0; r < size; r++) colP.push(getPieceAt(deck, r, z));
+            let colP = [0, 1, 2, 3].map(r => getPieceAt(r, z));
             res = testLine(colP);
             if (res.win) return { win: true, winningIds: res.ids };
 
-            // Diagonals
             if (x === z) {
-                let diag1 = [getPieceAt(deck, 0, 0), getPieceAt(deck, 1, 1), getPieceAt(deck, 2, 2), getPieceAt(deck, 3, 3)];
+                let diag1 = [0, 1, 2, 3].map(i => getPieceAt(i, i));
                 res = testLine(diag1);
                 if (res.win) return { win: true, winningIds: res.ids };
             }
             if (x + z === size - 1) {
-                let diag2 = [getPieceAt(deck, 0, 3), getPieceAt(deck, 1, 2), getPieceAt(deck, 2, 1), getPieceAt(deck, 3, 0)];
+                let diag2 = [0, 1, 2, 3].map(i => getPieceAt(i, size - 1 - i));
                 res = testLine(diag2);
                 if (res.win) return { win: true, winningIds: res.ids };
             }
@@ -1275,8 +1406,106 @@
             return { win: false, winningIds: [] };
         }
 
+        function checkLineFourWin(playerNum, x, z) {
+            const size = 4;
+            const getOwnedAt = (r, c) => {
+                const m = pieceMeshes.find(mesh => {
+                    const p = pieces.find(item => item.id === mesh.userData.pieceId);
+                    return p && p.placed && p.position.x === r && p.position.z === c && mesh.userData.owner === playerNum;
+                });
+                return m ? m.userData.pieceId : null;
+            };
+
+            const checkArr = (ids) => ids.length === 4 && ids.every(id => id !== null);
+
+            let rowIds = [0, 1, 2, 3].map(c => getOwnedAt(x, c));
+            if (checkArr(rowIds)) return { win: true, winningIds: rowIds };
+
+            let colIds = [0, 1, 2, 3].map(r => getOwnedAt(r, z));
+            if (checkArr(colIds)) return { win: true, winningIds: colIds };
+
+            if (x === z) {
+                let d1 = [0, 1, 2, 3].map(i => getOwnedAt(i, i));
+                if (checkArr(d1)) return { win: true, winningIds: d1 };
+            }
+            if (x + z === size - 1) {
+                let d2 = [0, 1, 2, 3].map(i => getOwnedAt(i, size - 1 - i));
+                if (checkArr(d2)) return { win: true, winningIds: d2 };
+            }
+            return { win: false, winningIds: [] };
+        }
+
         // --- AI OPPONENT LOGIC ---
-        function triggerAITurn() {
+        function triggerAIPlaceQuartoPiece() {
+            if (gameOver || activeGame !== 'quarto' || currentPlayer !== 2 || quartoPhase !== 'place_piece') return;
+            let emptySquares = [];
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const occ = pieces.find(p => p.placed && p.position.deck === 0 && p.position.x === r && p.position.z === c);
+                    if (!occ) emptySquares.push({ deck: 0, x: r, z: c });
+                }
+            }
+            if (emptySquares.length === 0) return;
+
+            // Check if any square gives AI an immediate Quarto win
+            let chosenSq = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+            const currentPiece = pieces.find(p => p.id === selectedRackPieceId);
+            if (currentPiece && aiDifficulty !== 'easy') {
+                for (const sq of emptySquares) {
+                    currentPiece.placed = true;
+                    currentPiece.position = sq;
+                    const testWin = checkQuartoWinWithLine(0, sq.x, sq.z);
+                    currentPiece.placed = false;
+                    currentPiece.position = null;
+                    if (testWin.win) {
+                        chosenSq = sq;
+                        break;
+                    }
+                }
+            }
+
+            const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'board_square' && m.userData.deck === 0 && m.userData.x === chosenSq.x && m.userData.z === chosenSq.z);
+            if (sqMesh) {
+                handleBoardSquareClick(0, chosenSq.x, chosenSq.z, sqMesh);
+            }
+        }
+
+        function triggerAIPickQuartoPieceForOpponent() {
+            if (gameOver || activeGame !== 'quarto' || currentPlayer !== 2 || quartoPhase !== 'pick_for_opponent') return;
+            const unplaced = pieces.filter(p => !p.placed);
+            if (unplaced.length === 0) return;
+
+            let chosenPiece = unplaced[Math.floor(Math.random() * unplaced.length)];
+
+            // In Medium/Hard mode, avoid handing Team 1 a piece that lets Team 1 win immediately
+            if (aiDifficulty !== 'easy') {
+                let emptySquares = [];
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 4; c++) {
+                        if (!pieces.some(p => p.placed && p.position.x === r && p.position.z === c)) {
+                            emptySquares.push({ deck: 0, x: r, z: c });
+                        }
+                    }
+                }
+                const safePieces = unplaced.filter(candidate => {
+                    return !emptySquares.some(sq => {
+                        candidate.placed = true;
+                        candidate.position = sq;
+                        const w = checkQuartoWinWithLine(0, sq.x, sq.z).win;
+                        candidate.placed = false;
+                        candidate.position = null;
+                        return w;
+                    });
+                });
+                if (safePieces.length > 0) {
+                    chosenPiece = safePieces[Math.floor(Math.random() * safePieces.length)];
+                }
+            }
+
+            selectPerimeterPiece(chosenPiece.id);
+        }
+
+        function triggerStandardAITurn() {
             if (gameOver) return;
             const unplaced = pieces.filter(p => !p.placed);
             if (unplaced.length === 0) return;
@@ -1303,6 +1532,282 @@
                     }
                 }
             }, 800);
+        }
+
+        // --- MOVE HISTORY, FAVORED PLAYERS & SESSIONS ---
+        function toggleMoveHistoryWindow() {
+            document.getElementById('move-history-window').classList.toggle('hidden');
+        }
+
+        function recordMove(description) {
+            const num = moveHistory.length + 1;
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            moveHistory.push({ num, description, timestamp });
+            renderMoveHistory();
+        }
+
+        function renderMoveHistory() {
+            const badge = document.getElementById('move-count-badge');
+            const listEl = document.getElementById('move-history-list');
+            if (badge) badge.innerText = moveHistory.length;
+            if (!listEl) return;
+
+            if (moveHistory.length === 0) {
+                listEl.innerHTML = `<div class="text-gray-500 italic text-[11px]">No moves recorded yet in this match.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = '';
+            moveHistory.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "bg-gray-900/80 px-2.5 py-1.5 rounded-lg border border-gray-800 flex justify-between items-start gap-2";
+                row.innerHTML = `
+                    <div><span class="font-bold text-purple-400">#${item.num}</span> <span class="text-gray-200">${item.description}</span></div>
+                    <span class="text-[10px] text-gray-500 shrink-0">${item.timestamp}</span>
+                `;
+                listEl.appendChild(row);
+            });
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+
+        function getFavoredPlayers() {
+            try {
+                const raw = localStorage.getItem(`intelligames_favs_${currentUser}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function toggleFavoritePlayer(targetUsername) {
+            let favs = getFavoredPlayers();
+            if (favs.includes(targetUsername)) {
+                favs = favs.filter(u => u !== targetUsername);
+            } else {
+                favs.push(targetUsername);
+            }
+            localStorage.setItem(`intelligames_favs_${currentUser}`, JSON.stringify(favs));
+            renderSessionsHub();
+        }
+
+        function getSessionsRegistry() {
+            try {
+                const raw = localStorage.getItem('intelligames_sessions_db');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveSessionsRegistry(list) {
+            localStorage.setItem('intelligames_sessions_db', JSON.stringify(list));
+        }
+
+        function openSessionsHub() {
+            renderSessionsHub();
+            document.getElementById('sessions-hub-modal').classList.remove('hidden');
+        }
+
+        function closeSessionsHub() {
+            document.getElementById('sessions-hub-modal').classList.add('hidden');
+        }
+
+        function renderSessionsHub() {
+            const users = getUsersRegistry().filter(u => u.username.toLowerCase() !== (currentUser || '').toLowerCase());
+            const favs = getFavoredPlayers();
+
+            // Sort favored players to the top
+            users.sort((a, b) => (favs.includes(b.username) ? 1 : 0) - (favs.includes(a.username) ? 1 : 0));
+
+            const listEl = document.getElementById('favored-players-list');
+            const selectEl = document.getElementById('invite-target-player');
+            listEl.innerHTML = '';
+            selectEl.innerHTML = '<option value="">-- Select Player --</option>';
+
+            if (users.length === 0) {
+                listEl.innerHTML = `<div class="text-gray-500 italic">No other registered players yet. Register another player or add one via Master Admin.</div>`;
+            }
+
+            users.forEach(u => {
+                const isFav = favs.includes(u.username);
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between bg-gray-900/90 px-3 py-2 rounded-lg border border-gray-800";
+                row.innerHTML = `
+                    <div class="flex items-center space-x-2 truncate">
+                        <button onclick="toggleFavoritePlayer('${u.username.replace(/'/g, "\\'")}')" class="${isFav ? 'text-amber-400' : 'text-gray-600 hover:text-amber-300'} transition" title="Toggle Favorite">
+                            <i class="fa-solid fa-star"></i>
+                        </button>
+                        <span class="font-bold text-white truncate">${u.username}</span>
+                        ${isFav ? '<span class="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded">Favored</span>' : ''}
+                    </div>
+                    <button onclick="quickInvitePlayer('${u.username.replace(/'/g, "\\'")}')" class="px-2 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 rounded text-[11px] font-semibold transition">
+                        Invite
+                    </button>
+                `;
+                listEl.appendChild(row);
+
+                const opt = document.createElement('option');
+                opt.value = u.username;
+                opt.text = `${isFav ? '★ ' : ''}${u.username}`;
+                selectEl.appendChild(opt);
+            });
+
+            // Render active sessions & invites
+            const sessions = getSessionsRegistry();
+            const sessListEl = document.getElementById('active-sessions-list');
+            sessListEl.innerHTML = '';
+            if (sessions.length === 0) {
+                sessListEl.innerHTML = `<div class="text-gray-500 italic">No saved sessions or invites yet.</div>`;
+            } else {
+                sessions.slice().reverse().forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = "bg-gray-900/90 p-2.5 rounded-lg border border-gray-800 flex items-center justify-between gap-2";
+                    card.innerHTML = `
+                        <div class="truncate">
+                            <div class="font-bold text-white truncate">${s.name}</div>
+                            <div class="text-[10px] text-cyan-300">${s.game.toUpperCase()} • Host: ${s.host}${s.invited ? ' → Invited: ' + s.invited : ''}</div>
+                        </div>
+                        <button onclick="joinGameSession('${s.id}')" class="px-2.5 py-1 bg-purple-500 hover:bg-purple-400 text-white font-bold rounded text-[11px] shrink-0 transition">
+                            Play
+                        </button>
+                    `;
+                    sessListEl.appendChild(card);
+                });
+            }
+        }
+
+        function quickInvitePlayer(username) {
+            document.getElementById('invite-target-player').value = username;
+            sendGameInvite();
+        }
+
+        function sendGameInvite() {
+            const target = document.getElementById('invite-target-player').value;
+            const game = document.getElementById('invite-game-type').value;
+            if (!target) {
+                showToast("Select a player to invite first.");
+                return;
+            }
+            const sessions = getSessionsRegistry();
+            const sessionObj = {
+                id: 'sess_' + Date.now(),
+                name: `${currentUser} vs ${target}`,
+                game,
+                host: currentUser,
+                invited: target
+            };
+            sessions.push(sessionObj);
+            saveSessionsRegistry(sessions);
+            renderSessionsHub();
+            addChatSystemMessage(`${currentUser} invited ${target} to a match of ${game.toUpperCase()}!`);
+            showToast(`Invite sent to ${target} for ${game.toUpperCase()}!`);
+        }
+
+        function createNewGameSession() {
+            const nameInput = document.getElementById('new-session-name');
+            const game = document.getElementById('new-session-game').value;
+            const sessionName = nameInput.value.trim() || `${currentUser}'s ${game.toUpperCase()} Room`;
+
+            const sessions = getSessionsRegistry();
+            const sessionObj = {
+                id: 'sess_' + Date.now(),
+                name: sessionName,
+                game,
+                host: currentUser,
+                invited: null
+            };
+            sessions.push(sessionObj);
+            saveSessionsRegistry(sessions);
+            nameInput.value = '';
+
+            activeGame = game;
+            activeSessionName = sessionName;
+            closeSessionsHub();
+            initGameArena();
+            addChatSystemMessage(`Started new session "${sessionName}" (${game.toUpperCase()}).`);
+        }
+
+        function joinGameSession(sessionId) {
+            const sessions = getSessionsRegistry();
+            const found = sessions.find(s => s.id === sessionId);
+            if (!found) return;
+
+            activeGame = found.game;
+            activeSessionName = found.name;
+            closeSessionsHub();
+            initGameArena();
+            addChatSystemMessage(`Joined session "${found.name}" (${found.game.toUpperCase()}).`);
+        }
+
+        function selectInstructionTab(gameKey) {
+            const keys = ['quarto', 'startrek', 'twixt', 'muhle', 'fourgewinnt'];
+            keys.forEach(k => {
+                const btn = document.getElementById(`rule-tab-${k}`);
+                if (!btn) return;
+                if (k === gameKey) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition";
+                }
+            });
+
+            const rulesHTML = {
+                quarto: `
+                    <h4 class="font-bold text-cyan-300 text-sm">Quarto 3D — Official Rules & Strategy</h4>
+                    <p><strong>Objective:</strong> Be the first team to form a line of 4 pieces (horizontally, vertically, or diagonally) on the 4×4 board where all 4 pieces share at least <strong>one common attribute</strong>.</p>
+                    <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800 space-y-1.5">
+                        <div class="font-bold text-white">The 16 Unique Pieces (4 Binary Traits):</div>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>Height:</strong> Tall vs. Short</li>
+                            <li><strong>Color:</strong> Dark Wood vs. Light Ivory</li>
+                            <li><strong>Shape:</strong> Square vs. Round</li>
+                            <li><strong>Top:</strong> Hollow (with center hole) vs. Solid</li>
+                        </ul>
+                    </div>
+                    <p><strong>Alternating Turn Flow (Crucial Rule):</strong></p>
+                    <ol class="list-decimal pl-5 space-y-1">
+                        <li><strong>Team 1 Picks:</strong> Team 1 clicks an available piece around the board perimeter to hand it to Team 2 (it floats above the arena).</li>
+                        <li><strong>Team 2 Places & Picks:</strong> Team 2 clicks a square on the 4×4 board to place that piece, then immediately selects the next piece from the perimeter for Team 1!</li>
+                        <li><strong>Victory:</strong> As soon as a placed piece completes a 4-piece line sharing any single trait (e.g., all 4 Hollow or all 4 Short), that placing team wins!</li>
+                    </ol>
+                `,
+                startrek: `
+                    <h4 class="font-bold text-purple-300 text-sm">Star Trek Tri-Dimensional Chess — Rules</h4>
+                    <p><strong>Board Architecture:</strong> Composed of 3 primary 4×4 main boards stacked vertically in stepped tiers, plus 4 suspended 2×2 attack boards at the upper and lower corners.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Turn Order:</strong> Starfleet (White, lower boards) moves first, followed by the Opponent (Red, upper boards).</li>
+                        <li><strong>Selecting & Moving:</strong> Click any of your pieces to illuminate it in cyan, then tap any valid square across the main or attack boards to move or capture an enemy piece.</li>
+                        <li><strong>Tri-D Projection:</strong> Pieces project their orthogonal and diagonal paths vertically across the overlapping levels.</li>
+                        <li><strong>Victory Condition:</strong> Capture or checkmate the opposing King across the 3D spatial grid.</li>
+                    </ul>
+                `,
+                twixt: `
+                    <h4 class="font-bold text-emerald-300 text-sm">Twixt 3D — Bridging Strategy Rules</h4>
+                    <p><strong>Objective:</strong> Connect your opposite sides of the arena by placing pegs and forming an uninterrupted network of links.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Placement:</strong> On your turn, select a peg from the perimeter and place it onto an unoccupied square on the board.</li>
+                        <li><strong>Knight-Move Links:</strong> Pegs placed a knight's move apart (2 squares in one direction, 1 square perpendicular) form strategic bridges that block opponent paths.</li>
+                        <li><strong>Victory Condition:</strong> Complete a continuous chain spanning across your target borders (or align 4 linked nodes in quick-arena mode).</li>
+                    </ul>
+                `,
+                muhle: `
+                    <h4 class="font-bold text-amber-300 text-sm">Mühle 3D (Nine Men's Morris) — Rules</h4>
+                    <p><strong>Objective:</strong> Form "Mills" (3 or 4 aligned pieces in a straight line) to dominate the board and reduce your opponent's forces.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Phase 1 (Placing):</strong> Players alternate selecting pieces from around the board and placing them onto open board intersections.</li>
+                        <li><strong>Forming a Mill:</strong> Aligning your pieces along any straight row, column, or diagonal scores a Mill.</li>
+                        <li><strong>Victory Condition:</strong> Achieve full line alignment or immobilize your opponent so they have no legal moves remaining.</li>
+                    </ul>
+                `,
+                fourgewinnt: `
+                    <h4 class="font-bold text-rose-300 text-sm">4gewinnt 3D (Connect 4) — Rules</h4>
+                    <p><strong>Objective:</strong> Be the first player to align 4 of your colored pieces in an unbroken horizontal, vertical, or diagonal line.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Turn Sequence:</strong> Player 1 (Cyan) and Player 2 (Purple) take turns picking a piece from the perimeter and placing it onto any open square on the 4×4 grid.</li>
+                        <li><strong>Blocking & Threats:</strong> Watch both orthogonal rows/columns and the two main corner-to-corner diagonals simultaneously.</li>
+                        <li><strong>Victory Condition:</strong> The first player to connect 4 of their own pieces in a line wins the match!</li>
+                    </ul>
+                `
+            };
+
+            const box = document.getElementById('instruction-content-box');
+            if (box) box.innerHTML = rulesHTML[gameKey] || rulesHTML.quarto;
         }
 
         // --- UI & MODAL HELPERS ---
@@ -1458,6 +1963,7 @@
         }
 
         function openInstructionsModal() {
+            selectInstructionTab(activeGame || 'quarto');
             document.getElementById('instructions-modal').classList.remove('hidden');
         }
 

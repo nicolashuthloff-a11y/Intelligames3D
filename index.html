@@ -37,7 +37,7 @@
             pointer-events: auto;
         }
         .glass-panel {
-            background: rgba(15, 23, 42, 0.84);
+            background: rgba(15, 23, 42, 0.86);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(56, 189, 248, 0.24);
@@ -103,9 +103,14 @@
                         <h2 class="text-xl font-extrabold text-white tracking-wide flex items-center">
                             <i class="fa-solid fa-gamepad text-cyan-400 mr-2.5"></i> Select Your Match
                         </h2>
-                        <button onclick="logoutUser()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
-                            Log Out
-                        </button>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="openDriveSyncModal()" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
+                                <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
+                            </button>
+                            <button onclick="logoutUser()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
+                                Log Out
+                            </button>
+                        </div>
                     </div>
                     <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-0.5">Tap a game card below, configure mode & display, and launch</p>
                 </div>
@@ -117,7 +122,7 @@
                         <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
                     </div>
                     <input type="hidden" id="select-game" value="quarto">
-                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[46vh] overflow-y-auto pr-1"></div>
+                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[44vh] overflow-y-auto pr-1"></div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -196,7 +201,7 @@
             </div>
 
             <div class="glass-panel px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto text-center flex items-center space-x-2">
-                <span id="mode-pill-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">2P LOCAL</span>
+                <span id="mode-pill-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">2P SAME DEVICE</span>
                 <span id="turn-status" class="text-xs font-bold text-white">Player 1: Pick a piece around the board</span>
             </div>
 
@@ -361,6 +366,12 @@
                     <span class="text-xs font-semibold text-gray-200">Sessions & Invites</span>
                     <span id="invite-badge" class="hidden px-1.5 py-0.5 text-[10px] font-extrabold bg-rose-500 text-white rounded-full animate-pulse">0</span>
                 </button>
+                <!-- Google Drive Sheet Sync Status Button -->
+                <button onclick="openDriveSyncModal()" class="interactive glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-emerald-500/50 transition" title="Sync Users, Sessions, Invites & Scores with Google Drive Sheet">
+                    <i class="fa-brands fa-google-drive text-emerald-400"></i>
+                    <span id="drive-sync-hud-label" class="text-xs font-semibold text-gray-200">Drive Sync</span>
+                    <span id="drive-sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                </button>
             </div>
         </div>
 
@@ -393,6 +404,125 @@
                 <button onclick="sendChatMessage()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GOOGLE DRIVE / GOOGLE SHEETS SYNC MODAL -->
+    <div id="drive-sync-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-emerald-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center">
+                    <i class="fa-brands fa-google-drive text-emerald-400 mr-2"></i> Google Drive Sheet Synchronization Setup
+                </h3>
+                <button onclick="closeDriveSyncModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs text-gray-300">
+                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Game Sessions, Invites, Favored Players, Match Scores, and Move History</strong> automatically sync across devices and populate structured spreadsheet tabs.</p>
+
+                <div class="bg-gray-950/80 p-3.5 rounded-xl border border-emerald-500/30 space-y-2.5">
+                    <div>
+                        <label class="block font-semibold text-emerald-300 mb-1">Google Apps Script Web App URL (from your Drive Sheet)</label>
+                        <input type="url" id="drive-sync-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <label class="flex items-center space-x-2 cursor-pointer text-gray-200">
+                            <input type="checkbox" id="drive-auto-sync" checked class="rounded text-emerald-500">
+                            <span>Auto-sync on login, registration, invites & match end</span>
+                        </label>
+                        <span id="drive-last-sync-time" class="text-[10px] text-gray-400">Not synced yet</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button onclick="saveDriveSyncConfig(true)" class="py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 font-bold rounded-xl transition">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Save & Push Now
+                    </button>
+                    <button onclick="pullFromGoogleDriveSheet(false)" class="py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-bold rounded-xl transition">
+                        <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Pull from Sheet
+                    </button>
+                    <button onclick="exportLocalBackupCSV()" class="py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-semibold rounded-xl transition">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Download Sheet CSV
+                    </button>
+                </div>
+
+                <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-cyan-300"><i class="fa-solid fa-table mr-1"></i> Google Sheet Setup Instructions (Auto-Creates 6 Tabs)</span>
+                        <button onclick="copyAppsScriptCode()" class="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-lg text-[10px] font-bold transition">
+                            <i class="fa-solid fa-copy mr-1"></i> Copy Script
+                        </button>
+                    </div>
+                    <ol class="list-decimal pl-5 space-y-1 text-[11px] text-gray-400">
+                        <li>Open <a href="https://sheets.new" target="_blank" rel="noopener" class="text-emerald-400 underline font-semibold">sheets.new</a> in your browser to create a new Google Sheet on your Drive (name it <em>Intelligames_3D_Sync</em>).</li>
+                        <li>In the Sheet menu, click <strong>Extensions → Apps Script</strong>, delete any starter code, and paste the script below.</li>
+                        <li>Click <strong>Deploy → New deployment</strong> → Select type <strong>Web app</strong> → Set <em>Execute as</em>: <strong>Me</strong> and <em>Who has access</em>: <strong>Anyone</strong> → Click <strong>Deploy</strong>.</li>
+                        <li>Copy the generated <strong>Web app URL</strong>, paste it into the field above, and click <strong>Save & Push Now</strong>. Your Sheet will automatically create tabs for <code>Users</code>, <code>Sessions_Invites</code>, <code>Match_Scores</code>, <code>Move_History</code>, <code>Favorites</code>, and <code>Raw_JSON</code>.</li>
+                    </ol>
+                    <textarea id="apps-script-code-box" readonly rows="8" class="w-full p-2.5 bg-gray-900 border border-gray-800 rounded-lg text-[10px] font-mono text-emerald-300 focus:outline-none">function doGet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var rawSheet = ss.getSheetByName('Raw_JSON') || ss.insertSheet('Raw_JSON');
+  var raw = rawSheet.getRange('A1').getValue() || '{}';
+  return ContentService.createTextOutput(raw).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var payloadStr = (e && e.postData && e.postData.contents) ? e.postData.contents : '{}';
+  var data = JSON.parse(payloadStr);
+
+  // 1. Raw JSON snapshot for bidirectional state restore
+  var rawSheet = ss.getSheetByName('Raw_JSON') || ss.insertSheet('Raw_JSON');
+  rawSheet.getRange('A1').setValue(payloadStr);
+  rawSheet.getRange('B1').setValue(new Date().toISOString());
+
+  // 2. Users Tab
+  var uSheet = ss.getSheetByName('Users') || ss.insertSheet('Users');
+  uSheet.clearContents();
+  uSheet.appendRow(['Username', 'Role', 'Password_PIN', 'Synced_At']);
+  (data.users || []).forEach(function(u) {
+    uSheet.appendRow([u.username, u.role || 'player', u.password, data.updatedAt]);
+  });
+
+  // 3. Sessions & Invites Tab
+  var sSheet = ss.getSheetByName('Sessions_Invites') || ss.insertSheet('Sessions_Invites');
+  sSheet.clearContents();
+  sSheet.appendRow(['Session_ID', 'Session_Name', 'Game', 'Host', 'Invited_Player', 'Accepted']);
+  (data.sessions || []).forEach(function(s) {
+    sSheet.appendRow([s.id, s.name, s.game, s.host, s.invited || '', s.accepted ? 'Yes' : 'Pending']);
+  });
+
+  // 4. Match Scores Log Tab
+  if (data.latestMatch) {
+    var mSheet = ss.getSheetByName('Match_Scores') || ss.insertSheet('Match_Scores');
+    if (mSheet.getLastRow() === 0) {
+      mSheet.appendRow(['Timestamp', 'Game', 'Mode', 'Player_1', 'Player_2', 'P1_Score', 'P2_Score']);
+    }
+    var m = data.latestMatch;
+    mSheet.appendRow([data.updatedAt, m.game, m.mode, m.player1, m.player2, m.scores.p1, m.scores.p2]);
+  }
+
+  // 5. Move History Tab
+  var hSheet = ss.getSheetByName('Move_History') || ss.insertSheet('Move_History');
+  hSheet.clearContents();
+  hSheet.appendRow(['Move_Number', 'Time', 'Action_Description']);
+  ((data.latestMatch && data.latestMatch.moveHistory) || []).forEach(function(mv) {
+    hSheet.appendRow([mv.num, mv.time, mv.text]);
+  });
+
+  // 6. Favored Players Tab
+  var fSheet = ss.getSheetByName('Favorites') || ss.insertSheet('Favorites');
+  fSheet.clearContents();
+  fSheet.appendRow(['Player', 'Favored_Players']);
+  var favMap = data.favoritesByUser || {};
+  Object.keys(favMap).forEach(function(owner) {
+    fSheet.appendRow([owner, (favMap[owner] || []).join(', ')]);
+  });
+
+  return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+}</textarea>
+                </div>
             </div>
         </div>
     </div>
@@ -548,6 +678,15 @@
                         <option value="desktop">Desktop / Widescreen</option>
                     </select>
                 </div>
+                <div class="bg-gray-950/70 p-3 rounded-xl border border-emerald-500/30 flex items-center justify-between gap-2">
+                    <div>
+                        <div class="font-bold text-emerald-300"><i class="fa-brands fa-google-drive mr-1"></i> Google Drive Sheet Sync</div>
+                        <div id="menu-drive-sync-status" class="text-[10px] text-gray-400">Configure or sync Users, Invites & Scores</div>
+                    </div>
+                    <button onclick="closeMasterMenu(); openDriveSyncModal();" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold rounded-lg text-xs transition">
+                        Configure Sync
+                    </button>
+                </div>
             </div>
 
             <!-- MASTER ADMIN USER MANAGEMENT SECTION -->
@@ -603,6 +742,426 @@
                 </h3>
                 <button onclick="closeInstructionsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
+
+            <!-- Game Rule Tabs -->
+            <div class="flex flex-wrap gap-1.5 border-b border-gray-800 pb-2.5">
+                <button onclick="selectInstructionTab('quarto')" id="rule-tab-quarto" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">Quarto 3D</button>
+                <button onclick="selectInstructionTab('azul')" id="rule-tab-azul" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Azul 3D</button>
+                <button onclick="selectInstructionTab('sevenwonders')" id="rule-tab-sevenwonders" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">7 Wonders 3D</button>
+                <button onclick="selectInstructionTab('hive')" id="rule-tab-hive" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Hive 3D</button>
+                <button onclick="selectInstructionTab('carcassonne')" id="rule-tab-carcassonne" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Carcassonne 3D</button>
+                <button onclick="selectInstructionTab('twixt')" id="rule-tab-twixt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Twixt 3D</button>
+                <button onclick="selectInstructionTab('startrek')" id="rule-tab-startrek" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Star Trek Chess</button>
+                <button onclick="selectInstructionTab('mensch')" id="rule-tab-mensch" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mensch ärgere Dich nicht</button>
+                <button onclick="selectInstructionTab('skribbl')" id="rule-tab-skribbl" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Skribbl 3D</button>
+                <button onclick="selectInstructionTab('hangman')" id="rule-tab-hangman" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Hangman 3D</button>
+                <button onclick="selectInstructionTab('yahtzee')" id="rule-tab-yahtzee" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Yahtzee 3D</button>
+                <button onclick="selectInstructionTab('muhle')" id="rule-tab-muhle" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mühle 3D</button>
+                <button onclick="selectInstructionTab('fourgewinnt')" id="rule-tab-fourgewinnt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">4gewinnt 3D</button>
+            </div>
+
+            <div id="instruction-content-box" class="space-y-3 text-xs text-gray-300 leading-relaxed"></div>
+
+            <button onclick="closeInstructionsModal()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
+                Got It, Let's Play!
+            </button>
+        </div>
+    </div>
+
+    <!-- POST-GAME CELEBRATION & OPTIONS MODAL -->
+    <div id="post-game-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl border border-cyan-500/40 space-y-4">
+            <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-purple-500 rounded-full flex items-center justify-center mx-auto shadow-lg glow-cyan">
+                <i class="fa-solid fa-trophy text-2xl text-white"></i>
+            </div>
+            <div>
+                <h3 id="post-game-title" class="text-xl font-extrabold text-white">Player 1 Wins!</h3>
+                <p id="post-game-subtitle" class="text-xs text-cyan-300 mt-1">Magnificent victory!</p>
+            </div>
+            
+            <div class="space-y-2 pt-2">
+                <button onclick="restartMatch()" class="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-lg text-xs shadow transition">
+                    <i class="fa-solid fa-rotate-right mr-1.5"></i> Restart Match
+                </button>
+                <button onclick="returnToNewGameSetup()" class="w-full py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded-lg text-xs border border-gray-700 transition">
+                    <i class="fa-solid fa-gamepad mr-1.5"></i> Play New Game
+                </button>
+                <button onclick="changeGameModeDirectly()" class="w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-cyan-400 font-semibold rounded-lg text-xs border border-cyan-500/30 transition">
+                    <i class="fa-solid fa-sliders mr-1.5"></i> Change Game / Mode
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        let scene, camera, renderer, controls;
+        let boardSquareMeshes = [];
+        let pieceMeshes = [];
+        let perimeterPieceMeshes = [];
+        let floatingPieceMesh = null;
+        let pieces = [];
+        let selectedRackPieceId = null;
+        let selectedChessPiece = null;
+        let currentPlayer = 1;
+        let quartoPhase = 'pick_for_opponent';
+        let activeGame = 'quarto';
+        let gameModeType = 'pvp';
+        let aiDifficulty = 'medium';
+        let player1Name = 'Player 1';
+        let player2Name = 'Player 2';
+        let displayProfileSetting = 'auto';
+        let activeResolvedDisplay = 'desktop';
+        let authMode = 'login';
+        let currentUser = null;
+        let currentUserRole = 'player';
+        let editingUsername = null;
+        let gameOver = false;
+        let scores = { p1: 0, p2: 0 };
+        let chatMessages = [];
+        let moveHistory = [];
+        let winningPieces = [];
+        let activeSessionName = 'Quick Match';
+        let dismissedInviteIds = [];
+        let lastNotifiedInviteId = null;
+
+        // Mini-game states
+        let menschState = { dice: null, rolled: false, trackCoords: [], pawns: [] };
+        let skribblState = { drawing: false, currentWord: '', words: ['SPACESHIP', 'PYRAMID', 'DRAGON', 'CASTLE', 'VOLCANO', 'TELESCOPE', 'OCTOPUS', 'LIGHTHOUSE'] };
+        let hangmanState = { word: '', guessed: [], mistakes: 0, scaffoldMeshes: [], words: ['QUARTO', 'STARSHIP', 'GALAXY', 'STRATEGY', 'DIMENSION', 'MONOLITH', 'ASTEROID', 'NEBULA'] };
+        let yahtzeeState = { dice: [1, 2, 3, 4, 5], held: [false, false, false, false, false], rollsLeft: 3, scoresP1: {}, scoresP2: {}, diceMeshes: [] };
+        let azulState = { colors: [], factories: [], selectedBatch: null, wallP1: [], wallP2: [], ptsP1: 0, ptsP2: 0 };
+        let swState = { age: 1, turn: 1, p1: {}, p2: {}, hand: [] };
+        let hiveState = { selectedInsect: 'Queen', placed: [], p1Hand: [], p2Hand: [] };
+        let carcState = { grid: {}, currentTile: null, rotation: 0, meeplesP1: 7, meeplesP2: 7, ptsP1: 0, ptsP2: 0 };
+        let twixtState = { size: 12, pegs: [], links: [] };
+        let muhleState = { phase: 'place', p1Unplaced: 9, p2Unplaced: 9, nodes: [], selectedNode: null, mustRemove: false };
+        let connect4State = { cols: 7, rows: 6, grid: [] };
+
+        window.onload = function() {
+            if (typeof THREE === 'undefined') {
+                console.error("Three.js not loaded.");
+                return;
+            }
+            ensureMasterAccountExists();
+            init3D();
+            initDeviceAndDisplayDetection();
+            setupSkribblCanvasEvents();
+            loadChatHistory();
+            selectInstructionTab('quarto');
+            checkExistingSession();
+            startInviteNotificationListener();
+        };
+
+        // --- GOOGLE DRIVE SHEET SYNC ENGINE ---
+        function getDriveSyncConfig() {
+            try {
+                const raw = localStorage.getItem('intelligames_drive_sync_cfg');
+                return raw ? JSON.parse(raw) : { url: '', autoSync: true, lastSync: null };
+            } catch (e) {
+                return { url: '', autoSync: true, lastSync: null };
+            }
+        }
+
+        function initDriveSyncEngine() {
+            const cfg = getDriveSyncConfig();
+            updateDriveSyncBadge(cfg.url ? 'connected' : 'unconfigured', cfg.lastSync);
+            if (cfg.url && cfg.autoSync) {
+                pullFromGoogleDriveSheet(true);
+            }
+        }
+
+        function updateDriveSyncBadge(state, lastSync) {
+            const dot = document.getElementById('drive-sync-dot');
+            const label = document.getElementById('drive-sync-hud-label');
+            const timeEl = document.getElementById('drive-last-sync-time');
+            const menuStatus = document.getElementById('menu-drive-sync-status');
+
+            if (dot) {
+                if (state === 'syncing') dot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
+                else if (state === 'connected') dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+                else if (state === 'error') dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+                else dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+            }
+            if (label) {
+                label.innerText = state === 'syncing' ? 'Syncing...' : (state === 'connected' ? 'Sheet Synced' : 'Drive Sync');
+            }
+            if (timeEl) {
+                timeEl.innerText = lastSync ? `Last synced: ${lastSync}` : 'Not synced yet';
+            }
+            if (menuStatus) {
+                menuStatus.innerText = lastSync ? `Connected • Last synced ${lastSync}` : 'No Google Sheet URL linked yet';
+            }
+        }
+
+        function openDriveSyncModal() {
+            const cfg = getDriveSyncConfig();
+            const urlInp = document.getElementById('drive-sync-url');
+            const autoChk = document.getElementById('drive-auto-sync');
+            if (urlInp) urlInp.value = cfg.url || '';
+            if (autoChk) autoChk.checked = cfg.autoSync !== false;
+            updateDriveSyncBadge(cfg.url ? 'connected' : 'unconfigured', cfg.lastSync);
+            document.getElementById('drive-sync-modal').classList.remove('hidden');
+        }
+
+        function closeDriveSyncModal() {
+            document.getElementById('drive-sync-modal').classList.add('hidden');
+        }
+
+        function copyAppsScriptCode() {
+            const box = document.getElementById('apps-script-code-box');
+            if (!box) return;
+            box.select();
+            document.execCommand('copy');
+            showToast("Google Apps Script code copied to clipboard!");
+        }
+
+        function buildDriveSyncPayload() {
+            const allFavs = {};
+            getUsersRegistry().forEach(u => {
+                const rawFav = localStorage.getItem(`intelligames_favs_${u.username}`);
+                if (rawFav) {
+                    try { allFavs[u.username] = JSON.parse(rawFav); } catch (e) {}
+                }
+            });
+
+            return {
+                app: 'Intelligames 3D',
+                updatedAt: new Date().toISOString(),
+                users: getUsersRegistry(),
+                sessions: getSessionsRegistry(),
+                favoritesByUser: allFavs,
+                chatMessages: chatMessages.slice(-40),
+                latestMatch: {
+                    game: activeGame,
+                    mode: gameModeType,
+                    player1: player1Name,
+                    player2: player2Name,
+                    scores,
+                    moveHistory
+                }
+            };
+        }
+
+        function applyDriveSyncPayload(data) {
+            if (!data || typeof data !== 'object') return;
+            if (Array.isArray(data.users) && data.users.length > 0) {
+                const localUsers = getUsersRegistry();
+                const mergedUsers = [...localUsers];
+                data.users.forEach(remoteU => {
+                    if (!remoteU || !remoteU.username) return;
+                    const idx = mergedUsers.findIndex(u => u.username.toLowerCase() === remoteU.username.toLowerCase());
+                    if (idx === -1) mergedUsers.push(remoteU);
+                    else mergedUsers[idx] = remoteU;
+                });
+                localStorage.setItem('intelligames_users_db', JSON.stringify(mergedUsers));
+            }
+            if (Array.isArray(data.sessions)) {
+                localStorage.setItem('intelligames_sessions_db', JSON.stringify(data.sessions));
+                checkIncomingInvites();
+            }
+            if (data.favoritesByUser && typeof data.favoritesByUser === 'object') {
+                Object.keys(data.favoritesByUser).forEach(uname => {
+                    localStorage.setItem(`intelligames_favs_${uname}`, JSON.stringify(data.favoritesByUser[uname]));
+                });
+            }
+            if (Array.isArray(data.chatMessages) && data.chatMessages.length > 0) {
+                chatMessages = data.chatMessages;
+                localStorage.setItem('intelligames_chat_history', JSON.stringify(chatMessages));
+                renderChatMessages();
+            }
+        }
+
+        function saveDriveSyncConfig(pushImmediately = false) {
+            const url = (document.getElementById('drive-sync-url').value || '').trim();
+            const autoSync = document.getElementById('drive-auto-sync').checked;
+            const prev = getDriveSyncConfig();
+            const cfg = { url, autoSync, lastSync: prev.lastSync };
+            localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
+
+            if (!url) {
+                updateDriveSyncBadge('unconfigured', null);
+                showToast("Drive Sync URL cleared.");
+                return;
+            }
+            if (pushImmediately) {
+                pushToGoogleDriveSheet(false);
+            }
+        }
+
+        async function pushToGoogleDriveSheet(silent = true) {
+            const cfg = getDriveSyncConfig();
+            if (!cfg.url) return;
+
+            updateDriveSyncBadge('syncing', cfg.lastSync);
+            const payload = buildDriveSyncPayload();
+
+            try {
+                await fetch(cfg.url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                const stamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                cfg.lastSync = stamp;
+                localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
+                updateDriveSyncBadge('connected', stamp);
+                if (!silent) showToast("Synced Users, Sessions, Invites, Scores & Moves to Google Drive Sheet!");
+            } catch (err) {
+                updateDriveSyncBadge('error', cfg.lastSync);
+                if (!silent) showToast("Google Drive Sheet sync failed — verify your Web App URL.");
+            }
+        }
+
+        async function pullFromGoogleDriveSheet(silent = false) {
+            const cfg = getDriveSyncConfig();
+            if (!cfg.url) {
+                if (!silent) showToast("Enter your Google Sheet Web App URL first.");
+                return;
+            }
+            updateDriveSyncBadge('syncing', cfg.lastSync);
+            try {
+                const res = await fetch(cfg.url, { method: 'GET' });
+                const data = await res.json();
+                applyDriveSyncPayload(data);
+                const stamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                cfg.lastSync = stamp;
+                localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
+                updateDriveSyncBadge('connected', stamp);
+                if (!silent) {
+                    renderSessionsHub();
+                    populatePlayerToPlayerSelects();
+                    showToast("Pulled latest Users, Sessions & Invites from Google Drive Sheet!");
+                }
+            } catch (err) {
+                updateDriveSyncBadge('error', cfg.lastSync);
+                if (!silent) showToast("Could not read from Sheet URL (ensure Apps Script is deployed as Anyone).");
+            }
+        }
+
+        function exportLocalBackupCSV() {
+            const payload = buildDriveSyncPayload();
+            const rows = [
+                ['Section', 'Key_ID', 'Name_User', 'Details_Game', 'Extra_Score'],
+                ...payload.users.map(u => ['USER', u.username, u.role, u.password, '']),
+                ...payload.sessions.map(s => ['SESSION', s.id, s.name, s.game, `Host:${s.host} Invited:${s.invited || 'None'}`]),
+                ['MATCH', payload.latestMatch.game, `${payload.latestMatch.player1} vs ${payload.latestMatch.player2}`, payload.latestMatch.mode, `P1:${payload.latestMatch.scores.p1} P2:${payload.latestMatch.scores.p2}`],
+                ...payload.latestMatch.moveHistory.map(m => ['MOVE', m.num, m.time, m.text, ''])
+            ];
+            const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Intelligames3D_Sheet_Backup_${new Date().toISOString().slice(0, 10)}.csv`;
+            link.click();
+            showToast("Downloaded CSV backup ready for Google Sheets!");
+        }
+
+        // --- AUTOMATIC DEVICE & DISPLAY SIZE RECOGNITION + SELECTOR ---
+        function detectPhysicalDeviceAndScreen() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const ua = navigator.userAgent || '';
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            const isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            const isTabletUA = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (isTouch && Math.min(w, h) >= 600 && Math.max(w, h) <= 1366);
+
+            let detectedType = 'desktop';
+            if (w < 640 || (isMobileUA && w < 768)) {
+                detectedType = 'mobile';
+            } else if (w < 1024 || isTabletUA) {
+                detectedType = 'tablet';
+            }
+
+            return {
+                type: detectedType,
+                width: w,
+                height: h,
+                orientation: w >= h ? 'Landscape' : 'Portrait'
+            };
+        }
+
+        function initDeviceAndDisplayDetection() {
+            const savedProfile = localStorage.getItem('intelligames_display_profile');
+            if (savedProfile && ['auto', 'mobile', 'tablet', 'desktop'].includes(savedProfile)) {
+                displayProfileSetting = savedProfile;
+            }
+            applyDisplayProfile();
+            window.addEventListener('resize', () => {
+                if (displayProfileSetting === 'auto') {
+                    applyDisplayProfile();
+                } else {
+                    updateDetectedDeviceHints();
+                }
+            });
+        }
+
+        function setDisplayProfile(profileValue) {
+            displayProfileSetting = profileValue;
+            localStorage.setItem('intelligames_display_profile', profileValue);
+            const lobbySel = document.getElementById('select-display-profile');
+            const menuSel = document.getElementById('menu-select-display-profile');
+            if (lobbySel) lobbySel.value = profileValue;
+            if (menuSel) menuSel.value = profileValue;
+            applyDisplayProfile();
+        }
+
+        function updateDetectedDeviceHints() {
+            const info = detectPhysicalDeviceAndScreen();
+            const labelMap = { mobile: 'Phone', tablet: 'Tablet', desktop: 'Desktop' };
+            const hintText = `(Detected: ${labelMap[info.type]} • ${info.width}×${info.height} ${info.orientation})`;
+            const lobbyHint = document.getElementById('detected-device-hint');
+            const menuHint = document.getElementById('menu-detected-device-hint');
+            if (lobbyHint) lobbyHint.innerText = hintText;
+            if (menuHint) menuHint.innerText = hintText;
+        }
+
+        function applyDisplayProfile() {
+            const info = detectPhysicalDeviceAndScreen();
+            updateDetectedDeviceHints();
+
+            const resolved = displayProfileSetting === 'auto' ? info.type : displayProfileSetting;
+            activeResolvedDisplay = resolved;
+
+            const lobbySel = document.getElementById('select-display-profile');
+            const menuSel = document.getElementById('menu-select-display-profile');
+            if (lobbySel) lobbySel.value = displayProfileSetting;
+            if (menuSel) menuSel.value = displayProfileSetting;
+
+            const hudIcon = document.getElementById('device-hud-icon');
+            const hudLabel = document.getElementById('device-hud-label');
+            const lobbyGrid = document.getElementById('lobby-game-cards-grid');
+
+            if (resolved === 'mobile') {
+                if (hudIcon) hudIcon.className = 'fa-solid fa-mobile-screen-button text-emerald-400 text-xs';
+                if (hudLabel) hudLabel.innerText = `Mobile (${info.width}×${info.height})`;
+                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 gap-2 max-h-[42vh] overflow-y-auto pr-1';
+                if (camera) {
+                    camera.fov = 54;
+                    camera.position.set(0, 15.5, 17.5);
+                    camera.updateProjectionMatrix();
+                }
+            } else if (resolved === 'tablet') {
+                if (hudIcon) hudIcon.className = 'fa-solid fa-tablet-screen-button text-emerald-400 text-xs';
+                if (hudLabel) hudLabel.innerText = `Tablet (${info.width}×${info.height})`;
+                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-3 gap-2.5 max-h-[45vh] overflow-y-auto pr-1';
+                if (camera) {
+                    camera.fov = 48;
+                    camera.position.set(0, 13.5, 15.5);
+                    camera.updateProjectionMatrix();
+                }
+            } else {
+                if (hudIcon) hudIcon.className = 'fa-solid fa-desktop text-emerald-400 text-xs';
+                if (hudLabel) hudLabel.innerText = `Desktop (${info.width}×${info.height})`;
+                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[44vh] overflow-y-auto pr-1';
+                if (camera) {
+                    camera.fov = 45;
+                    camera.position.set(0, 12, 14);
+                    camera.updateProjectionMatrix();
+                }
+            }
+        }
 
         function populatePlayerToPlayerSelects() {
             const users = getUsersRegistry().filter(u => u.username.toLowerCase() !== (currentUser || '').toLowerCase());
@@ -707,216 +1266,6 @@
             document.getElementById('game-lobby-modal').classList.add('hidden');
             initGameArena();
             addChatSystemMessage(`Started ${activeGame.toUpperCase()} — ${player1Name} vs ${player2Name} (${modeTextMap[gameModeType]}).`);
-        }
-            ensureMasterAccountExists();
-            init3D();
-            initDeviceAndDisplayDetection();
-            setupSkribblCanvasEvents();
-            loadChatHistory();
-            selectInstructionTab('quarto');
-            checkExistingSession();
-            startInviteNotificationListener();
-        };
-
-        // --- AUTOMATIC DEVICE & DISPLAY SIZE RECOGNITION + SELECTOR ---
-        function detectPhysicalDeviceAndScreen() {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            const ua = navigator.userAgent || '';
-            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-            const isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-            const isTabletUA = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (isTouch && Math.min(w, h) >= 600 && Math.max(w, h) <= 1366);
-
-            let detectedType = 'desktop';
-            if (w < 640 || (isMobileUA && w < 768)) {
-                detectedType = 'mobile';
-            } else if (w < 1024 || isTabletUA) {
-                detectedType = 'tablet';
-            }
-
-            return {
-                type: detectedType,
-                width: w,
-                height: h,
-                orientation: w >= h ? 'Landscape' : 'Portrait'
-            };
-        }
-
-        function initDeviceAndDisplayDetection() {
-            const savedProfile = localStorage.getItem('intelligames_display_profile');
-            if (savedProfile && ['auto', 'mobile', 'tablet', 'desktop'].includes(savedProfile)) {
-                displayProfileSetting = savedProfile;
-            }
-            applyDisplayProfile();
-            window.addEventListener('resize', () => {
-                if (displayProfileSetting === 'auto') {
-                    applyDisplayProfile();
-                } else {
-                    updateDetectedDeviceHints();
-                }
-            });
-        }
-
-        function setDisplayProfile(profileValue) {
-            displayProfileSetting = profileValue;
-            localStorage.setItem('intelligames_display_profile', profileValue);
-            const lobbySel = document.getElementById('select-display-profile');
-            const menuSel = document.getElementById('menu-select-display-profile');
-            if (lobbySel) lobbySel.value = profileValue;
-            if (menuSel) menuSel.value = profileValue;
-            applyDisplayProfile();
-        }
-
-        function updateDetectedDeviceHints() {
-            const info = detectPhysicalDeviceAndScreen();
-            const labelMap = { mobile: 'Phone', tablet: 'Tablet', desktop: 'Desktop' };
-            const hintText = `(Detected: ${labelMap[info.type]} • ${info.width}×${info.height} ${info.orientation})`;
-            const lobbyHint = document.getElementById('detected-device-hint');
-            const menuHint = document.getElementById('menu-detected-device-hint');
-            if (lobbyHint) lobbyHint.innerText = hintText;
-            if (menuHint) menuHint.innerText = hintText;
-        }
-
-        function applyDisplayProfile() {
-            const info = detectPhysicalDeviceAndScreen();
-            updateDetectedDeviceHints();
-
-            const resolved = displayProfileSetting === 'auto' ? info.type : displayProfileSetting;
-            activeResolvedDisplay = resolved;
-
-            const lobbySel = document.getElementById('select-display-profile');
-            const menuSel = document.getElementById('menu-select-display-profile');
-            if (lobbySel) lobbySel.value = displayProfileSetting;
-            if (menuSel) menuSel.value = displayProfileSetting;
-
-            const hudIcon = document.getElementById('device-hud-icon');
-            const hudLabel = document.getElementById('device-hud-label');
-            const lobbyGrid = document.getElementById('lobby-game-cards-grid');
-
-            if (resolved === 'mobile') {
-                if (hudIcon) hudIcon.className = 'fa-solid fa-mobile-screen-button text-emerald-400 text-xs';
-                if (hudLabel) hudLabel.innerText = `Mobile (${info.width}×${info.height})`;
-                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 gap-2 max-h-[42vh] overflow-y-auto pr-1';
-                if (camera) {
-                    camera.fov = 54;
-                    camera.position.set(0, 15.5, 17.5);
-                    camera.updateProjectionMatrix();
-                }
-            } else if (resolved === 'tablet') {
-                if (hudIcon) hudIcon.className = 'fa-solid fa-tablet-screen-button text-emerald-400 text-xs';
-                if (hudLabel) hudLabel.innerText = `Tablet (${info.width}×${info.height})`;
-                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-3 gap-2.5 max-h-[45vh] overflow-y-auto pr-1';
-                if (camera) {
-                    camera.fov = 48;
-                    camera.position.set(0, 13.5, 15.5);
-                    camera.updateProjectionMatrix();
-                }
-            } else {
-                if (hudIcon) hudIcon.className = 'fa-solid fa-desktop text-emerald-400 text-xs';
-                if (hudLabel) hudLabel.innerText = `Desktop (${info.width}×${info.height})`;
-                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[46vh] overflow-y-auto pr-1';
-                if (camera) {
-                    camera.fov = 45;
-                    camera.position.set(0, 12, 14);
-                    camera.updateProjectionMatrix();
-                }
-            }
-        }
-
-        function openGameLobby() {
-            const roleBadge = currentUserRole === 'master' ? ' [MASTER]' : '';
-            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Choose your game & settings`;
-            const p1Inp = document.getElementById('lobby-p1-name');
-            const p2Inp = document.getElementById('lobby-p2-name');
-            if (p1Inp && !p1Inp.value) p1Inp.value = currentUser || 'Player 1';
-            if (p2Inp && !p2Inp.value) p2Inp.value = 'Player 2';
-            syncLobbyModeOptionsForGame();
-            toggleLobbyModeFields();
-            applyDisplayProfile();
-            const masterBtn = document.getElementById('lobby-master-btn');
-            if (currentUserRole === 'master') {
-                masterBtn.classList.remove('hidden');
-            } else {
-                masterBtn.classList.add('hidden');
-            }
-            renderLobbyGameCards();
-            document.getElementById('game-lobby-modal').classList.remove('hidden');
-        }
-
-        function syncLobbyModeOptionsForGame() {
-            const gameId = document.getElementById('select-game').value || 'quarto';
-            const modeSel = document.getElementById('select-mode');
-            const noteEl = document.getElementById('lobby-mode-note');
-            const isQuarto = gameId === 'quarto';
-
-            const pvpOpt = modeSel.querySelector('option[value="pvp"]');
-            if (pvpOpt) {
-                pvpOpt.disabled = !isQuarto;
-                pvpOpt.hidden = !isQuarto;
-            }
-            if (!isQuarto && modeSel.value === 'pvp') {
-                modeSel.value = 'pve';
-            }
-            if (noteEl) {
-                noteEl.innerText = isQuarto
-                    ? 'Pass & Play (Same Device) or Vs Computer available.'
-                    : 'Pass & Play is only available for Quarto 3D. Playing Vs Computer (or invite a friend via Sessions).';
-            }
-            toggleLobbyModeFields();
-        }
-
-        function syncMenuModeOptionsForGame() {
-            const gameId = document.getElementById('menu-select-game').value || 'quarto';
-            const modeSel = document.getElementById('menu-select-mode');
-            const isQuarto = gameId === 'quarto';
-
-            const pvpOpt = modeSel.querySelector('option[value="pvp"]');
-            if (pvpOpt) {
-                pvpOpt.disabled = !isQuarto;
-                pvpOpt.hidden = !isQuarto;
-            }
-            if (!isQuarto && modeSel.value === 'pvp') {
-                modeSel.value = 'pve';
-            }
-            toggleMenuModeFields();
-        }
-
-        function toggleLobbyModeFields() {
-            const gameId = document.getElementById('select-game').value || 'quarto';
-            if (gameId !== 'quarto' && document.getElementById('select-mode').value === 'pvp') {
-                document.getElementById('select-mode').value = 'pve';
-            }
-            const mode = document.getElementById('select-mode').value;
-            document.getElementById('pvp-names-container').classList.toggle('hidden', mode !== 'pvp');
-            document.getElementById('ai-difficulty-container').classList.toggle('hidden', mode !== 'pve');
-        }
-
-        function toggleMenuModeFields() {
-            const gameId = document.getElementById('menu-select-game').value || 'quarto';
-            if (gameId !== 'quarto' && document.getElementById('menu-select-mode').value === 'pvp') {
-                document.getElementById('menu-select-mode').value = 'pve';
-            }
-            const mode = document.getElementById('menu-select-mode').value;
-            document.getElementById('menu-pvp-names-container').classList.toggle('hidden', mode !== 'pvp');
-            document.getElementById('menu-ai-difficulty-container').classList.toggle('hidden', mode !== 'pve');
-        }
-
-        function launchSelectedGame() {
-            activeGame = document.getElementById('select-game').value || 'quarto';
-            gameModeType = activeGame === 'quarto'
-                ? (document.getElementById('select-mode').value || 'pvp')
-                : 'pve';
-            aiDifficulty = document.getElementById('select-ai-difficulty').value || 'medium';
-            if (gameModeType === 'pvp' && activeGame === 'quarto') {
-                player1Name = (document.getElementById('lobby-p1-name').value || '').trim() || currentUser || 'Player 1';
-                player2Name = (document.getElementById('lobby-p2-name').value || '').trim() || 'Player 2';
-            } else {
-                player1Name = currentUser || 'Player 1';
-                player2Name = `AI (${aiDifficulty.toUpperCase()})`;
-            }
-            document.getElementById('game-lobby-modal').classList.add('hidden');
-            initGameArena();
-            addChatSystemMessage(`Started ${activeGame.toUpperCase()} — ${player1Name} vs ${player2Name} (${gameModeType === 'pvp' ? 'Same Device 2P' : 'PvE'}).`);
         }
 
         function getPlayerLabel(pNum) {
@@ -1170,6 +1519,49 @@
             ['hud-mensch', 'hud-skribbl', 'hud-hangman', 'hud-yahtzee', 'hud-azul', 'hud-sevenwonders', 'hud-hive', 'hud-carcassonne', 'hud-twixt'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
+            });
+        }
+
+        // --- HANGMAN 3D ---
+        function initHangmanGame() {
+            const word = hangmanState.words[Math.floor(Math.random() * hangmanState.words.length)];
+            hangmanState.word = word;
+            hangmanState.guessed = [];
+            hangmanState.mistakes = 0;
+            hangmanState.scaffoldMeshes = [];
+
+            const woodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.5 });
+            const base = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.25, 1.8), woodMat);
+            base.position.set(0, 0.1, 0);
+            const post = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.4, 0.25), woodMat);
+            post.position.set(-0.9, 2.2, 0);
+            const beam = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.22, 0.22), woodMat);
+            beam.position.set(0, 4.3, 0);
+            const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xfef3c7 }));
+            rope.position.set(0.8, 3.95, 0);
+
+            [base, post, beam, rope].forEach(m => { scene.add(m); boardSquareMeshes.push(m); });
+            renderHangmanUI();
+            document.getElementById('turn-status').innerText = `Hangman 3D — Deduce the secret word!`;
+        }
+
+        function renderHangmanUI() {
+            document.getElementById('hangman-mistakes').innerText = hangmanState.mistakes;
+            const slots = hangmanState.word.split('').map(ch => hangmanState.guessed.includes(ch) ? ch : '_').join(' ');
+            document.getElementById('hangman-word-slots').innerText = slots;
+
+            const kb = document.getElementById('hangman-keyboard');
+            kb.innerHTML = '';
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+                const used = hangmanState.guessed.includes(letter);
+                const btn = document.createElement('button');
+                btn.disabled = used;
+                btn.onclick = () => guessHangmanLetter(letter);
+                btn.className = used
+                    ? "w-7 h-7 rounded-lg bg-gray-950 text-gray-600 text-xs font-bold border border-gray-800"
+                    : "w-7 h-7 rounded-lg bg-gray-900 hover:bg-rose-950 text-white text-xs font-bold border border-gray-700 transition";
+                btn.innerText = letter;
+                kb.appendChild(btn);
             });
         }
 
@@ -1569,49 +1961,6 @@
             }
         }
 
-        // --- HANGMAN 3D ---
-        function initHangmanGame() {
-            const word = hangmanState.words[Math.floor(Math.random() * hangmanState.words.length)];
-            hangmanState.word = word;
-            hangmanState.guessed = [];
-            hangmanState.mistakes = 0;
-            hangmanState.scaffoldMeshes = [];
-
-            const woodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.5 });
-            const base = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.25, 1.8), woodMat);
-            base.position.set(0, 0.1, 0);
-            const post = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.4, 0.25), woodMat);
-            post.position.set(-0.9, 2.2, 0);
-            const beam = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.22, 0.22), woodMat);
-            beam.position.set(0, 4.3, 0);
-            const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xfef3c7 }));
-            rope.position.set(0.8, 3.95, 0);
-
-            [base, post, beam, rope].forEach(m => { scene.add(m); boardSquareMeshes.push(m); });
-            renderHangmanUI();
-            document.getElementById('turn-status').innerText = `Hangman 3D — Deduce the secret word!`;
-        }
-
-        function renderHangmanUI() {
-            document.getElementById('hangman-mistakes').innerText = hangmanState.mistakes;
-            const slots = hangmanState.word.split('').map(ch => hangmanState.guessed.includes(ch) ? ch : '_').join(' ');
-            document.getElementById('hangman-word-slots').innerText = slots;
-
-            const kb = document.getElementById('hangman-keyboard');
-            kb.innerHTML = '';
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
-                const used = hangmanState.guessed.includes(letter);
-                const btn = document.createElement('button');
-                btn.disabled = used;
-                btn.onclick = () => guessHangmanLetter(letter);
-                btn.className = used
-                    ? "w-7 h-7 rounded-lg bg-gray-950 text-gray-600 text-xs font-bold border border-gray-800"
-                    : "w-7 h-7 rounded-lg bg-gray-900 hover:bg-rose-950 text-white text-xs font-bold border border-gray-700 transition";
-                btn.innerText = letter;
-                kb.appendChild(btn);
-            });
-        }
-
         // --- STAR TREK TRI-DIMENSIONAL CHESS ---
         function buildStarTrekChessArena() {
             pieces = [];
@@ -1643,7 +1992,6 @@
                 }
             };
 
-            // 3 Stepped Main 4x4 Boards + 4 Suspended 2x2 Attack Boards (64 squares total)
             addChessSubBoard('main_0', 4, 4, 0, 0.5, -2.5);
             addChessSubBoard('main_1', 4, 4, 0, 2.3, 0);
             addChessSubBoard('main_2', 4, 4, 0, 4.1, 2.5);
@@ -1692,7 +2040,6 @@
                 pieces.push({ id: idCounter++, team, role, boardId, r, c, mesh: group });
             };
 
-            // Team 1 (12 pieces)
             placePiece(1, 'rook', 'atk_0', 0, 0);
             placePiece(1, 'knight', 'atk_0', 0, 1);
             placePiece(1, 'pawn', 'atk_0', 1, 0);
@@ -1707,7 +2054,6 @@
             placePiece(1, 'pawn', 'atk_1', 1, 0);
             placePiece(1, 'pawn', 'atk_1', 1, 1);
 
-            // Team 2 (12 pieces)
             placePiece(2, 'rook', 'atk_2', 1, 0);
             placePiece(2, 'knight', 'atk_2', 1, 1);
             placePiece(2, 'pawn', 'atk_2', 0, 0);
@@ -2062,6 +2408,8 @@
             document.getElementById('post-game-title').innerText = title;
             document.getElementById('post-game-subtitle').innerText = subtitle;
             document.getElementById('post-game-modal').classList.remove('hidden');
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && cfg.autoSync) pushToGoogleDriveSheet(true);
         }
 
         function restartMatch() {
@@ -3374,7 +3722,7 @@
             const rulesHTML = {
                 quarto: `
                     <h4 class="font-bold text-cyan-300 text-sm">Quarto 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Main Board + Perimeter Ring', '4 × 4 Grid (16 Squares)', '16 Unique Pieces (Tall/Short, Dark/Light, Square/Round, Solid/Hollow)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 Main Board + Perimeter Ring', '4 × 4 Grid (16 Squares)', '16 Unique Pieces (Tall/Short, Dark/Light, Square/Round, Solid/Hollow)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Complete a line of 4 pieces (horizontal, vertical, or diagonal) sharing at least one common attribute: <strong>Tall or Short</strong>, <strong>Dark or Light</strong>, <strong>Square or Round</strong>, or <strong>Solid or Hollow</strong>.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Step 1 (Pick for Opponent):</strong> You never choose the piece you place yourself! Player 1 selects a piece from around the perimeter of the board to hand to Player 2.</li>
@@ -3384,7 +3732,7 @@
                 `,
                 azul: `
                     <h4 class="font-bold text-sky-300 text-sm">Azul 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('2 Player Mosaic Boards + 5 Factory Displays', 'Two 5 × 5 Grids (25 Tiles Each)', '20 Factory Tiles per Round across 5 Glazed Colors (Cobalt, Amber, Crimson, Obsidian, Teal)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('2 Player Mosaic Boards + 5 Factory Displays', 'Two 5 × 5 Grids (25 Tiles Each)', '20 Factory Tiles per Round across 5 Glazed Colors (Cobalt, Amber, Crimson, Obsidian, Teal)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Draft colored ceramic tiles from the 5 Factory Displays to decorate your 5×5 3D Mosaic Wall and score the highest adjacency points.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Drafting:</strong> Click any colored tile inside a Factory Display to gather all matching tiles of that color from that factory.</li>
@@ -3394,7 +3742,7 @@
                 `,
                 sevenwonders: `
                     <h4 class="font-bold text-amber-300 text-sm">7 Wonders 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('2 Civilization Wonder Boards', '2 Monument Platforms (3 Tiers Each) + City Skyline', '6 Turns per Age across 2 Ages (Blue Civic, Red Military, Green Science, Yellow Commerce Cards)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('2 Civilization Wonder Boards', '2 Monument Platforms (3 Tiers Each) + City Skyline', '6 Turns per Age across 2 Ages (Blue Civic, Red Military, Green Science, Yellow Commerce Cards)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Lead an ancient city across Ages by constructing Civic, Military, Science, and Commerce buildings or erecting your golden 3D Wonder Monument.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Drafting Cards:</strong> Each turn, choose 1 card from your 3-card hand to <strong>Build</strong> as a 3D city structure or sacrifice to raise a <strong>Wonder Stage</strong> (+4 VP).</li>
@@ -3403,7 +3751,7 @@
                 `,
                 hive: `
                     <h4 class="font-bold text-amber-300 text-sm">Hive 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Hexagonal Arena Board', '61-Hex Grid (Radius 4)', '22 Insect Tiles (11 per Player: 1 Queen Bee, 2 Beetles, 3 Grasshoppers, 2 Spiders, 3 Soldier Ants)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 Hexagonal Arena Board', '61-Hex Grid (Radius 4)', '22 Insect Tiles (11 per Player: 1 Queen Bee, 2 Beetles, 3 Grasshoppers, 2 Spiders, 3 Soldier Ants)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Surround your opponent's Queen Bee on all 6 hexagonal sides while keeping your own Queen Bee safe.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>One Hive Rule:</strong> Every insect placed onto the 3D hex arena must touch at least one existing tile in the Hive.</li>
@@ -3412,7 +3760,7 @@
                 `,
                 carcassonne: `
                     <h4 class="font-bold text-emerald-300 text-sm">Carcassonne 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Expandable Countryside Board', '6 × 6 Landscape Grid (36 Tiles)', '36 Terrain Tiles (Walled Cities, Monasteries, Crossroads) + 14 Meeples (7 per Player)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 Expandable Countryside Board', '6 × 6 Landscape Grid (36 Tiles)', '36 Terrain Tiles (Walled Cities, Monasteries, Crossroads) + 14 Meeples (7 per Player)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Expand a medieval 3D countryside tile-by-tile and deploy Meeples to claim bonus territory points.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Tile Placement:</strong> Click any slot orthogonally adjacent to an existing tile to expand Walled Cities, Monasteries, and Crossroads.</li>
@@ -3421,7 +3769,7 @@
                 `,
                 twixt: `
                     <h4 class="font-bold text-purple-300 text-sm">Twixt 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Pegboard Arena with 4 Goal Borders', '12 × 12 Grid (140 Peg Holes; 4 Corners Excluded)', 'Unlimited Cyan & Red Pegs + Auto-Linking Knight-Move 3D Bridges', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 Pegboard Arena with 4 Goal Borders', '12 × 12 Grid (140 Peg Holes; 4 Corners Excluded)', 'Unlimited Cyan & Red Pegs + Auto-Linking Knight-Move 3D Bridges', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Build an unbroken chain of pegs and knight-move bridges connecting your two opposite goal borders.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Goal Borders:</strong> Player 1 (Cyan) connects North ↔ South; Player 2 (Red) connects West ↔ East.</li>
@@ -3430,7 +3778,7 @@
                 `,
                 startrek: `
                     <h4 class="font-bold text-cyan-300 text-sm">Star Trek Tri-Dimensional Chess — Complete Specifications & Rules</h4>
-                    ${specsCard('7 Multi-Level Boards', '3 Stepped 4 × 4 Main Boards + 4 Suspended 2 × 2 Attack Boards (64 Squares Total)', '24 Pieces (12 per Side: 1 King, 1 Queen, 2 Rooks, 2 Bishops, 2 Knights, 4 Pawns)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('7 Multi-Level Boards', '3 Stepped 4 × 4 Main Boards + 4 Suspended 2 × 2 Attack Boards (64 Squares Total)', '24 Pieces (12 per Side: 1 King, 1 Queen, 2 Rooks, 2 Bishops, 2 Knights, 4 Pawns)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Capture the opponent's King across 3 stepped 4×4 main boards and 4 suspended 2×2 attack boards.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>3D Movement:</strong> Tap any friendly Starfleet (White) or Opponent (Red) piece to select it, then tap a destination square on the same level or an overlapping upper/lower level.</li>
@@ -3439,7 +3787,7 @@
                 `,
                 mensch: `
                     <h4 class="font-bold text-amber-300 text-sm">Mensch ärgere Dich nicht 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Circular Circuit Board + Central Home Sanctuary', '40 Outer Circuit Spaces + 2 Starting Yards', '8 Conical Pawns (4 Cyan for Player 1, 4 Red for Player 2) + 1 Six-Sided Die', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 Circular Circuit Board + Central Home Sanctuary', '40 Outer Circuit Spaces + 2 Starting Yards', '8 Conical Pawns (4 Cyan for Player 1, 4 Red for Player 2) + 1 Six-Sided Die', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Be the first player to race all 4 of your pawns around the 40-tile circuit into the central golden Home Sanctuary.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Entering Play:</strong> Roll a <strong>6</strong> to deploy a pawn from your starting yard onto the track and earn a bonus roll.</li>
@@ -3448,7 +3796,7 @@
                 `,
                 skribbl: `
                     <h4 class="font-bold text-cyan-300 text-sm">Skribbl 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Interactive Neon Sketchpad Canvas', '520 × 210 px Multi-Color Drawing Board', 'Full RGB Color Picker, Touch/Mouse Brush & Secret Word Dictionary', '2+ Players (Same Device Pass & Play)')}
+                    ${specsCard('1 Interactive Neon Sketchpad Canvas', '520 × 210 px Multi-Color Drawing Board', 'Full RGB Color Picker, Touch/Mouse Brush & Secret Word Dictionary', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Illustrate the secret word on the neon sketchpad while players type guesses in real time.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Drawing:</strong> Pick any color from the swatch picker and draw clues using mouse or touch.</li>
@@ -3457,7 +3805,7 @@
                 `,
                 hangman: `
                     <h4 class="font-bold text-rose-300 text-sm">Hangman 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 3D Wooden Gallows Stage', '3.2 × 4.4 Unit 3D Scaffold Platform', '6-Part 3D Figure (Head, Torso, Left/Right Arms, Left/Right Legs) + 26-Letter Keyboard', '1–2 Players (Word Deduction)')}
+                    ${specsCard('1 3D Wooden Gallows Stage', '3.2 × 4.4 Unit 3D Scaffold Platform', '6-Part 3D Figure (Head, Torso, Left/Right Arms, Left/Right Legs) + 26-Letter Keyboard', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Deduce the hidden word letter-by-letter before all 6 parts of the 3D figure appear on the gallows.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Letter Selection:</strong> Tap letters on the A–Z keyboard. Correct letters reveal their positions; wrong letters add a 3D piece to the scaffold (max 6 mistakes).</li>
@@ -3465,7 +3813,7 @@
                 `,
                 yahtzee: `
                     <h4 class="font-bold text-amber-300 text-sm">Yahtzee 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 3D Dice Arena + Dual Scorecards', '5-Die Rolling Tray & 8-Category Scorecard', '5 Interactive 3D Dice (Up to 3 Rolls per Turn)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 3D Dice Arena + Dual Scorecards', '5-Die Rolling Tray & 8-Category Scorecard', '5 Interactive 3D Dice (Up to 3 Rolls per Turn)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Roll 5 dice up to 3 times per turn to achieve the highest total score across 8 scoring categories.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Holding Dice:</strong> Click any die between rolls to lock (HOLD) its value while re-rolling the remaining dice.</li>
@@ -3474,7 +3822,7 @@
                 `,
                 muhle: `
                     <h4 class="font-bold text-amber-300 text-sm">Mühle 3D (Nine Men's Morris) — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Concentric Morris Board', '3 Concentric Squares / 24 Intersection Nodes', '18 Stones (9 Cyan for Player 1, 9 Amber for Player 2)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 Concentric Morris Board', '3 Concentric Squares / 24 Intersection Nodes', '18 Stones (9 Cyan for Player 1, 9 Amber for Player 2)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Form "Mills" (3 of your stones in a straight line along the 3 concentric squares) to capture opponent stones until they have fewer than 3 left.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Phase 1 (Placing):</strong> Each player starts with 9 stones and takes turns placing them onto any of the 24 board intersections.</li>
@@ -3484,7 +3832,7 @@
                 `,
                 fourgewinnt: `
                     <h4 class="font-bold text-rose-300 text-sm">4gewinnt 3D (Connect 4) — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Standing Vertical Gravity Rack', '7 Columns × 6 Rows (42 Slots Total)', '42 Discs (21 Cyan for Player 1, 21 Red for Player 2)', '2 Players (Same Device or vs AI)')}
+                    ${specsCard('1 Standing Vertical Gravity Rack', '7 Columns × 6 Rows (42 Slots Total)', '42 Discs (21 Cyan for Player 1, 21 Red for Player 2)', 'Player to Player, 2P Same Device, or vs AI')}
                     <p><strong>Objective:</strong> Be the first player to align 4 of your colored discs horizontally, vertically, or diagonally inside the standing 7×6 3D gravity rack.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Gravity Drop:</strong> Click any of the 7 vertical columns (or top drop funnels); your disc drops to the lowest unoccupied slot in that column.</li>
@@ -3539,6 +3887,8 @@
             if (favs.includes(username)) favs = favs.filter(u => u !== username);
             else favs.push(username);
             localStorage.setItem(`intelligames_favs_${currentUser}`, JSON.stringify(favs));
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && cfg.autoSync) pushToGoogleDriveSheet(true);
             renderSessionsHub();
         }
 
@@ -3551,6 +3901,8 @@
 
         function saveSessionsRegistry(list) {
             localStorage.setItem('intelligames_sessions_db', JSON.stringify(list));
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && cfg.autoSync) pushToGoogleDriveSheet(true);
         }
 
         function openSessionsHub() {
@@ -3765,6 +4117,9 @@
             toggleMenuModeFields();
             updateDetectedDeviceHints();
 
+            const cfg = getDriveSyncConfig();
+            updateDriveSyncBadge(cfg.url ? 'connected' : 'unconfigured', cfg.lastSync);
+
             const adminSection = document.getElementById('master-user-admin-section');
             if (currentUserRole === 'master') {
                 adminSection.classList.remove('hidden');
@@ -3930,12 +4285,6 @@
             };
             addChatSystemMessage(`Game reconfigured to ${activeGame.toUpperCase()} — ${player1Name} vs ${player2Name}${modeInfoMap[gameModeType]} [${activeResolvedDisplay.toUpperCase()} view].`);
         }
-            closeMasterMenu();
-            document.getElementById('game-lobby-modal').classList.add('hidden');
-            initGameArena();
-            const diffInfo = gameModeType === 'pve' ? `, AI: ${aiDifficulty.toUpperCase()}` : ' (Same Device 2P)';
-            addChatSystemMessage(`Game reconfigured to ${activeGame.toUpperCase()} — ${player1Name} vs ${player2Name}${diffInfo} [${activeResolvedDisplay.toUpperCase()} view].`);
-        }
 
         function openMasterMenuFromLobby() {
             document.getElementById('game-lobby-modal').classList.add('hidden');
@@ -3964,6 +4313,8 @@
 
         function saveUsersRegistry(list) {
             localStorage.setItem('intelligames_users_db', JSON.stringify(list));
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && cfg.autoSync) pushToGoogleDriveSheet(true);
         }
 
         function ensureMasterAccountExists() {
@@ -3972,6 +4323,7 @@
                 users.push({ username: 'master', password: '123', role: 'master' });
                 saveUsersRegistry(users);
             }
+            initDriveSyncEngine();
         }
 
         function switchAuthTab(mode) {

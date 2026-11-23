@@ -63,126 +63,126 @@
                         <i class="fa-solid fa-cube text-2xl text-white"></i>
                     </div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-white">Intelligames 3D</h1>
-                    <p id="auth-subtitle" class="text-xs text-cyan-300">Log in with your registered account or switch to Register</p>
+                    <p id="auth-subtitle" class="text-xs text-cyan-300">Sign in to your account or register a new profile</p>
                 </div>
 
-                <!-- Login / Register Tabs -->
-                <div class="flex border-b border-gray-800">
-                    <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="flex-1 pb-2.5 text-xs font-bold text-cyan-400 border-b-2 border-cyan-400 transition">
-                        Log In
+                <!-- Login / Register Mode Switcher -->
+                <div class="grid grid-cols-2 gap-1.5 p-1 bg-gray-900/90 rounded-xl border border-gray-800">
+                    <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2 rounded-lg text-xs font-bold bg-cyan-500 text-gray-950 shadow transition">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i> Log In
                     </button>
-                    <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="flex-1 pb-2.5 text-xs font-semibold text-gray-400 border-b-2 border-transparent hover:text-gray-200 transition">
-                        Register New User
+                    <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Register
                     </button>
                 </div>
 
                 <div id="auth-error-msg" class="hidden p-2.5 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-300 text-xs text-center"></div>
+                <div id="auth-success-msg" class="hidden p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs text-center"></div>
 
-                <div class="space-y-3">
+                <!-- LOGIN FORM -->
+                <div id="login-form-fields" class="space-y-3">
                     <div>
-                        <label for="auth-user" class="block text-xs font-medium text-gray-300 mb-1">Username</label>
-                        <input type="text" id="auth-user" autocomplete="username" placeholder="Enter your username" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <label for="login-user" class="block text-xs font-medium text-gray-300 mb-1">Username</label>
+                        <input type="text" id="login-user" autocomplete="username" placeholder="Enter your registered username" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
                     </div>
                     <div>
-                        <label for="auth-pass" class="block text-xs font-medium text-gray-300 mb-1">Password / PIN</label>
-                        <input type="password" id="auth-pass" autocomplete="current-password" onkeypress="if(event.key==='Enter') handleAuthentication()" placeholder="Enter your password or PIN" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <label for="login-pass" class="block text-xs font-medium text-gray-300 mb-1">Password / PIN</label>
+                        <input type="password" id="login-pass" autocomplete="current-password" onkeypress="if(event.key==='Enter') handleAuthentication()" placeholder="Enter your password or PIN" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
                     </div>
                 </div>
 
-                <button type="button" id="auth-submit-btn" onclick="handleAuthentication()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
+                <!-- REGISTER FORM -->
+                <div id="register-form-fields" class="hidden space-y-3">
+                    <div>
+                        <label for="reg-user" class="block text-xs font-medium text-purple-300 mb-1">Choose Username</label>
+                        <input type="text" id="reg-user" autocomplete="username" placeholder="Create a unique username" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="reg-pass" class="block text-xs font-medium text-purple-300 mb-1">Create Password / PIN</label>
+                        <input type="password" id="reg-pass" autocomplete="new-password" placeholder="Create a password or PIN" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="reg-pass-confirm" class="block text-xs font-medium text-purple-300 mb-1">Confirm Password / PIN</label>
+                        <input type="password" id="reg-pass-confirm" autocomplete="new-password" onkeypress="if(event.key==='Enter') handleAuthentication()" placeholder="Re-enter your password or PIN" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+
+                <button type="button" id="auth-submit-btn" onclick="handleAuthentication()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
                     Log In
                 </button>
+
+                <div class="pt-1 border-t border-gray-800/80 flex items-center justify-between text-[11px] text-gray-400">
+                    <span id="auth-switch-prompt">Don't have an account yet? <button type="button" onclick="switchAuthTab('register')" class="text-purple-400 hover:text-purple-300 font-bold underline">Register here</button></span>
+                    <button type="button" onclick="openDriveSyncModal()" class="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center">
+                        <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- POST-LOGIN GAME SELECTION LOBBY MODAL -->
-        <div id="game-lobby-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/92 backdrop-blur-md hidden interactive p-3 sm:p-6 overflow-y-auto">
-            <div class="glass-panel p-5 sm:p-7 rounded-2xl w-full max-w-4xl shadow-2xl border border-cyan-500/40 space-y-5 my-auto max-h-[92vh] overflow-y-auto">
-                <div class="border-b border-gray-800 pb-4">
-                    <div class="flex items-center justify-between gap-2">
-                        <h2 class="text-xl font-extrabold text-white tracking-wide flex items-center">
-                            <i class="fa-solid fa-gamepad text-cyan-400 mr-2.5"></i> Select Your Match
-                        </h2>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="openDriveSyncModal()" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
-                                <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
-                            </button>
-                            <button onclick="logoutUser()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
-                                Log Out
-                            </button>
-                        </div>
-                    </div>
-                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-0.5">Tap a game card below, configure mode & display, and launch</p>
                 </div>
+            </div>
 
-                <!-- Visual Game Gallery Grid -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Choose Game (13 Games Available)</label>
-                        <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
-                    </div>
-                    <input type="hidden" id="select-game" value="quarto">
-                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[44vh] overflow-y-auto pr-1"></div>
-                </div>
+            <!-- Twixt 3D HUD -->
+            <div id="hud-twixt" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-purple-500/40 w-full max-w-xs space-y-1 text-[11px]">
+                <div class="font-bold text-cyan-300">Player 1 (Cyan): North ↔ South</div>
+                <div class="font-bold text-rose-400">Player 2 (Red): West ↔ East</div>
+                <div class="text-[10px] text-gray-400">12×12 Pegboard • Knight moves auto-bridge</div>
+            </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                    <div>
-                        <label class="block text-xs font-medium text-cyan-300 mb-1.5">Game Mode</label>
-                        <select id="select-mode" onchange="toggleLobbyModeFields()" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                            <option value="p2p">Player to Player (Online / Invite)</option>
-                            <option value="pvp" selected>2 Players on Same Device</option>
-                            <option value="pve">Player vs Computer (PvE)</option>
-                        </select>
-                        <p id="lobby-mode-note" class="text-[10px] text-gray-400 mt-1">All 3 modes available for every game.</p>
-                    </div>
-
-                    <div id="p2p-opponent-container" class="hidden">
-                        <label class="block text-xs font-medium text-amber-300 mb-1.5">Select Opponent (Player to Player)</label>
-                        <select id="lobby-p2p-opponent" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500">
-                            <option value="">-- Open Session / Any Player --</option>
-                        </select>
-                    </div>
-
-                    <div id="pvp-names-container" class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-medium text-cyan-300 mb-1.5">Player 1 Name</label>
-                            <input type="text" id="lobby-p1-name" placeholder="Player 1" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-purple-300 mb-1.5">Player 2 Name</label>
-                            <input type="text" id="lobby-p2-name" placeholder="Player 2" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
-                        </div>
-                    </div>
-
-                    <div id="ai-difficulty-container" class="hidden">
-                        <label class="block text-xs font-medium text-purple-300 mb-1.5">AI Difficulty Level</label>
-                        <select id="select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                            <option value="easy">Easy (Casual)</option>
-                            <option value="medium" selected>Medium (Tactical)</option>
-                            <option value="hard">Hard (Grandmaster)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-emerald-300 mb-1.5">
-                            Device & Display <span id="detected-device-hint" class="text-[10px] text-gray-400"></span>
-                        </label>
-                        <select id="select-display-profile" onchange="setDisplayProfile(this.value)" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <option value="auto" selected>Auto-Detect Display</option>
-                            <option value="mobile">Mobile / Phone (Compact)</option>
-                            <option value="tablet">Tablet (Balanced)</option>
-                            <option value="desktop">Desktop / Widescreen</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
-                    <button onclick="launchSelectedGame()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
-                        <i class="fa-solid fa-play mr-1.5"></i> Start Match
+            <!-- Mensch ärgere Dich nicht HUD -->
+            <div id="hud-mensch" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-amber-500/40 w-full max-w-xs space-y-2">
+                <div class="flex items-center space-x-2.5">
+                    <div id="mensch-dice-box" class="w-9 h-9 rounded-xl bg-white text-gray-950 font-extrabold text-base flex items-center justify-center shadow shrink-0">🎲</div>
+                    <button onclick="rollMenschDice()" id="mensch-roll-btn" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-gray-950 font-bold rounded-xl text-xs transition">
+                        Roll Die
                     </button>
-                    <button id="lobby-master-btn" onclick="openMasterMenuFromLobby()" class="hidden sm:w-auto px-5 py-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold rounded-xl text-xs transition">
-                        <i class="fa-solid fa-user-shield mr-1"></i> Manage Users
-                    </button>
+                </div>
+                <div id="mensch-info" class="text-[11px] text-gray-200 leading-snug">Roll a 6 to deploy a pawn, or click your pawn on the 40-tile track!</div>
+            </div>
+
+            <!-- Skribbl HUD -->
+            <div id="hud-skribbl" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-cyan-500/40 w-full max-w-md space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="text-xs font-bold text-cyan-300">Word: <span id="skribbl-word-display" class="text-white tracking-widest uppercase">_ _ _ _ _</span></div>
+                    <div class="flex items-center space-x-1.5">
+                        <input type="color" id="skribbl-color" value="#22d3ee" class="w-7 h-7 rounded bg-transparent border-0 cursor-pointer">
+                        <button onclick="clearSkribblCanvas()" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-xs">Clear</button>
+                        <button onclick="nextSkribblRound()" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-xs">New Word</button>
+                    </div>
+                </div>
+                <canvas id="skribbl-canvas" width="520" height="210" class="w-full h-40 bg-gray-950 rounded-xl border border-gray-800 cursor-crosshair touch-none"></canvas>
+                <div class="flex space-x-2">
+                    <input type="text" id="skribbl-guess-input" onkeypress="if(event.key==='Enter') submitSkribblGuess()" placeholder="Type your guess here..." class="flex-1 px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <button onclick="submitSkribblGuess()" class="px-4 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs">Guess</button>
+                </div>
+            </div>
+
+            <!-- Hangman 3D HUD -->
+            <div id="hud-hangman" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-rose-500/40 w-full max-w-sm space-y-2 text-center">
+                <div class="flex items-center justify-between text-[11px]">
+                    <span class="text-rose-300 font-bold">Mistakes: <span id="hangman-mistakes">0</span> / 6</span>
+                    <button onclick="initHangmanGame()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded font-semibold">New Word</button>
+                </div>
+                <div id="hangman-word-slots" class="text-lg font-extrabold tracking-[0.28em] text-white py-0.5">_ _ _ _ _</div>
+                <div id="hangman-keyboard" class="flex flex-wrap justify-center gap-1"></div>
+            </div>
+
+            <!-- Yahtzee 3D HUD -->
+            <div id="hud-yahtzee" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-emerald-500/40 w-full max-w-sm space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-emerald-300">Yahtzee 3D — Rolls: <span id="yahtzee-rolls-left">3</span></span>
+                    <button type="button" onclick="toggleHudPanelCollapse('hud-yahtzee-body', this)" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[10px] font-semibold">Hide</button>
+                </div>
+                <div id="hud-yahtzee-body" class="space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center space-x-1.5" id="yahtzee-dice-row"></div>
+                        <button onclick="rollYahtzeeDice()" id="yahtzee-roll-btn" class="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 font-bold rounded-xl text-xs transition">
+                            Roll
+                        </button>
+                    </div>
+                    <div id="yahtzee-scorecard" class="grid grid-cols-2 gap-1 text-[10px]"></div>
                 </div>
             </div>
         </div>
@@ -1527,6 +1527,29 @@ function doPost(e) {
             if (!body) return;
             const isHidden = body.classList.toggle('hidden');
             if (btnEl) btnEl.innerText = isHidden ? 'Show' : 'Hide';
+        }
+
+        // --- HANGMAN 3D ---
+        function initHangmanGame() {
+            const word = hangmanState.words[Math.floor(Math.random() * hangmanState.words.length)];
+            hangmanState.word = word;
+            hangmanState.guessed = [];
+            hangmanState.mistakes = 0;
+            hangmanState.scaffoldMeshes = [];
+
+            const woodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.5 });
+            const base = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.25, 1.8), woodMat);
+            base.position.set(0, 0.1, 0);
+            const post = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.4, 0.25), woodMat);
+            post.position.set(-0.9, 2.2, 0);
+            const beam = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.22, 0.22), woodMat);
+            beam.position.set(0, 4.3, 0);
+            const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0xfef3c7 }));
+            rope.position.set(0.8, 3.95, 0);
+
+            [base, post, beam, rope].forEach(m => { scene.add(m); boardSquareMeshes.push(m); });
+            renderHangmanUI();
+            document.getElementById('turn-status').innerText = `Hangman 3D — Deduce the secret word!`;
         }
 
         function renderHangmanUI() {
@@ -4316,52 +4339,91 @@ function doPost(e) {
             authMode = mode;
             const loginTab = document.getElementById('tab-login');
             const regTab = document.getElementById('tab-register');
+            const loginFields = document.getElementById('login-form-fields');
+            const regFields = document.getElementById('register-form-fields');
             const btn = document.getElementById('auth-submit-btn');
             const subtitle = document.getElementById('auth-subtitle');
-            const passInput = document.getElementById('auth-pass');
+            const promptEl = document.getElementById('auth-switch-prompt');
+
             document.getElementById('auth-error-msg').classList.add('hidden');
+            document.getElementById('auth-success-msg').classList.add('hidden');
 
             if (mode === 'login') {
-                loginTab.className = "flex-1 pb-2.5 text-xs font-bold text-cyan-400 border-b-2 border-cyan-400 transition";
-                regTab.className = "flex-1 pb-2.5 text-xs font-semibold text-gray-400 border-b-2 border-transparent hover:text-gray-200 transition";
+                loginTab.className = "py-2 rounded-lg text-xs font-bold bg-cyan-500 text-gray-950 shadow transition";
+                regTab.className = "py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition";
+                loginFields.classList.remove('hidden');
+                regFields.classList.add('hidden');
+                btn.className = "w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition";
                 btn.innerText = "Log In";
-                if (subtitle) subtitle.innerText = "Log in with your registered account or switch to Register";
-                if (passInput) passInput.setAttribute('autocomplete', 'current-password');
+                if (subtitle) subtitle.innerText = "Sign in to your account or register a new profile";
+                if (promptEl) promptEl.innerHTML = `Don't have an account yet? <button type="button" onclick="switchAuthTab('register')" class="text-purple-400 hover:text-purple-300 font-bold underline">Register here</button>`;
             } else {
-                regTab.className = "flex-1 pb-2.5 text-xs font-bold text-purple-400 border-b-2 border-purple-400 transition";
-                loginTab.className = "flex-1 pb-2.5 text-xs font-semibold text-gray-400 border-b-2 border-transparent hover:text-gray-200 transition";
-                btn.innerText = "Create Account & Log In";
-                if (subtitle) subtitle.innerText = "Create a new player account to unlock the 3D Arena";
-                if (passInput) passInput.setAttribute('autocomplete', 'new-password');
+                regTab.className = "py-2 rounded-lg text-xs font-bold bg-purple-500 text-white shadow transition";
+                loginTab.className = "py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition";
+                regFields.classList.remove('hidden');
+                loginFields.classList.add('hidden');
+                btn.className = "w-full py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-bold rounded-xl text-sm shadow-lg transition";
+                btn.innerText = "Register Account";
+                if (subtitle) subtitle.innerText = "Register a new player account first before logging in";
+                if (promptEl) promptEl.innerHTML = `Already registered? <button type="button" onclick="switchAuthTab('login')" class="text-cyan-400 hover:text-cyan-300 font-bold underline">Log in here</button>`;
             }
         }
 
         function handleAuthentication() {
-            const userInp = document.getElementById('auth-user').value.trim();
-            const passInp = document.getElementById('auth-pass').value.trim();
             const errBox = document.getElementById('auth-error-msg');
-
-            if (!userInp || !passInp) {
-                errBox.innerText = "Please enter both a Username and Password/PIN.";
-                errBox.classList.remove('hidden');
-                return;
-            }
+            const okBox = document.getElementById('auth-success-msg');
+            errBox.classList.add('hidden');
+            okBox.classList.add('hidden');
 
             const users = getUsersRegistry();
+
             if (authMode === 'register') {
-                if (users.some(u => u.username.toLowerCase() === userInp.toLowerCase())) {
-                    errBox.innerText = "That username is already registered. Switch to Log In.";
+                const regUser = document.getElementById('reg-user').value.trim();
+                const regPass = document.getElementById('reg-pass').value.trim();
+                const regConfirm = document.getElementById('reg-pass-confirm').value.trim();
+
+                if (!regUser || !regPass || !regConfirm) {
+                    errBox.innerText = "Please fill in Username, Password/PIN, and Confirm Password/PIN.";
                     errBox.classList.remove('hidden');
                     return;
                 }
-                const role = userInp.toLowerCase() === 'master' ? 'master' : 'player';
-                users.push({ username: userInp, password: passInp, role });
+                if (regPass !== regConfirm) {
+                    errBox.innerText = "Password / PIN entries do not match. Please re-enter.";
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+                if (users.some(u => u.username.toLowerCase() === regUser.toLowerCase())) {
+                    errBox.innerText = "That username is already registered. Please log in instead.";
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                const role = regUser.toLowerCase() === 'master' ? 'master' : 'player';
+                users.push({ username: regUser, password: regPass, role });
                 saveUsersRegistry(users);
-                completeLogin(userInp, role);
+
+                // Clear registration inputs and switch to Log In with username pre-filled
+                document.getElementById('reg-user').value = '';
+                document.getElementById('reg-pass').value = '';
+                document.getElementById('reg-pass-confirm').value = '';
+                switchAuthTab('login');
+                document.getElementById('login-user').value = regUser;
+                document.getElementById('login-pass').value = '';
+                okBox.innerText = `Account "${regUser}" registered! Please enter your Password/PIN to log in.`;
+                okBox.classList.remove('hidden');
             } else {
-                const found = users.find(u => u.username.toLowerCase() === userInp.toLowerCase() && u.password === passInp);
+                const loginUser = document.getElementById('login-user').value.trim();
+                const loginPass = document.getElementById('login-pass').value.trim();
+
+                if (!loginUser || !loginPass) {
+                    errBox.innerText = "Please enter both your registered Username and Password/PIN.";
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                const found = users.find(u => u.username.toLowerCase() === loginUser.toLowerCase() && u.password === loginPass);
                 if (!found) {
-                    errBox.innerText = "Invalid credentials or unregistered user. Please register first.";
+                    errBox.innerText = "Account not found or incorrect Password/PIN. Register first if you are a new user.";
                     errBox.classList.remove('hidden');
                     return;
                 }

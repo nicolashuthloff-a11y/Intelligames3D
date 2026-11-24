@@ -117,145 +117,15 @@
                         <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
                     </button>
                 </div>
-            </div>
-        </div>
 
-        <!-- POST-LOGIN GAME SELECTION LOBBY MODAL (ALL 13 GAMES AS TILES + PER-SEAT HUMAN/AI/ONLINE) -->
-        <div id="game-lobby-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/92 backdrop-blur-md hidden interactive p-3 sm:p-6 overflow-y-auto">
-            <div class="glass-panel p-5 sm:p-7 rounded-2xl w-full max-w-5xl shadow-2xl border border-cyan-500/40 space-y-5 my-auto max-h-[94vh] overflow-y-auto">
-                <div class="border-b border-gray-800 pb-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-xl font-extrabold text-white tracking-wide flex items-center">
-                            <i class="fa-solid fa-gamepad text-cyan-400 mr-2.5"></i> Select Your Match
-                        </h2>
-                        <div class="flex items-center space-x-2">
-                            <button type="button" onclick="openDriveSyncModal()" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
-                                <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
-                            </button>
-                            <button type="button" onclick="logoutUser()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
-                                Log Out
-                            </button>
-                        </div>
+                <!-- ACTIVE SESSION LOG OUT FIELD -->
+                <div id="auth-logout-field" class="hidden pt-3 border-t border-gray-800/80 bg-gray-950/75 p-3 rounded-xl flex items-center justify-between gap-2 text-xs">
+                    <div class="truncate">
+                        <span class="text-gray-400">Signed in as:</span>
+                        <span id="auth-active-user-label" class="font-bold text-cyan-300 ml-1"></span>
                     </div>
-                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Tap any game tile below, set each seat as Human or Computer, and launch</p>
-                </div>
-
-                <!-- Visual Game Tiles Gallery (All 13 Games) -->
-                <div class="space-y-2.5">
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Choose Game (All 13 Games)</label>
-                        <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
-                    </div>
-                    <input type="hidden" id="select-game" value="quarto">
-                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                    <div>
-                        <label class="block text-xs font-medium text-cyan-300 mb-1.5">Match Preset & Player Count</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="select-mode" onchange="applyModePresetToSlots('lobby')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                                <option value="pvp" selected>Local / Custom Mix</option>
-                                <option value="p2p">Online / Invite</option>
-                                <option value="pve">Vs Computer (AI)</option>
-                            </select>
-                            <select id="lobby-player-count" onchange="updateMultiplayerInputs('lobby')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                                <option value="2" selected>2 Players</option>
-                                <option value="3">3 Players</option>
-                                <option value="4">4 Players</option>
-                            </select>
-                        </div>
-                        <p id="lobby-mode-note" class="text-[10px] text-gray-400 mt-1">Set each player seat (2–4) as Human, Online, or Computer.</p>
-                    </div>
-
-                    <div id="ai-difficulty-container">
-                        <label class="block text-xs font-medium text-purple-300 mb-1.5">AI Difficulty (for Computer Seats)</label>
-                        <select id="select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                            <option value="easy">Easy (Casual)</option>
-                            <option value="medium" selected>Medium (Tactical)</option>
-                            <option value="hard">Hard (Grandmaster)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-emerald-300 mb-1.5">
-                            Device & Display <span id="detected-device-hint" class="text-[10px] text-gray-400"></span>
-                        </label>
-                        <select id="select-display-profile" onchange="setDisplayProfile(this.value)" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <option value="auto" selected>Auto-Detect Display</option>
-                            <option value="mobile">Mobile / Phone (Compact)</option>
-                            <option value="tablet">Tablet (Balanced)</option>
-                            <option value="desktop">Desktop / Widescreen</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Per-Player Seat Configuration (Human / Computer / Online) -->
-                <div id="lobby-player-slots-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-gray-950/60 p-3 rounded-2xl border border-gray-800">
-                    <!-- Slot 1 -->
-                    <div class="bg-gray-900/90 p-2.5 rounded-xl border border-cyan-500/30 space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-cyan-300">Player 1 (Cyan)</span>
-                            <span class="text-[10px] text-gray-400">Host</span>
-                        </div>
-                        <input type="text" id="lobby-p1-name" placeholder="Player 1" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-500">
-                    </div>
-
-                    <!-- Slot 2 -->
-                    <div id="lobby-slot-2" class="bg-gray-900/90 p-2.5 rounded-xl border border-purple-500/30 space-y-1.5">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-[11px] font-bold text-purple-300">Player 2 (Red)</span>
-                            <select id="lobby-p2-type" onchange="toggleSlotTypeUI('lobby', 2)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-cyan-300">
-                                <option value="human" selected>Human (Local)</option>
-                                <option value="ai">Computer (AI)</option>
-                                <option value="online">Online Player</option>
-                            </select>
-                        </div>
-                        <input type="text" id="lobby-p2-name" placeholder="Player 2" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-purple-500">
-                        <select id="lobby-p2-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
-                            <option value="">-- Open Invite / Any Player --</option>
-                        </select>
-                    </div>
-
-                    <!-- Slot 3 -->
-                    <div id="lobby-slot-3" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-amber-500/30 space-y-1.5">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-[11px] font-bold text-amber-300">Player 3 (Gold)</span>
-                            <select id="lobby-p3-type" onchange="toggleSlotTypeUI('lobby', 3)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-amber-300">
-                                <option value="human" selected>Human (Local)</option>
-                                <option value="ai">Computer (AI)</option>
-                                <option value="online">Online Player</option>
-                            </select>
-                        </div>
-                        <input type="text" id="lobby-p3-name" placeholder="Player 3" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-amber-500">
-                        <select id="lobby-p3-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
-                            <option value="">-- Open Invite / Any Player --</option>
-                        </select>
-                    </div>
-
-                    <!-- Slot 4 -->
-                    <div id="lobby-slot-4" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-emerald-500/30 space-y-1.5">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-[11px] font-bold text-emerald-300">Player 4 (Emerald)</span>
-                            <select id="lobby-p4-type" onchange="toggleSlotTypeUI('lobby', 4)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-emerald-300">
-                                <option value="human" selected>Human (Local)</option>
-                                <option value="ai">Computer (AI)</option>
-                                <option value="online">Online Player</option>
-                            </select>
-                        </div>
-                        <input type="text" id="lobby-p4-name" placeholder="Player 4" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500">
-                        <select id="lobby-p4-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
-                            <option value="">-- Open Invite / Any Player --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
-                    <button type="button" onclick="launchSelectedGame()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
-                        <i class="fa-solid fa-play mr-1.5"></i> Start Match
-                    </button>
-                    <button type="button" id="lobby-master-btn" onclick="openMasterMenuFromLobby()" class="hidden sm:w-auto px-5 py-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold rounded-xl text-xs transition">
-                        <i class="fa-solid fa-user-shield mr-1"></i> Manage Users
+                    <button type="button" id="auth-logout-btn" onclick="logoutUser()" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold rounded-lg text-xs transition shrink-0">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Log Out
                     </button>
                 </div>
             </div>
@@ -272,24 +142,9 @@
                     <span id="current-game-title" class="text-xs font-extrabold text-cyan-300">Quarto 3D</span>
                     <span id="user-display-badge" class="text-[11px] text-gray-400 hidden sm:inline"></span>
                 </div>
-            </div>
-
-            <div class="glass-panel px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto text-center flex items-center space-x-2">
-                <span id="mode-pill-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">2P HUMAN LOCAL</span>
-                <span id="turn-status" class="text-xs font-bold text-white">Player 1: Pick a piece around the board</span>
-            </div>
-
-            <div class="flex items-center space-x-2 pointer-events-auto">
-                <div class="glass-panel px-3 py-2.5 rounded-2xl shadow-xl hidden md:flex items-center space-x-1.5" title="Active Device & Display Profile">
-                    <i id="device-hud-icon" class="fa-solid fa-desktop text-emerald-400 text-xs"></i>
-                    <span id="device-hud-label" class="text-[11px] font-semibold text-emerald-300">Desktop</span>
-                </div>
-                <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl">
-                    <span id="score-display" class="text-xs font-extrabold text-purple-300">P1: 0 | P2: 0</span>
-                </div>
-                <button id="top-rules-btn" onclick="openInstructionsModal()" class="hidden interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-cyan-500/50 transition" title="Rules for the Active Game">
-                    <i class="fa-solid fa-book-open text-cyan-400"></i>
-                    <span class="text-xs font-semibold text-gray-200 hidden sm:inline">Game Rules</span>
+                <button type="button" id="top-logout-btn" onclick="logoutUser()" class="hidden interactive glass-panel px-3 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-rose-500/50 text-rose-300 transition" title="Log Out of Your Account">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                    <span class="text-xs font-semibold hidden sm:inline">Log Out</span>
                 </button>
             </div>
         </div>
@@ -5240,6 +5095,12 @@ function doPost(e) {
             document.getElementById('auth-screen').style.display = 'none';
             const badge = document.getElementById('user-display-badge');
             if (badge) badge.innerText = `• ${username}`;
+            const topLogoutBtn = document.getElementById('top-logout-btn');
+            if (topLogoutBtn) topLogoutBtn.classList.remove('hidden');
+            const authLogoutField = document.getElementById('auth-logout-field');
+            const authUserLabel = document.getElementById('auth-active-user-label');
+            if (authUserLabel) authUserLabel.innerText = username;
+            if (authLogoutField) authLogoutField.classList.remove('hidden');
             checkIncomingInvites();
             openGameLobby();
         }
@@ -5250,6 +5111,10 @@ function doPost(e) {
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed && parsed.username) {
+                        const authLogoutField = document.getElementById('auth-logout-field');
+                        const authUserLabel = document.getElementById('auth-active-user-label');
+                        if (authUserLabel) authUserLabel.innerText = parsed.username;
+                        if (authLogoutField) authLogoutField.classList.remove('hidden');
                         completeLogin(parsed.username, parsed.role || 'player');
                     }
                 }
@@ -5264,7 +5129,14 @@ function doPost(e) {
             closeInstructionsModal();
             const topRulesBtn = document.getElementById('top-rules-btn');
             if (topRulesBtn) topRulesBtn.classList.add('hidden');
+            const topLogoutBtn = document.getElementById('top-logout-btn');
+            if (topLogoutBtn) topLogoutBtn.classList.add('hidden');
+            const authLogoutField = document.getElementById('auth-logout-field');
+            if (authLogoutField) authLogoutField.classList.add('hidden');
+            const badge = document.getElementById('user-display-badge');
+            if (badge) badge.innerText = '';
             document.getElementById('game-lobby-modal').classList.add('hidden');
+            switchAuthTab('login');
             document.getElementById('auth-screen').style.display = 'flex';
         }
 

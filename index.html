@@ -151,14 +151,36 @@
                     <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Tap any game tile below, configure player count & Human/Computer per seat, and launch</p>
                 </div>
 
-                <!-- Visual Game Tiles Gallery (All 13 Games) -->
+                <!-- Visual Game Tiles Gallery (All 14 Games) -->
                 <div class="space-y-2.5">
                     <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Choose Game (All 13 Games)</label>
+                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Choose Game (All 14 Games)</label>
                         <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
                     </div>
                     <input type="hidden" id="select-game" value="quarto">
                     <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                </div>
+
+                <!-- SAVED / OPEN GAMES & PLAYERS ONLINE PANEL (LOBBY) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 bg-gray-950/65 p-3.5 rounded-2xl border border-gray-800 text-xs">
+                    <div class="lg:col-span-2 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-cyan-300 flex items-center">
+                                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Open & Saved Games
+                            </span>
+                            <span id="lobby-saved-count" class="text-[10px] text-gray-400">0 saved</span>
+                        </div>
+                        <div id="lobby-saved-games-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                    </div>
+                    <div class="space-y-2 border-t lg:border-t-0 lg:border-l border-gray-800 pt-2.5 lg:pt-0 lg:pl-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-emerald-300 flex items-center">
+                                <i class="fa-solid fa-circle text-[8px] text-emerald-400 mr-1.5 animate-pulse"></i> Players Online
+                            </span>
+                            <span id="lobby-online-count" class="text-[10px] text-gray-400">1 online</span>
+                        </div>
+                        <div id="lobby-online-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -184,7 +206,7 @@
                         <select id="select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
                             <option value="easy">Easy (Casual)</option>
                             <option value="medium" selected>Medium (Tactical)</option>
-                            <option value="hard">Hard (Grandmaster)</option>
+                            <option value="hard">Hard (Grandmaster Engine)</option>
                         </select>
                     </div>
 
@@ -203,7 +225,6 @@
 
                 <!-- Per-Player Seat Configuration (Human / Online / Computer) -->
                 <div id="lobby-player-slots-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-gray-950/60 p-3 rounded-2xl border border-gray-800">
-                    <!-- Slot 1 -->
                     <div class="bg-gray-900/90 p-2.5 rounded-xl border border-cyan-500/30 space-y-1.5">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-bold text-cyan-300">Player 1 (Cyan)</span>
@@ -212,7 +233,6 @@
                         <input type="text" id="lobby-p1-name" placeholder="Player 1" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-500">
                     </div>
 
-                    <!-- Slot 2 -->
                     <div id="lobby-slot-2" class="bg-gray-900/90 p-2.5 rounded-xl border border-purple-500/30 space-y-1.5">
                         <div class="flex items-center justify-between gap-1">
                             <span class="text-[11px] font-bold text-purple-300">Player 2 (Red)</span>
@@ -228,7 +248,6 @@
                         </select>
                     </div>
 
-                    <!-- Slot 3 -->
                     <div id="lobby-slot-3" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-amber-500/30 space-y-1.5">
                         <div class="flex items-center justify-between gap-1">
                             <span class="text-[11px] font-bold text-amber-300">Player 3 (Gold)</span>
@@ -244,7 +263,6 @@
                         </select>
                     </div>
 
-                    <!-- Slot 4 -->
                     <div id="lobby-slot-4" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-emerald-500/30 space-y-1.5">
                         <div class="flex items-center justify-between gap-1">
                             <span class="text-[11px] font-bold text-emerald-300">Player 4 (Emerald)</span>
@@ -278,6 +296,10 @@
                 <button onclick="openMasterMenu()" class="interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-cyan-500/50 transition">
                     <i class="fa-solid fa-bars text-cyan-400"></i>
                     <span class="text-xs font-bold text-white">Menu</span>
+                </button>
+                <button type="button" id="top-pause-save-btn" onclick="pauseAndSaveCurrentGame()" class="hidden interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-amber-500/50 text-amber-300 transition" title="Pause match and save state for later">
+                    <i class="fa-solid fa-pause text-xs"></i>
+                    <span class="text-xs font-bold hidden sm:inline">Pause & Save</span>
                 </button>
                 <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2">
                     <span id="current-game-title" class="text-xs font-extrabold text-cyan-300">Quarto 3D</span>
@@ -584,7 +606,7 @@
             </div>
 
             <div class="space-y-3 text-xs text-gray-300">
-                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Game Sessions, Invites, Favored Players, Match Scores (2–4 Players), and Move History</strong> automatically sync across devices and populate structured spreadsheet tabs.</p>
+                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Game Sessions, Invites, Favored Players, Saved Games, Match Scores (2–4 Players), and Move History</strong> automatically sync across devices and populate structured spreadsheet tabs.</p>
 
                 <div class="bg-gray-950/80 p-3.5 rounded-xl border border-emerald-500/30 space-y-2.5">
                     <div>
@@ -594,7 +616,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <label class="flex items-center space-x-2 cursor-pointer text-gray-200">
                             <input type="checkbox" id="drive-auto-sync" checked class="rounded text-emerald-500">
-                            <span>Auto-sync on login, registration, invites & match end</span>
+                            <span>Auto-sync on login, registration, invites, save & match end</span>
                         </label>
                         <span id="drive-last-sync-time" class="text-[10px] text-gray-400">Not synced yet</span>
                     </div>
@@ -715,6 +737,7 @@ function doPost(e) {
                         </select>
                         <select id="invite-game-type" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
                             <option value="quarto">Quarto 3D</option>
+                            <option value="chess">Classic Chess 3D</option>
                             <option value="azul">Azul 3D</option>
                             <option value="sevenwonders">7 Wonders 3D</option>
                             <option value="hive">Hive 3D</option>
@@ -741,6 +764,7 @@ function doPost(e) {
                         <input type="text" id="new-session-name" placeholder="Session Name (e.g. Friday Cup)" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-cyan-500">
                         <select id="new-session-game" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
                             <option value="quarto">Quarto 3D</option>
+                            <option value="chess">Classic Chess 3D</option>
                             <option value="azul">Azul 3D</option>
                             <option value="sevenwonders">7 Wonders 3D</option>
                             <option value="hive">Hive 3D</option>
@@ -779,6 +803,9 @@ function doPost(e) {
                     <p class="text-[11px] text-cyan-300 mt-0.5">Switch game tiles, configure 2–4 seats (Human / AI / Online), or manage users</p>
                 </div>
                 <div class="flex items-center space-x-2">
+                    <button type="button" onclick="saveCurrentGameSnapshot(true); renderSavedGamesAndOnlineUI();" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold rounded-xl text-xs border border-amber-500/40 transition">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Save Match
+                    </button>
                     <button type="button" onclick="closeMasterMenu(); openDriveSyncModal();" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
                         <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
                     </button>
@@ -788,10 +815,32 @@ function doPost(e) {
                 </div>
             </div>
 
+            <!-- SAVED / OPEN GAMES & PLAYERS ONLINE PANEL (MASTER MENU) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 bg-gray-950/65 p-3.5 rounded-2xl border border-gray-800 text-xs">
+                <div class="lg:col-span-2 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-cyan-300 flex items-center">
+                            <i class="fa-solid fa-floppy-disk mr-1.5"></i> Open & Saved Games (Continue / Restart / Delete)
+                        </span>
+                        <span id="menu-saved-count" class="text-[10px] text-gray-400">0 saved</span>
+                    </div>
+                    <div id="menu-saved-games-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+                <div class="space-y-2 border-t lg:border-t-0 lg:border-l border-gray-800 pt-2.5 lg:pt-0 lg:pl-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-emerald-300 flex items-center">
+                            <i class="fa-solid fa-circle text-[8px] text-emerald-400 mr-1.5 animate-pulse"></i> Players Online
+                        </span>
+                        <span id="menu-online-count" class="text-[10px] text-gray-400">1 online</span>
+                    </div>
+                    <div id="menu-online-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+            </div>
+
             <!-- Visual Game Tiles Gallery (Matches Start Match Lobby) -->
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                    <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Switch Game (All 13 Games)</label>
+                    <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Switch Game (All 14 Games)</label>
                     <span id="menu-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
                 </div>
                 <input type="hidden" id="menu-select-game" value="quarto">
@@ -821,7 +870,7 @@ function doPost(e) {
                     <select id="menu-select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
                         <option value="easy">Easy (Casual)</option>
                         <option value="medium" selected>Medium (Tactical)</option>
-                        <option value="hard">Hard (Grandmaster)</option>
+                        <option value="hard">Hard (Grandmaster Engine)</option>
                     </select>
                 </div>
 
@@ -1026,8 +1075,8 @@ function doPost(e) {
         let skribblState = { drawing: false, currentWord: '', words: ['SPACESHIP', 'PYRAMID', 'DRAGON', 'CASTLE', 'VOLCANO', 'TELESCOPE', 'OCTOPUS', 'LIGHTHOUSE'] };
         let hangmanState = { word: '', guessed: [], mistakes: 0, scaffoldMeshes: [], words: ['QUARTO', 'STARSHIP', 'GALAXY', 'STRATEGY', 'DIMENSION', 'MONOLITH', 'ASTEROID', 'NEBULA'] };
         let yahtzeeState = { dice: [1, 2, 3, 4, 5], held: [false, false, false, false, false], rollsLeft: 3, scoreCards: [{}, {}, {}, {}], diceMeshes: [] };
-        let azulState = { colors: [], factories: [], selectedBatch: null, walls: [], pts: [0, 0, 0, 0] };
-        let swState = { age: 1, turn: 1, players: [], hand: [] };
+        let azulState = { colors: [], factories: [], selectedBatch: null, walls: [], pts: [0, 0, 0, 0], boardPositions: [] };
+        let swState = { age: 1, turn: 1, players: [], hand: [], wonderCoords: [] };
         let hiveState = { selectedInsect: 'Queen', placed: [], p1Hand: [], p2Hand: [] };
         let carcState = { grid: {}, currentTile: null, rotation: 0, meeples: [7, 7, 7, 7], pts: [0, 0, 0, 0] };
         let twixtState = { size: 12, pegs: [], links: [] };
@@ -1037,12 +1086,340 @@ function doPost(e) {
         const MULTIPLAYER_CAPABLE_GAMES = ['azul', 'sevenwonders', 'carcassonne', 'mensch', 'yahtzee', 'skribbl', 'hangman'];
         const TEAM_HEX_COLORS = [0x22d3ee, 0xf43f5e, 0xfbbf24, 0x10b981];
 
-        function isCurrentPlayerAI() {
-            return playerTypes[currentPlayer - 1] === 'ai';
+        window.onload = function() {
+            if (typeof THREE === 'undefined') {
+                console.error("Three.js not loaded.");
+                return;
+            }
+            ensureMasterAccountExists();
+            init3D();
+            initDeviceAndDisplayDetection();
+            setupSkribblCanvasEvents();
+            loadChatHistory();
+            initWebRTCSignalingListener();
+            checkExistingSession();
+            startInviteNotificationListener();
+            renderSavedGamesAndOnlineUI();
+        };
+
+        // --- SAVED / PAUSED GAMES & ONLINE PLAYERS MANAGER ---
+        function getSavedGamesRegistry() {
+            try {
+                const raw = localStorage.getItem('intelligames_saved_games_db');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
         }
 
-        function isPlayerAI(pNum) {
-            return playerTypes[pNum - 1] === 'ai';
+        function saveSavedGamesRegistry(list) {
+            localStorage.setItem('intelligames_saved_games_db', JSON.stringify(list));
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && cfg.autoSync) pushToGoogleDriveSheet(true);
+        }
+
+        function captureCurrentGameSnapshotData() {
+            const gameObj = GAME_CATALOG.find(g => g.id === activeGame);
+            return {
+                id: 'save_' + Date.now(),
+                title: `${gameObj ? gameObj.name : activeGame.toUpperCase()} — ${playerNames.slice(0, numPlayers).join(' vs ')}`,
+                game: activeGame,
+                numPlayers,
+                playerTypes: [...playerTypes],
+                playerNames: [...playerNames],
+                aiDifficulty,
+                currentPlayer,
+                quartoPhase,
+                scores: { ...scores },
+                moveHistory: [...moveHistory],
+                savedBy: currentUser || 'Player',
+                updatedAt: new Date().toLocaleString([], { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                piecesState: pieces.map(p => ({ ...p, mesh: null })),
+                azulState: activeGame === 'azul' ? {
+                    factories: JSON.parse(JSON.stringify(azulState.factories)),
+                    walls: JSON.parse(JSON.stringify(azulState.walls)),
+                    pts: [...azulState.pts]
+                } : null,
+                swState: activeGame === 'sevenwonders' ? {
+                    age: swState.age,
+                    turn: swState.turn,
+                    players: JSON.parse(JSON.stringify(swState.players)),
+                    hand: JSON.parse(JSON.stringify(swState.hand))
+                } : null,
+                yahtzeeState: activeGame === 'yahtzee' ? {
+                    dice: [...yahtzeeState.dice],
+                    held: [...yahtzeeState.held],
+                    rollsLeft: yahtzeeState.rollsLeft,
+                    scoreCards: JSON.parse(JSON.stringify(yahtzeeState.scoreCards))
+                } : null,
+                hangmanState: activeGame === 'hangman' ? {
+                    word: hangmanState.word,
+                    guessed: [...hangmanState.guessed],
+                    mistakes: hangmanState.mistakes
+                } : null,
+                connect4State: activeGame === 'fourgewinnt' ? {
+                    cols: connect4State.cols,
+                    rows: connect4State.rows,
+                    grid: JSON.parse(JSON.stringify(connect4State.grid))
+                } : null
+            };
+        }
+
+        function saveCurrentGameSnapshot(notify = true) {
+            const snap = captureCurrentGameSnapshotData();
+            const list = getSavedGamesRegistry();
+            list.push(snap);
+            saveSavedGamesRegistry(list);
+            if (notify) {
+                showToast(`Game paused & saved (${snap.title})!`);
+            }
+            return snap;
+        }
+
+        function pauseAndSaveCurrentGame() {
+            if (gameOver) {
+                openGameLobby();
+                return;
+            }
+            saveCurrentGameSnapshot(true);
+            openGameLobby();
+        }
+
+        function resumeSavedGame(saveId) {
+            const list = getSavedGamesRegistry();
+            const snap = list.find(s => s.id === saveId);
+            if (!snap) return;
+
+            activeGame = snap.game;
+            numPlayers = snap.numPlayers || 2;
+            playerTypes = snap.playerTypes || ['human', 'human', 'human', 'human'];
+            playerNames = snap.playerNames || ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+            player1Name = playerNames[0];
+            player2Name = playerNames[1];
+            aiDifficulty = snap.aiDifficulty || 'medium';
+            scores = snap.scores || { p1: 0, p2: 0, p3: 0, p4: 0 };
+
+            closeMasterMenu();
+            document.getElementById('game-lobby-modal').classList.add('hidden');
+            initGameArena();
+
+            currentPlayer = snap.currentPlayer || 1;
+            quartoPhase = snap.quartoPhase || 'pick_for_opponent';
+            moveHistory = snap.moveHistory || [];
+            renderMoveHistory();
+            updateScoreDisplay();
+
+            if (activeGame === 'quarto' && Array.isArray(snap.piecesState)) {
+                pieces = snap.piecesState.map(p => ({ ...p }));
+                pieces.filter(p => p.placed && p.position).forEach(piece => {
+                    const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'board_square' && m.userData.x === piece.position.x && m.userData.z === piece.position.z);
+                    if (!sqMesh) return;
+                    const height = piece.tall ? 2.1 : 1.15;
+                    const pMat = new THREE.MeshStandardMaterial({ color: piece.dark ? 0x78350f : 0xfef3c7, roughness: 0.2, metalness: 0.5 });
+                    const pGroup = new THREE.Group();
+                    if (piece.square) {
+                        pGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, height, 0.8), pMat));
+                    } else {
+                        pGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, height, 32), pMat));
+                    }
+                    pGroup.position.copy(sqMesh.position);
+                    pGroup.position.y += (height / 2) + 0.1;
+                    pGroup.userData = { pieceId: piece.id };
+                    scene.add(pGroup);
+                    pieceMeshes.push(pGroup);
+                });
+                buildPerimeterPieces();
+            } else if ((activeGame === 'chess' || activeGame === 'startrek') && Array.isArray(snap.piecesState)) {
+                pieceMeshes.forEach(m => scene.remove(m));
+                pieceMeshes = [];
+                pieces = [];
+                snap.piecesState.forEach(savedP => {
+                    if (activeGame === 'chess') {
+                        const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'classic_chess_square' && m.userData.r === savedP.r && m.userData.c === savedP.c);
+                        if (sqMesh) createClassicChessPieceMesh(savedP.id, savedP.team, savedP.role, savedP.r, savedP.c, sqMesh);
+                    } else {
+                        const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'chess_square' && m.userData.boardId === savedP.boardId && m.userData.r === savedP.r && m.userData.c === savedP.c);
+                        if (sqMesh) createStarTrekPieceMesh(savedP.id, savedP.team, savedP.role, savedP.boardId, savedP.r, savedP.c, sqMesh);
+                    }
+                });
+            } else if (activeGame === 'azul' && snap.azulState) {
+                azulState.factories = snap.azulState.factories;
+                azulState.walls = snap.azulState.walls;
+                azulState.pts = snap.azulState.pts;
+                for (let pIdx = 0; pIdx < numPlayers; pIdx++) {
+                    const bPos = azulState.boardPositions[pIdx];
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            if (azulState.walls[pIdx][r][c]) {
+                                const colorIdx = (r + c) % 5;
+                                const tileMesh = new THREE.Mesh(
+                                    new THREE.BoxGeometry(0.82, 0.24, 0.82),
+                                    new THREE.MeshStandardMaterial({ color: azulState.colors[colorIdx].hex, roughness: 0.15, metalness: 0.4 })
+                                );
+                                tileMesh.position.set(bPos.x + (c - 2) * 0.96, 0.16, (r - 2) * 0.96 + bPos.z);
+                                scene.add(tileMesh);
+                                pieceMeshes.push(tileMesh);
+                            }
+                        }
+                    }
+                }
+                renderAzulHUD();
+            } else if (activeGame === 'sevenwonders' && snap.swState) {
+                swState.age = snap.swState.age;
+                swState.turn = snap.swState.turn;
+                swState.players = snap.swState.players;
+                swState.hand = snap.swState.hand;
+                renderSevenWondersHUD();
+            } else if (activeGame === 'yahtzee' && snap.yahtzeeState) {
+                yahtzeeState.dice = snap.yahtzeeState.dice;
+                yahtzeeState.held = snap.yahtzeeState.held;
+                yahtzeeState.rollsLeft = snap.yahtzeeState.rollsLeft;
+                yahtzeeState.scoreCards = snap.yahtzeeState.scoreCards;
+                renderYahtzeeUI();
+            } else if (activeGame === 'hangman' && snap.hangmanState) {
+                hangmanState.word = snap.hangmanState.word;
+                hangmanState.guessed = snap.hangmanState.guessed;
+                hangmanState.mistakes = snap.hangmanState.mistakes;
+                renderHangmanUI();
+            } else if (activeGame === 'fourgewinnt' && snap.connect4State) {
+                connect4State.grid = snap.connect4State.grid;
+                const spacing = 1.12;
+                for (let r = 0; r < connect4State.rows; r++) {
+                    for (let c = 0; c < connect4State.cols; c++) {
+                        const team = connect4State.grid[r][c];
+                        if (team > 0) {
+                            const colX = (c - (connect4State.cols - 1) / 2) * spacing;
+                            const cellY = r * spacing + 0.65;
+                            const disc = new THREE.Mesh(
+                                new THREE.CylinderGeometry(0.38, 0.38, 0.24, 28),
+                                new THREE.MeshStandardMaterial({ color: team === 1 ? 0x22d3ee : 0xf43f5e, roughness: 0.2, metalness: 0.45 })
+                            );
+                            disc.rotation.x = Math.PI / 2;
+                            disc.position.set(colX, cellY, 0);
+                            disc.userData = { r, c };
+                            scene.add(disc);
+                            pieceMeshes.push(disc);
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('turn-status').innerText = `Resumed: ${snap.title} — ${getPlayerLabel(currentPlayer)}'s Turn`;
+            addChatSystemMessage(`Resumed saved game "${snap.title}".`);
+        }
+
+        function restartSavedGame(saveId) {
+            const list = getSavedGamesRegistry();
+            const snap = list.find(s => s.id === saveId);
+            if (!snap) return;
+            activeGame = snap.game;
+            numPlayers = snap.numPlayers || 2;
+            playerTypes = snap.playerTypes || ['human', 'human', 'human', 'human'];
+            playerNames = snap.playerNames || ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+            player1Name = playerNames[0];
+            player2Name = playerNames[1];
+            aiDifficulty = snap.aiDifficulty || 'medium';
+            closeMasterMenu();
+            document.getElementById('game-lobby-modal').classList.add('hidden');
+            initGameArena();
+            addChatSystemMessage(`Restarted match "${snap.title}" from the beginning.`);
+        }
+
+        function deleteSavedGame(saveId) {
+            const updated = getSavedGamesRegistry().filter(s => s.id !== saveId);
+            saveSavedGamesRegistry(updated);
+            renderSavedGamesAndOnlineUI();
+            showToast("Saved match deleted.");
+        }
+
+        function inviteOnlinePlayer(targetUsername) {
+            const game = document.getElementById('select-game')?.value || activeGame || 'quarto';
+            const sessions = getSessionsRegistry();
+            sessions.push({
+                id: 'sess_' + Date.now(),
+                name: `${currentUser} vs ${targetUsername}`,
+                game,
+                host: currentUser,
+                invited: targetUsername,
+                accepted: false
+            });
+            saveSessionsRegistry(sessions);
+            addChatSystemMessage(`${currentUser} sent a live match invite to ${targetUsername} (${game.toUpperCase()})!`);
+            showToast(`Invite sent to ${targetUsername}!`);
+        }
+
+        function renderSavedGamesAndOnlineUI() {
+            const savedList = getSavedGamesRegistry();
+            const users = getUsersRegistry();
+
+            ['lobby', 'menu'].forEach(prefix => {
+                const countEl = document.getElementById(`${prefix}-saved-count`);
+                const listEl = document.getElementById(`${prefix}-saved-games-list`);
+                if (countEl) countEl.innerText = `${savedList.length} saved`;
+                if (listEl) {
+                    listEl.innerHTML = '';
+                    if (savedList.length === 0) {
+                        listEl.innerHTML = `<div class="text-gray-500 italic text-[11px]">No paused or saved matches yet. Use "Pause & Save" during any game!</div>`;
+                    } else {
+                        savedList.slice().reverse().forEach(s => {
+                            const row = document.createElement('div');
+                            row.className = "bg-gray-900/90 px-3 py-2 rounded-xl border border-gray-800 flex flex-wrap items-center justify-between gap-2";
+                            row.innerHTML = `
+                                <div class="min-w-0 flex-1">
+                                    <div class="font-bold text-white truncate">${s.title}</div>
+                                    <div class="text-[10px] text-gray-400">Saved: ${s.updatedAt} • Turn: ${s.playerNames ? s.playerNames[(s.currentPlayer || 1) - 1] : 'P1'}</div>
+                                </div>
+                                <div class="flex items-center space-x-1.5 shrink-0">
+                                    <button type="button" onclick="resumeSavedGame('${s.id}')" class="px-2.5 py-1 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-lg text-[10px] transition">
+                                        Continue
+                                    </button>
+                                    <button type="button" onclick="restartSavedGame('${s.id}')" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-amber-300 font-semibold rounded-lg text-[10px] transition" title="Restart from scratch">
+                                        Restart
+                                    </button>
+                                    <button type="button" onclick="deleteSavedGame('${s.id}')" class="px-2 py-1 bg-gray-800 hover:bg-rose-950 text-rose-400 rounded-lg text-[10px] transition" title="Delete saved game">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                            listEl.appendChild(row);
+                        });
+                    }
+                }
+
+                const onlineCountEl = document.getElementById(`${prefix}-online-count`);
+                const onlineListEl = document.getElementById(`${prefix}-online-players-list`);
+                if (onlineCountEl) onlineCountEl.innerText = `${users.length} registered`;
+                if (onlineListEl) {
+                    onlineListEl.innerHTML = '';
+                    users.forEach(u => {
+                        const isSelf = currentUser && u.username.toLowerCase() === currentUser.toLowerCase();
+                        const row = document.createElement('div');
+                        row.className = "bg-gray-900/90 px-2.5 py-1.5 rounded-lg border border-gray-800 flex items-center justify-between gap-2";
+                        row.innerHTML = `
+                            <div class="flex items-center space-x-1.5 min-w-0">
+                                <span class="w-2 h-2 rounded-full ${isSelf ? 'bg-emerald-400' : 'bg-cyan-400'} shrink-0"></span>
+                                <span class="font-semibold text-white truncate">${u.username}${isSelf ? ' (You)' : ''}</span>
+                            </div>
+                            ${isSelf
+                                ? '<span class="text-[10px] text-emerald-400 font-bold">Online</span>'
+                                : `<button type="button" onclick="inviteOnlinePlayer('${u.username.replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded text-[10px] font-bold transition">Invite</button>`
+                            }
+                        `;
+                        onlineListEl.appendChild(row);
+                    });
+                }
+            });
+        }
+
+        function updateMultiplayerInputs(prefix) {
+            const countSel = document.getElementById(`${prefix}-player-count`);
+            const count = countSel ? parseInt(countSel.value, 10) || 2 : 2;
+            const slot3 = document.getElementById(`${prefix}-slot-3`);
+            const slot4 = document.getElementById(`${prefix}-slot-4`);
+            if (slot3) slot3.classList.toggle('hidden', count < 3);
+            if (slot4) slot4.classList.toggle('hidden', count < 4);
+        }
+
+        function isCurrentPlayerAI() {
+            return playerTypes[currentPlayer - 1] === 'ai';
         }
 
         function nextTurnPlayer() {
@@ -1086,211 +1463,173 @@ function doPost(e) {
             });
         }
 
-        function updateMultiplayerInputs(prefix) {
-            const countSel = document.getElementById(`${prefix}-player-count`);
-            const count = countSel ? parseInt(countSel.value, 10) || 2 : 2;
-            const slot3 = document.getElementById(`${prefix}-slot-3`);
-            const slot4 = document.getElementById(`${prefix}-slot-4`);
-            if (slot3) slot3.classList.toggle('hidden', count < 3);
-            if (slot4) slot4.classList.toggle('hidden', count < 4);
-        }
-
-        window.onload = function() {
-            if (typeof THREE === 'undefined') {
-                console.error("Three.js not loaded.");
-                return;
-            }
-            ensureMasterAccountExists();
-            init3D();
-            initDeviceAndDisplayDetection();
-            setupSkribblCanvasEvents();
-            loadChatHistory();
-            checkExistingSession();
-            startInviteNotificationListener();
-            initWebRTCSignalingListener();
-        };
-
-        // --- LIVE AUDIO & VIDEO CALL (WEBRTC) ---
+        // --- LIVE AUDIO & VIDEO CALL (WEBRTC SIGNALING & CONTROLS) ---
         function toggleVideoCallDrawer() {
             const drawer = document.getElementById('video-call-drawer');
             if (drawer) drawer.classList.toggle('hidden');
         }
 
-        function updateCallStatusBadge(text, active = false) {
+        function updateCallStatusBadge(text, isActive) {
             const badge = document.getElementById('webrtc-status-badge');
             const dot = document.getElementById('call-active-dot');
             if (badge) {
                 badge.innerText = text;
-                badge.className = active
-                    ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold'
+                badge.className = isActive
+                    ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold'
                     : 'text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 font-semibold';
             }
-            if (dot) dot.classList.toggle('hidden', !active);
+            if (dot) dot.classList.toggle('hidden', !isActive);
         }
 
-        async function startLocalMediaCall(withVideo = true) {
-            try {
-                if (localMediaStream) {
-                    localMediaStream.getTracks().forEach(t => t.stop());
-                }
-                localMediaStream = await navigator.mediaDevices.getUserMedia({
-                    audio: { echoCancellation: true, noiseSuppression: true },
-                    video: withVideo ? { width: { ideal: 640 }, height: { ideal: 480 } } : false
-                });
-
-                const localVid = document.getElementById('local-video-el');
-                const localPh = document.getElementById('local-video-placeholder');
-                if (withVideo && localVid) {
-                    localVid.srcObject = localMediaStream;
-                    localVid.classList.remove('hidden');
-                    if (localPh) localPh.classList.add('hidden');
-                } else if (localVid) {
-                    localVid.classList.add('hidden');
-                    if (localPh) {
-                        localPh.innerText = 'Mic On';
-                        localPh.classList.remove('hidden');
+        function initWebRTCSignalingListener() {
+            window.addEventListener('storage', async (e) => {
+                if (e.key !== 'intelligames_webrtc_signal' || !e.newValue) return;
+                try {
+                    const msg = JSON.parse(e.newValue);
+                    if (!msg || msg.sender === currentUser) return;
+                    if (msg.type === 'offer' && peerConnection && !peerConnection.currentRemoteDescription) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        localStorage.setItem('intelligames_webrtc_signal', JSON.stringify({
+                            sender: currentUser || 'Peer',
+                            type: 'answer',
+                            sdp: peerConnection.localDescription,
+                            ts: Date.now()
+                        }));
+                        updateCallStatusBadge('Connected', true);
+                    } else if (msg.type === 'answer' && peerConnection && !peerConnection.currentRemoteDescription) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+                        updateCallStatusBadge('Connected', true);
                     }
-                }
-
-                isMicMuted = false;
-                updateMicButtonUI();
-                setupPeerConnection();
-                updateCallStatusBadge(withVideo ? 'Camera & Mic Ready' : 'Audio Ready', true);
-                addChatSystemMessage(`${currentUser || 'Player'} started ${withVideo ? 'Video & Audio' : 'Audio'} call.`);
-            } catch (err) {
-                showToast("Camera/Microphone permission denied or unavailable on this device.");
-                updateCallStatusBadge('No Device Access', false);
-            }
+                } catch (err) {}
+            });
         }
 
-        function setupPeerConnection() {
-            if (peerConnection) {
-                try { peerConnection.close(); } catch (e) {}
-            }
-            peerConnection = new RTCPeerConnection({
+        function createPeerConnectionInstance() {
+            const pc = new RTCPeerConnection({
                 iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
             });
-
-            if (localMediaStream) {
-                localMediaStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localMediaStream);
-                });
-            }
-
-            peerConnection.ontrack = (event) => {
+            pc.ontrack = (event) => {
                 const remoteVid = document.getElementById('remote-video-el');
                 const remotePh = document.getElementById('remote-video-placeholder');
                 if (remoteVid && event.streams && event.streams[0]) {
                     remoteVid.srcObject = event.streams[0];
                     remoteVid.classList.remove('hidden');
                     if (remotePh) remotePh.classList.add('hidden');
-                    updateCallStatusBadge('Connected Live', true);
+                    updateCallStatusBadge('Live', true);
                 }
             };
+            if (localMediaStream) {
+                localMediaStream.getTracks().forEach(track => pc.addTrack(track, localMediaStream));
+            }
+            return pc;
+        }
 
-            peerConnection.onconnectionstatechange = () => {
-                if (!peerConnection) return;
-                if (peerConnection.connectionState === 'connected') {
-                    updateCallStatusBadge('Connected Live', true);
-                } else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
-                    updateCallStatusBadge('Disconnected', false);
+        async function startLocalMediaCall(withVideo = true) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                updateCallStatusBadge('HTTPS Needed', false);
+                showToast('Camera/microphone requires HTTPS or localhost.');
+                return;
+            }
+            try {
+                if (localMediaStream) {
+                    localMediaStream.getTracks().forEach(t => t.stop());
                 }
-            };
+                localMediaStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: withVideo
+                });
+                isMicMuted = false;
+                updateMicButtonUI();
+
+                const localVid = document.getElementById('local-video-el');
+                const localPh = document.getElementById('local-video-placeholder');
+                if (localVid && withVideo) {
+                    localVid.srcObject = localMediaStream;
+                    localVid.classList.remove('hidden');
+                    if (localPh) localPh.classList.add('hidden');
+                } else if (localPh) {
+                    localPh.innerText = 'Mic Live';
+                    localPh.classList.remove('hidden');
+                }
+
+                peerConnection = createPeerConnectionInstance();
+                updateCallStatusBadge(withVideo ? 'Camera Ready' : 'Audio Ready', true);
+                showToast(withVideo ? 'Camera & microphone active!' : 'Audio call ready!');
+            } catch (err) {
+                updateCallStatusBadge('No Mic/Cam', false);
+                showToast('Could not access camera/microphone. Please check browser permissions.');
+            }
         }
 
         async function createWebRTCOffer() {
             if (!localMediaStream) {
-                await startLocalMediaCall(true);
+                await startLocalMediaCall(false);
             }
-            if (!peerConnection) setupPeerConnection();
-
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-
-            await new Promise(resolve => {
-                if (peerConnection.iceGatheringState === 'complete') return resolve();
-                const checkState = () => {
-                    if (peerConnection.iceGatheringState === 'complete') {
-                        peerConnection.removeEventListener('icegatheringstatechange', checkState);
-                        resolve();
+            if (!peerConnection) peerConnection = createPeerConnectionInstance();
+            try {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                await new Promise(resolve => {
+                    if (peerConnection.iceGatheringState === 'complete') resolve();
+                    else {
+                        const check = () => {
+                            if (peerConnection.iceGatheringState === 'complete') {
+                                peerConnection.removeEventListener('icegatheringstatechange', check);
+                                resolve();
+                            }
+                        };
+                        peerConnection.addEventListener('icegatheringstatechange', check);
+                        setTimeout(resolve, 1200);
                     }
-                };
-                peerConnection.addEventListener('icegatheringstatechange', checkState);
-                setTimeout(resolve, 1500);
-            });
-
-            const encoded = btoa(JSON.stringify(peerConnection.localDescription));
-            const box = document.getElementById('webrtc-signal-box');
-            if (box) {
-                box.value = encoded;
-                box.select();
-                document.execCommand('copy');
+                });
+                const code = btoa(JSON.stringify(peerConnection.localDescription));
+                const box = document.getElementById('webrtc-signal-box');
+                if (box) {
+                    box.value = code;
+                    box.select();
+                }
+                localStorage.setItem('intelligames_webrtc_signal', JSON.stringify({
+                    sender: currentUser || 'Host',
+                    type: 'offer',
+                    sdp: peerConnection.localDescription,
+                    ts: Date.now()
+                }));
+                updateCallStatusBadge('Offer Created', true);
+                showToast('Offer code generated! Share it with your opponent.');
+            } catch (err) {
+                showToast('Unable to generate WebRTC offer.');
             }
-            localStorage.setItem('intelligames_webrtc_signal', JSON.stringify({
-                sender: currentUser || 'Host',
-                sdp: encoded,
-                ts: Date.now()
-            }));
-            updateCallStatusBadge('Offer Copied', true);
-            showToast("Call Offer created & copied! Send it to your opponent or open a 2nd tab.");
         }
 
         async function acceptRemoteSignalCode() {
             const box = document.getElementById('webrtc-signal-box');
-            const rawCode = (box ? box.value : '').trim();
-            if (!rawCode) {
-                showToast("Paste your opponent's Offer or Answer code first!");
+            const raw = box ? box.value.trim() : '';
+            if (!raw) {
+                showToast('Paste an Offer or Answer code first!');
                 return;
             }
             try {
-                const desc = JSON.parse(atob(rawCode));
-                if (!localMediaStream) {
-                    await startLocalMediaCall(true);
-                }
-                if (!peerConnection) setupPeerConnection();
+                const desc = JSON.parse(atob(raw));
+                if (!localMediaStream) await startLocalMediaCall(false);
+                if (!peerConnection) peerConnection = createPeerConnectionInstance();
 
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(desc));
                 if (desc.type === 'offer') {
                     const answer = await peerConnection.createAnswer();
                     await peerConnection.setLocalDescription(answer);
-                    await new Promise(resolve => setTimeout(resolve, 1200));
-                    const ansEncoded = btoa(JSON.stringify(peerConnection.localDescription));
-                    if (box) {
-                        box.value = ansEncoded;
-                        box.select();
-                        document.execCommand('copy');
-                    }
-                    localStorage.setItem('intelligames_webrtc_signal', JSON.stringify({
-                        sender: currentUser || 'Guest',
-                        sdp: ansEncoded,
-                        ts: Date.now()
-                    }));
-                    updateCallStatusBadge('Answer Copied', true);
-                    showToast("Answer generated & copied! Paste it back on the host's device.");
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    if (box) box.value = btoa(JSON.stringify(peerConnection.localDescription));
+                    updateCallStatusBadge('Answer Ready', true);
+                    showToast('Answer generated! Send this code back to the host.');
                 } else {
-                    updateCallStatusBadge('Connected Live', true);
-                    showToast("Connected to opponent's Audio/Video stream!");
+                    updateCallStatusBadge('Connected', true);
+                    showToast('Audio/Video peer connection established!');
                 }
-            } catch (e) {
-                showToast("Invalid connection code. Ensure you copied the full code.");
+            } catch (err) {
+                showToast('Invalid connection code.');
             }
-        }
-
-        function initWebRTCSignalingListener() {
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'intelligames_webrtc_signal' && e.newValue) {
-                    try {
-                        const data = JSON.parse(e.newValue);
-                        if (data && data.sender !== currentUser && data.sdp) {
-                            const box = document.getElementById('webrtc-signal-box');
-                            if (box) box.value = data.sdp;
-                            const drawer = document.getElementById('video-call-drawer');
-                            if (drawer) drawer.classList.remove('hidden');
-                            showToast(`Incoming call signal from ${data.sender} — click "Connect Code"!`);
-                        }
-                    } catch (err) {}
-                }
-            });
         }
 
         function toggleCallMic() {
@@ -1355,7 +1694,6 @@ function doPost(e) {
             const dot = document.getElementById('drive-sync-dot');
             const label = document.getElementById('drive-sync-hud-label');
             const timeEl = document.getElementById('drive-last-sync-time');
-            const menuStatus = document.getElementById('menu-drive-sync-status');
 
             if (dot) {
                 if (state === 'syncing') dot.className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
@@ -1368,9 +1706,6 @@ function doPost(e) {
             }
             if (timeEl) {
                 timeEl.innerText = lastSync ? `Last synced: ${lastSync}` : 'Not synced yet';
-            }
-            if (menuStatus) {
-                menuStatus.innerText = lastSync ? `Connected • Last synced ${lastSync}` : 'No Google Sheet URL linked yet';
             }
         }
 
@@ -1422,7 +1757,8 @@ function doPost(e) {
                     player2: playerNames[1],
                     scores,
                     moveHistory
-                }
+                },
+                savedGames: getSavedGamesRegistry()
             };
         }
 
@@ -1442,6 +1778,10 @@ function doPost(e) {
             if (Array.isArray(data.sessions)) {
                 localStorage.setItem('intelligames_sessions_db', JSON.stringify(data.sessions));
                 checkIncomingInvites();
+            }
+            if (Array.isArray(data.savedGames)) {
+                localStorage.setItem('intelligames_saved_games_db', JSON.stringify(data.savedGames));
+                renderSavedGamesAndOnlineUI();
             }
             if (data.favoritesByUser && typeof data.favoritesByUser === 'object') {
                 Object.keys(data.favoritesByUser).forEach(uname => {
@@ -1674,9 +2014,11 @@ function doPost(e) {
         function openGameLobby() {
             const topRulesBtn = document.getElementById('top-rules-btn');
             if (topRulesBtn) topRulesBtn.classList.add('hidden');
+            const topPauseBtn = document.getElementById('top-pause-save-btn');
+            if (topPauseBtn) topPauseBtn.classList.add('hidden');
             closeInstructionsModal();
             const roleBadge = currentUserRole === 'master' ? ' [MASTER]' : '';
-            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Choose game, player count (2–4) & Human/Computer per seat`;
+            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Resume a saved match, invite online players, or start a new game`;
             const p1Inp = document.getElementById('lobby-p1-name');
             const p2Inp = document.getElementById('lobby-p2-name');
             if (p1Inp && !p1Inp.value) p1Inp.value = currentUser || 'Player 1';
@@ -1693,6 +2035,7 @@ function doPost(e) {
                 masterBtn.classList.add('hidden');
             }
             renderLobbyGameCards();
+            renderSavedGamesAndOnlineUI();
             document.getElementById('game-lobby-modal').classList.remove('hidden');
         }
 
@@ -1819,6 +2162,13 @@ function doPost(e) {
                 tag: '2P • Logic & Geometry',
                 gradient: 'from-cyan-500 to-blue-600',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="10" y="22" width="16" height="30" rx="3" fill="#fef3c7" stroke="#0f172a" stroke-width="2"/><circle cx="18" cy="30" r="3.5" fill="#0f172a"/><rect x="34" y="12" width="18" height="40" rx="9" fill="#b45309" stroke="#fef3c7" stroke-width="2"/><circle cx="43" cy="22" r="4" fill="#0f172a"/></svg>`
+            },
+            {
+                id: 'chess',
+                name: 'Classic Chess 3D',
+                tag: '2P • 8×8 Grandmaster',
+                gradient: 'from-slate-600 to-cyan-700',
+                svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><path d="M22 50 H42 L39 28 L44 22 L38 14 L32 18 L26 14 L20 22 L25 28 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/><rect x="18" y="50" width="28" height="5" rx="2" fill="#22d3ee"/></svg>`
             },
             {
                 id: 'azul',
@@ -1982,6 +2332,7 @@ function doPost(e) {
 
             const titles = { 
                 quarto: "Quarto 3D", 
+                chess: "Classic Chess 3D",
                 azul: "Azul 3D",
                 sevenwonders: "7 Wonders 3D",
                 hive: "Hive 3D",
@@ -1998,6 +2349,8 @@ function doPost(e) {
             document.getElementById('current-game-title').innerText = titles[activeGame] || "Intelligames";
             const topRulesBtn = document.getElementById('top-rules-btn');
             if (topRulesBtn) topRulesBtn.classList.remove('hidden');
+            const topPauseBtn = document.getElementById('top-pause-save-btn');
+            if (topPauseBtn) topPauseBtn.classList.remove('hidden');
             const modePill = document.getElementById('mode-pill-badge');
             if (modePill) {
                 const aiCount = playerTypes.slice(0, numPlayers).filter(t => t === 'ai').length;
@@ -2014,6 +2367,11 @@ function doPost(e) {
                 controls.target.set(0, 2.5, 0);
                 buildStarTrekChessArena();
                 document.getElementById('turn-status').innerText = `${getPlayerLabel(1)} (White) Turn: Select a piece`;
+            } else if (activeGame === 'chess') {
+                applyDisplayProfile();
+                controls.target.set(0, 0, 0);
+                buildClassicChessArena();
+                document.getElementById('turn-status').innerText = `Classic Chess 3D — ${getPlayerLabel(1)} (White) Turn: Select a piece`;
             } else if (activeGame === 'mensch') {
                 applyDisplayProfile();
                 controls.target.set(0, 0, 0);
@@ -2087,6 +2445,282 @@ function doPost(e) {
             if (!body) return;
             const isHidden = body.classList.toggle('hidden');
             if (btnEl) btnEl.innerText = isHidden ? 'Show' : 'Hide';
+        }
+
+        // --- CLASSIC 8×8 CHESS 3D (AUTHENTIC PIECE MOVEMENT & GRANDMASTER AI) ---
+        function createClassicChessPieceMesh(pieceId, team, role, r, c, sqMesh) {
+            const mat = new THREE.MeshStandardMaterial({
+                color: team === 1 ? 0xf8fafc : 0xe11d48,
+                roughness: 0.22,
+                metalness: 0.5
+            });
+            const group = new THREE.Group();
+            let height = 0.7;
+
+            if (role === 'king' || role === 'queen') {
+                height = role === 'king' ? 1.25 : 1.12;
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.35, height, 18), mat);
+                const crown = new THREE.Mesh(role === 'king' ? new THREE.BoxGeometry(0.24, 0.24, 0.24) : new THREE.SphereGeometry(0.22, 14, 14), mat);
+                crown.position.y = height / 2 + 0.12;
+                group.add(body, crown);
+            } else if (role === 'rook') {
+                height = 0.88;
+                group.add(new THREE.Mesh(new THREE.BoxGeometry(0.52, height, 0.52), mat));
+            } else if (role === 'bishop') {
+                height = 0.96;
+                group.add(new THREE.Mesh(new THREE.ConeGeometry(0.3, height, 16), mat));
+            } else if (role === 'knight') {
+                height = 0.92;
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, height * 0.65, 14), mat);
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.42, 0.46), mat);
+                head.position.set(0, height * 0.35, 0.08);
+                group.add(base, head);
+            } else {
+                height = 0.66;
+                group.add(new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.28, height, 16), mat));
+            }
+
+            group.position.copy(sqMesh.position);
+            group.position.y += height / 2 + 0.05;
+            group.userData = { type: 'classic_chess_piece', pieceId, height };
+            scene.add(group);
+            pieceMeshes.push(group);
+            pieces.push({ id: pieceId, team, role, r, c, mesh: group });
+        }
+
+        function buildClassicChessArena() {
+            pieces = [];
+            let idCounter = 1;
+            const sqSize = 1.05;
+
+            const frame = new THREE.Mesh(
+                new THREE.BoxGeometry(8 * sqSize + 0.5, 0.25, 8 * sqSize + 0.5),
+                new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.6, roughness: 0.3 })
+            );
+            frame.position.y = -0.15;
+            scene.add(frame);
+            boardSquareMeshes.push(frame);
+
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const isLight = (r + c) % 2 === 0;
+                    const sq = new THREE.Mesh(
+                        new THREE.BoxGeometry(sqSize * 0.98, 0.1, sqSize * 0.98),
+                        new THREE.MeshStandardMaterial({
+                            color: isLight ? 0x38bdf8 : 0x1e293b,
+                            roughness: 0.25,
+                            metalness: 0.4
+                        })
+                    );
+                    sq.position.set((c - 3.5) * sqSize, 0.02, (r - 3.5) * sqSize);
+                    sq.userData = { type: 'classic_chess_square', r, c };
+                    scene.add(sq);
+                    boardSquareMeshes.push(sq);
+                }
+            }
+
+            const placeClassicPiece = (team, role, r, c) => {
+                const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'classic_chess_square' && m.userData.r === r && m.userData.c === c);
+                if (!sqMesh) return;
+                createClassicChessPieceMesh(idCounter++, team, role, r, c, sqMesh);
+            };
+
+            const backRank = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+            for (let c = 0; c < 8; c++) {
+                placeClassicPiece(1, backRank[c], 7, c);
+                placeClassicPiece(1, 'pawn', 6, c);
+                placeClassicPiece(2, backRank[c], 0, c);
+                placeClassicPiece(2, 'pawn', 1, c);
+            }
+        }
+
+        function getValidClassicChessMoves(piece, boardPieces = pieces) {
+            const moves = [];
+            const inBounds = (r, c) => r >= 0 && r < 8 && c >= 0 && c < 8;
+            const at = (r, c) => boardPieces.find(p => p.r === r && p.c === c);
+
+            const slideDirs = (dirs) => {
+                dirs.forEach(([dr, dc]) => {
+                    let nr = piece.r + dr;
+                    let nc = piece.c + dc;
+                    while (inBounds(nr, nc)) {
+                        const occ = at(nr, nc);
+                        if (!occ) {
+                            moves.push({ r: nr, c: nc });
+                        } else {
+                            if (occ.team !== piece.team) moves.push({ r: nr, c: nc });
+                            break;
+                        }
+                        nr += dr;
+                        nc += dc;
+                    }
+                });
+            };
+
+            if (piece.role === 'pawn') {
+                const dir = piece.team === 1 ? -1 : 1;
+                const startRow = piece.team === 1 ? 6 : 1;
+                if (inBounds(piece.r + dir, piece.c) && !at(piece.r + dir, piece.c)) {
+                    moves.push({ r: piece.r + dir, c: piece.c });
+                    if (piece.r === startRow && !at(piece.r + dir * 2, piece.c)) {
+                        moves.push({ r: piece.r + dir * 2, c: piece.c });
+                    }
+                }
+                [-1, 1].forEach(dc => {
+                    const nr = piece.r + dir;
+                    const nc = piece.c + dc;
+                    if (inBounds(nr, nc)) {
+                        const occ = at(nr, nc);
+                        if (occ && occ.team !== piece.team) moves.push({ r: nr, c: nc });
+                    }
+                });
+            } else if (piece.role === 'rook') {
+                slideDirs([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+            } else if (piece.role === 'bishop') {
+                slideDirs([[1, 1], [1, -1], [-1, 1], [-1, -1]]);
+            } else if (piece.role === 'queen') {
+                slideDirs([[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]);
+            } else if (piece.role === 'knight') {
+                [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]].forEach(([dr, dc]) => {
+                    const nr = piece.r + dr;
+                    const nc = piece.c + dc;
+                    if (inBounds(nr, nc)) {
+                        const occ = at(nr, nc);
+                        if (!occ || occ.team !== piece.team) moves.push({ r: nr, c: nc });
+                    }
+                });
+            } else if (piece.role === 'king') {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        const nr = piece.r + dr;
+                        const nc = piece.c + dc;
+                        if (inBounds(nr, nc)) {
+                            const occ = at(nr, nc);
+                            if (!occ || occ.team !== piece.team) moves.push({ r: nr, c: nc });
+                        }
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function handleClassicChessPieceClick(pieceId) {
+            if (gameOver) return;
+            const clicked = pieces.find(p => p.id === pieceId);
+            if (!clicked) return;
+
+            if (clicked.team === currentPlayer) {
+                selectedChessPiece = clicked;
+                const validMoves = getValidClassicChessMoves(clicked);
+                pieces.forEach(p => {
+                    p.mesh.children.forEach(c => {
+                        if (c.material) c.material.emissive = new THREE.Color(p.id === clicked.id ? 0x22d3ee : 0x000000);
+                    });
+                });
+                boardSquareMeshes.forEach(sq => {
+                    if (sq.userData && sq.userData.type === 'classic_chess_square') {
+                        const isValid = validMoves.some(m => m.r === sq.userData.r && m.c === sq.userData.c);
+                        sq.material.emissive = new THREE.Color(isValid ? 0x0284c7 : 0x000000);
+                    }
+                });
+                document.getElementById('turn-status').innerText = `Classic Chess — ${getPlayerLabel(currentPlayer)}: Selected ${clicked.role.toUpperCase()} (${validMoves.length} valid moves)`;
+            } else if (selectedChessPiece) {
+                const destSq = boardSquareMeshes.find(m => m.userData && m.userData.type === 'classic_chess_square' && m.userData.r === clicked.r && m.userData.c === clicked.c);
+                if (destSq) handleClassicChessSquareClick(clicked.r, clicked.c, destSq);
+            }
+        }
+
+        function handleClassicChessSquareClick(r, c, sqMesh) {
+            if (gameOver || !selectedChessPiece) return;
+            const validMoves = getValidClassicChessMoves(selectedChessPiece);
+            if (!validMoves.some(m => m.r === r && m.c === c)) {
+                showToast(`Illegal move for ${selectedChessPiece.role.toUpperCase()}!`);
+                return;
+            }
+
+            boardSquareMeshes.forEach(sq => {
+                if (sq.userData && sq.userData.type === 'classic_chess_square') sq.material.emissive = new THREE.Color(0x000000);
+            });
+
+            const occupant = pieces.find(p => p.r === r && p.c === c);
+            if (occupant) {
+                scene.remove(occupant.mesh);
+                pieceMeshes = pieceMeshes.filter(m => m !== occupant.mesh);
+                pieces = pieces.filter(p => p.id !== occupant.id);
+                recordMove(`${getPlayerLabel(currentPlayer)} captured ${occupant.role.toUpperCase()} at (${r + 1},${c + 1})`);
+                if (occupant.role === 'king') {
+                    gameOver = true;
+                    scores[`p${currentPlayer}`]++;
+                    updateScoreDisplay();
+                    showPostGameModal(`${getPlayerLabel(currentPlayer)} Wins Classic Chess 3D!`, "Checkmate — The opposing King has been captured!");
+                    return;
+                }
+            }
+
+            selectedChessPiece.r = r;
+            selectedChessPiece.c = c;
+            if (selectedChessPiece.role === 'pawn' && (r === 0 || r === 7)) {
+                selectedChessPiece.role = 'queen';
+                addChatSystemMessage(`${getPlayerLabel(currentPlayer)} promoted a Pawn to Queen!`);
+            }
+            selectedChessPiece.mesh.position.copy(sqMesh.position);
+            selectedChessPiece.mesh.position.y += (selectedChessPiece.mesh.userData.height || 0.8) / 2 + 0.05;
+            selectedChessPiece.mesh.children.forEach(ch => { if (ch.material) ch.material.emissive = new THREE.Color(0x000000); });
+            recordMove(`${getPlayerLabel(currentPlayer)} moved ${selectedChessPiece.role} to (${r + 1},${c + 1})`);
+            selectedChessPiece = null;
+
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            document.getElementById('turn-status').innerText = `Classic Chess — ${getPlayerLabel(currentPlayer)}'s Turn: Select a piece`;
+
+            if (isCurrentPlayerAI() && !gameOver) {
+                setTimeout(triggerClassicChessAITurn, 650);
+            }
+        }
+
+        function triggerClassicChessAITurn() {
+            if (gameOver || activeGame !== 'chess' || !isCurrentPlayerAI()) return;
+            const valMap = { pawn: 10, knight: 32, bishop: 33, rook: 50, queen: 95, king: 9000 };
+            const aiPieces = pieces.filter(p => p.team === 2);
+            let candidates = [];
+
+            aiPieces.forEach(p => {
+                const moves = getValidClassicChessMoves(p);
+                moves.forEach(m => {
+                    let score = (Math.random() * 4);
+                    const target = pieces.find(occ => occ.r === m.r && occ.c === m.c);
+                    if (target && target.team === 1) {
+                        score += valMap[target.role] || 10;
+                    }
+                    score += (3.5 - Math.abs(3.5 - m.c)) * 1.5 + m.r * 0.8;
+
+                    if (aiDifficulty === 'hard') {
+                        const simBoard = pieces
+                            .filter(x => x.id !== p.id && !(x.r === m.r && x.c === m.c))
+                            .concat([{ id: p.id, team: 2, role: p.role, r: m.r, c: m.c }]);
+                        const p1Responses = simBoard.filter(x => x.team === 1);
+                        let maxCounterLoss = 0;
+                        p1Responses.forEach(opp => {
+                            const oppMoves = getValidClassicChessMoves(opp, simBoard);
+                            if (oppMoves.some(om => om.r === m.r && om.c === m.c)) {
+                                maxCounterLoss = Math.max(maxCounterLoss, valMap[p.role] || 10);
+                            }
+                        });
+                        score -= maxCounterLoss * 0.95;
+                    }
+                    candidates.push({ piece: p, move: m, score });
+                });
+            });
+
+            if (candidates.length === 0) return;
+            candidates.sort((a, b) => b.score - a.score);
+            const pick = aiDifficulty === 'easy'
+                ? candidates[Math.floor(Math.random() * candidates.length)]
+                : candidates[0];
+
+            selectedChessPiece = pick.piece;
+            const destSq = boardSquareMeshes.find(m => m.userData && m.userData.type === 'classic_chess_square' && m.userData.r === pick.move.r && m.userData.c === pick.move.c);
+            if (destSq) handleClassicChessSquareClick(pick.move.r, pick.move.c, destSq);
         }
 
         // --- HANGMAN 3D ---
@@ -2419,7 +3053,20 @@ function doPost(e) {
             } else {
                 document.getElementById('mensch-info').innerText = `Rolled ${roll}! Click one of your pawns to move.`;
                 if (isCurrentPlayerAI()) {
-                    setTimeout(() => handleMenschPawnClick(movable[0].id), 700);
+                    let bestPawn = movable[0];
+                    let bestScore = -999;
+                    movable.forEach(p => {
+                        let sc = p.steps;
+                        if (p.steps === -1 && roll === 6) sc += 35;
+                        if (p.steps + roll === 40) sc += 100;
+                        if (p.steps >= 0 && p.steps + roll < 40) {
+                            const destIdx = (((p.team - 1) * 10) + p.steps + roll) % 40;
+                            const hitsOpp = menschState.pawns.some(o => o.team !== p.team && o.steps >= 0 && o.steps < 40 && ((((o.team - 1) * 10) + o.steps) % 40) === destIdx);
+                            if (hitsOpp) sc += 75;
+                        }
+                        if (sc > bestScore) { bestScore = sc; bestPawn = p; }
+                    });
+                    setTimeout(() => handleMenschPawnClick(bestPawn.id), 650);
                 }
             }
         }
@@ -2561,6 +3208,43 @@ function doPost(e) {
         }
 
         // --- STAR TREK TRI-DIMENSIONAL CHESS ---
+        function createStarTrekPieceMesh(pieceId, team, role, boardId, r, c, sqMesh) {
+            const mat = new THREE.MeshStandardMaterial({
+                color: team === 1 ? 0xf8fafc : 0xe11d48,
+                roughness: 0.25,
+                metalness: 0.5
+            });
+            const group = new THREE.Group();
+            let height = 0.7;
+
+            if (role === 'king' || role === 'queen') {
+                height = 1.15;
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, height, 16), mat);
+                const crown = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), mat);
+                crown.position.y = height / 2 + 0.1;
+                group.add(body, crown);
+            } else if (role === 'rook') {
+                height = 0.85;
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, height, 0.5), mat);
+                group.add(body);
+            } else if (role === 'bishop' || role === 'knight') {
+                height = 0.9;
+                const body = new THREE.Mesh(new THREE.ConeGeometry(0.3, height, 16), mat);
+                group.add(body);
+            } else {
+                height = 0.65;
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, height, 16), mat);
+                group.add(body);
+            }
+
+            group.position.copy(sqMesh.position);
+            group.position.y += height / 2 + 0.05;
+            group.userData = { type: 'chess_piece', pieceId, height };
+            scene.add(group);
+            pieceMeshes.push(group);
+            pieces.push({ id: pieceId, team, role, boardId, r, c, mesh: group });
+        }
+
         function buildStarTrekChessArena() {
             pieces = [];
             let idCounter = 1;
@@ -2602,41 +3286,7 @@ function doPost(e) {
             const placePiece = (team, role, boardId, r, c) => {
                 const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.boardId === boardId && m.userData.r === r && m.userData.c === c);
                 if (!sqMesh) return;
-
-                const mat = new THREE.MeshStandardMaterial({
-                    color: team === 1 ? 0xf8fafc : 0xe11d48,
-                    roughness: 0.25,
-                    metalness: 0.5
-                });
-                const group = new THREE.Group();
-                let height = 0.7;
-
-                if (role === 'king' || role === 'queen') {
-                    height = 1.15;
-                    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, height, 16), mat);
-                    const crown = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), mat);
-                    crown.position.y = height / 2 + 0.1;
-                    group.add(body, crown);
-                } else if (role === 'rook') {
-                    height = 0.85;
-                    const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, height, 0.5), mat);
-                    group.add(body);
-                } else if (role === 'bishop' || role === 'knight') {
-                    height = 0.9;
-                    const body = new THREE.Mesh(new THREE.ConeGeometry(0.3, height, 16), mat);
-                    group.add(body);
-                } else {
-                    height = 0.65;
-                    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, height, 16), mat);
-                    group.add(body);
-                }
-
-                group.position.copy(sqMesh.position);
-                group.position.y += height / 2 + 0.05;
-                group.userData = { type: 'chess_piece', pieceId: idCounter, height };
-                scene.add(group);
-                pieceMeshes.push(group);
-                pieces.push({ id: idCounter++, team, role, boardId, r, c, mesh: group });
+                createStarTrekPieceMesh(idCounter++, team, role, boardId, r, c, sqMesh);
             };
 
             placePiece(1, 'rook', 'atk_0', 0, 0);
@@ -2728,13 +3378,36 @@ function doPost(e) {
 
         function triggerChessAITurn() {
             if (gameOver || activeGame !== 'startrek' || !isCurrentPlayerAI()) return;
+            const valMap = { pawn: 10, knight: 30, bishop: 32, rook: 50, queen: 90, king: 5000 };
             const aiPieces = pieces.filter(p => p.team === 2);
             const openSquares = boardSquareMeshes.filter(m => m.userData && m.userData.type === 'chess_square');
-            if (aiPieces.length > 0 && openSquares.length > 0) {
-                selectedChessPiece = aiPieces[Math.floor(Math.random() * aiPieces.length)];
-                const dest = openSquares[Math.floor(Math.random() * openSquares.length)];
-                handleChessSquareClick(dest.userData.boardId, dest.userData.r, dest.userData.c, dest);
+            if (aiPieces.length === 0 || openSquares.length === 0) return;
+
+            let bestChoice = null;
+            let bestScore = -9999;
+
+            aiPieces.forEach(p => {
+                openSquares.forEach(sq => {
+                    const { boardId, r, c } = sq.userData;
+                    const occ = pieces.find(x => x.boardId === boardId && x.r === r && x.c === c);
+                    if (occ && occ.team === 2) return;
+                    let sc = Math.random() * 6;
+                    if (occ && occ.team === 1) sc += (valMap[occ.role] || 15) * (aiDifficulty === 'hard' ? 3 : 1.5);
+                    if (aiDifficulty !== 'easy' && sc > bestScore) {
+                        bestScore = sc;
+                        bestChoice = { piece: p, sq };
+                    }
+                });
+            });
+
+            if (!bestChoice) {
+                bestChoice = {
+                    piece: aiPieces[Math.floor(Math.random() * aiPieces.length)],
+                    sq: openSquares[Math.floor(Math.random() * openSquares.length)]
+                };
             }
+            selectedChessPiece = bestChoice.piece;
+            handleChessSquareClick(bestChoice.sq.userData.boardId, bestChoice.sq.userData.r, bestChoice.sq.userData.c, bestChoice.sq);
         }
 
         // --- QUARTO 3D (4×4 BOARD + 16 UNIQUE PIECES) ---
@@ -2934,19 +3607,55 @@ function doPost(e) {
                 m.userData && m.userData.type === 'board_square' &&
                 !pieces.some(p => p.placed && p.position && p.position.x === m.userData.x && p.position.z === m.userData.z)
             );
-            if (openSquares.length > 0) {
-                const chosenSq = openSquares[Math.floor(Math.random() * openSquares.length)];
-                handleBoardSquareClick(0, chosenSq.userData.x, chosenSq.userData.z, chosenSq);
+            if (openSquares.length === 0) return;
+
+            let chosenSq = openSquares[Math.floor(Math.random() * openSquares.length)];
+            if (aiDifficulty !== 'easy' && selectedRackPieceId !== null) {
+                const activePiece = pieces.find(p => p.id === selectedRackPieceId);
+                if (activePiece) {
+                    for (const sq of openSquares) {
+                        activePiece.placed = true;
+                        activePiece.position = { deck: 0, x: sq.userData.x, z: sq.userData.z };
+                        const test = checkQuartoWinWithLine(0, sq.userData.x, sq.userData.z);
+                        activePiece.placed = false;
+                        activePiece.position = null;
+                        if (test.win) {
+                            chosenSq = sq;
+                            break;
+                        }
+                    }
+                }
             }
+            handleBoardSquareClick(0, chosenSq.userData.x, chosenSq.userData.z, chosenSq);
         }
 
         function triggerQuartoAIPick() {
             if (gameOver || activeGame !== 'quarto' || !isCurrentPlayerAI() || quartoPhase !== 'pick_for_opponent') return;
             const unplaced = pieces.filter(p => !p.placed);
-            if (unplaced.length > 0) {
-                const chosen = unplaced[Math.floor(Math.random() * unplaced.length)];
-                selectPerimeterPiece(chosen.id);
+            if (unplaced.length === 0) return;
+
+            let chosen = unplaced[Math.floor(Math.random() * unplaced.length)];
+            if (aiDifficulty !== 'easy') {
+                const openSquares = boardSquareMeshes.filter(m =>
+                    m.userData && m.userData.type === 'board_square' &&
+                    !pieces.some(p => p.placed && p.position && p.position.x === m.userData.x && p.position.z === m.userData.z)
+                );
+                const safePieces = unplaced.filter(candidate => {
+                    for (const sq of openSquares) {
+                        candidate.placed = true;
+                        candidate.position = { deck: 0, x: sq.userData.x, z: sq.userData.z };
+                        const oppWins = checkQuartoWinWithLine(0, sq.userData.x, sq.userData.z).win;
+                        candidate.placed = false;
+                        candidate.position = null;
+                        if (oppWins) return false;
+                    }
+                    return true;
+                });
+                if (safePieces.length > 0) {
+                    chosen = safePieces[Math.floor(Math.random() * safePieces.length)];
+                }
             }
+            selectPerimeterPiece(chosen.id);
         }
 
         function triggerStandardAITurn() {
@@ -3061,6 +3770,15 @@ function doPost(e) {
                         <li><strong>Step 1 (Pick for Opponent):</strong> You never choose the piece you place yourself! Player 1 selects a piece from around the perimeter of the board to hand to Player 2.</li>
                         <li><strong>Step 2 (Place & Hand Over):</strong> Player 2 places that floating piece onto any open square on the 4×4 board, and then selects the next piece from the perimeter for Player 1.</li>
                         <li><strong>Victory:</strong> As soon as any 4 aligned pieces share a matching trait, the player who placed the 4th piece wins!</li>
+                    </ul>
+                `,
+                chess: `
+                    <h4 class="font-bold text-cyan-300 text-sm">Classic Chess 3D — Rules & Specifications</h4>
+                    ${specsCard('1 Classic Checkered 3D Board', '8 × 8 Grid (64 Squares)', '32 Pieces (16 White vs 16 Red: King, Queen, 2 Rooks, 2 Bishops, 2 Knights, 8 Pawns)', '2 Players (Human, Online, or Grandmaster AI)')}
+                    <p><strong>Objective:</strong> Command your 16-piece army across the 8×8 3D board to capture the opponent's King.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Authentic Piece Movement:</strong> Click any friendly piece to highlight all valid destination squares in blue (Pawns advance 1–2 squares and capture diagonally; Knights jump in L-shapes; Bishops slide diagonally; Rooks slide orthogonally; Queens combine Rook + Bishop; Kings step 1 square).</li>
+                        <li><strong>Promotion & Victory:</strong> Pawns reaching the opposite back rank automatically promote to a Queen. Capturing the opposing King wins the match!</li>
                     </ul>
                 `,
                 azul: `
@@ -3300,7 +4018,8 @@ function doPost(e) {
                 factories: [],
                 selectedBatch: null,
                 walls: [makeWall(), makeWall(), makeWall(), makeWall()],
-                pts: [0, 0, 0, 0]
+                pts: [0, 0, 0, 0],
+                boardPositions: []
             };
 
             const boardPositions = numPlayers === 2
@@ -3436,18 +4155,34 @@ function doPost(e) {
         function triggerAzulAITurn() {
             if (gameOver || activeGame !== 'azul' || !isCurrentPlayerAI()) return;
             const pIdx = currentPlayer - 1;
+            const wall = azulState.walls[pIdx];
+            let bestMove = null;
+            let bestGain = -1;
+
             for (let f = 0; f < azulState.factories.length; f++) {
-                if (azulState.factories[f].length > 0) {
-                    const colorIdx = azulState.factories[f][0];
-                    selectAzulFactoryColor(f, colorIdx);
+                const uniqueColors = [...new Set(azulState.factories[f])];
+                for (const colorIdx of uniqueColors) {
+                    const count = azulState.factories[f].filter(c => c === colorIdx).length;
                     for (let r = 0; r < 5; r++) {
                         const colIdx = (colorIdx - r + 5) % 5;
-                        if (!azulState.walls[pIdx][r][colIdx]) {
-                            placeAzulInRow(r);
-                            return;
+                        if (wall[r][colIdx]) continue;
+                        let gain = 1 + Math.min(count, 2);
+                        if (colIdx > 0 && wall[r][colIdx - 1]) gain += 2;
+                        if (colIdx < 4 && wall[r][colIdx + 1]) gain += 2;
+                        if (r > 0 && wall[r - 1][colIdx]) gain += 2;
+                        if (r < 4 && wall[r + 1][colIdx]) gain += 2;
+                        if (wall[r].filter(Boolean).length === 4) gain += 15;
+                        if (gain > bestGain) {
+                            bestGain = gain;
+                            bestMove = { f, colorIdx, r };
                         }
                     }
                 }
+            }
+
+            if (bestMove) {
+                selectAzulFactoryColor(bestMove.f, bestMove.colorIdx);
+                placeAzulInRow(bestMove.r);
             }
         }
 
@@ -3492,7 +4227,8 @@ function doPost(e) {
                 age: 1,
                 turn: 1,
                 players: Array.from({ length: 4 }, () => ({ coins: 3, shields: 0, science: 0, victory: 0, stages: 0 })),
-                hand: []
+                hand: [],
+                wonderCoords: []
             };
 
             const wonderCoords = numPlayers === 2
@@ -3782,10 +4518,18 @@ function doPost(e) {
                 !hiveState.placed.some(p => p.q === m.userData.q && p.r === m.userData.r) &&
                 getHiveNeighbors(m.userData.q, m.userData.r).some(n => hiveState.placed.some(p => p.q === n.q && p.r === n.r))
             );
-            if (openHexes.length > 0) {
-                const target = openHexes[Math.floor(Math.random() * openHexes.length)];
-                handleHiveHexClick(target.userData.q, target.userData.r, target);
+            if (openHexes.length === 0) return;
+
+            let target = openHexes[Math.floor(Math.random() * openHexes.length)];
+            if (aiDifficulty !== 'easy') {
+                const oppQueen = hiveState.placed.find(p => p.team === 1 && p.insect === 'Queen');
+                if (oppQueen) {
+                    const queenAdj = getHiveNeighbors(oppQueen.q, oppQueen.r);
+                    const attackHex = openHexes.find(h => queenAdj.some(qa => qa.q === h.userData.q && qa.r === h.userData.r));
+                    if (attackHex) target = attackHex;
+                }
             }
+            handleHiveHexClick(target.userData.q, target.userData.r, target);
         }
 
         // --- CARCASSONNE 3D (SUPPORTS 2–4 PLAYERS ON 6×6 36-TILE LANDSCAPE & 7 MEEPLES EACH) ---
@@ -4306,29 +5050,70 @@ function doPost(e) {
             const targets = muhleState.nodes.filter(n => n.owner === 1);
             const nonMill = targets.filter(n => !checkMuhleMill(n.idx, 1));
             const pool = nonMill.length > 0 ? nonMill : targets;
-            if (pool.length > 0) handleMuhleNodeClick(pool[0].idx);
+            if (pool.length === 0) return;
+
+            let bestTarget = pool[0];
+            for (const cand of pool) {
+                const threatensMill = MUHLE_MILLS.some(triple =>
+                    triple.includes(cand.idx) && triple.filter(i => muhleState.nodes[i].owner === 1).length === 2
+                );
+                if (threatensMill) { bestTarget = cand; break; }
+            }
+            handleMuhleNodeClick(bestTarget.idx);
         }
 
         function triggerMuhleAITurn() {
             if (gameOver || activeGame !== 'muhle' || !isCurrentPlayerAI()) return;
             if (muhleState.p2Unplaced > 0) {
                 const open = muhleState.nodes.filter(n => n.owner === 0);
-                if (open.length > 0) {
-                    const pick = open[Math.floor(Math.random() * open.length)];
-                    handleMuhleNodeClick(pick.idx);
+                if (open.length === 0) return;
+
+                let pick = open[Math.floor(Math.random() * open.length)];
+                if (aiDifficulty !== 'easy') {
+                    const winNode = open.find(n => {
+                        n.owner = 2;
+                        const isMill = checkMuhleMill(n.idx, 2);
+                        n.owner = 0;
+                        return isMill;
+                    });
+                    const blockNode = open.find(n => {
+                        n.owner = 1;
+                        const oppMill = checkMuhleMill(n.idx, 1);
+                        n.owner = 0;
+                        return oppMill;
+                    });
+                    if (winNode) pick = winNode;
+                    else if (blockNode) pick = blockNode;
                 }
+                handleMuhleNodeClick(pick.idx);
             } else {
                 const myNodes = muhleState.nodes.filter(n => n.owner === 2);
                 const canFly = myNodes.length === 3;
+                let bestSlide = null;
+
                 for (const src of myNodes) {
                     const dests = canFly
                         ? muhleState.nodes.filter(n => n.owner === 0)
                         : MUHLE_ADJ[src.idx].map(i => muhleState.nodes[i]).filter(n => n.owner === 0);
-                    if (dests.length > 0) {
-                        handleMuhleNodeClick(src.idx);
-                        handleMuhleNodeClick(dests[0].idx);
-                        return;
+                    for (const dst of dests) {
+                        if (!bestSlide) bestSlide = { src, dst };
+                        if (aiDifficulty !== 'easy') {
+                            src.owner = 0;
+                            dst.owner = 2;
+                            const makesMill = checkMuhleMill(dst.idx, 2);
+                            dst.owner = 0;
+                            src.owner = 2;
+                            if (makesMill) {
+                                handleMuhleNodeClick(src.idx);
+                                handleMuhleNodeClick(dst.idx);
+                                return;
+                            }
+                        }
                     }
+                }
+                if (bestSlide) {
+                    handleMuhleNodeClick(bestSlide.src.idx);
+                    handleMuhleNodeClick(bestSlide.dst.idx);
                 }
             }
         }
@@ -4439,7 +5224,7 @@ function doPost(e) {
             document.getElementById('turn-status').innerText = `4gewinnt 3D — ${getPlayerLabel(currentPlayer)} (${currentPlayer === 1 ? 'Cyan' : 'Red'}): Tap a column to drop!`;
 
             if (isCurrentPlayerAI() && !gameOver) {
-                setTimeout(triggerConnect4AITurn, 750);
+                setTimeout(triggerConnect4AITurn, 650);
             }
         }
 
@@ -4471,10 +5256,125 @@ function doPost(e) {
             for (let c = 0; c < connect4State.cols; c++) {
                 if (connect4State.grid[connect4State.rows - 1][c] === 0) validCols.push(c);
             }
-            if (validCols.length > 0) {
-                const pick = validCols[Math.floor(Math.random() * validCols.length)];
-                handleConnect4ColumnClick(pick);
+            if (validCols.length === 0) return;
+
+            const getDropRow = (col) => {
+                for (let r = 0; r < connect4State.rows; r++) {
+                    if (connect4State.grid[r][col] === 0) return r;
+                }
+                return -1;
+            };
+
+            // 1. Immediate winning drop
+            for (const c of validCols) {
+                const r = getDropRow(c);
+                connect4State.grid[r][c] = 2;
+                const wins = !!checkConnect4Win(r, c, 2);
+                connect4State.grid[r][c] = 0;
+                if (wins) { handleConnect4ColumnClick(c); return; }
             }
+
+            // 2. Immediate block against Player 1 winning drop
+            if (aiDifficulty !== 'easy') {
+                for (const c of validCols) {
+                    const r = getDropRow(c);
+                    connect4State.grid[r][c] = 1;
+                    const oppWins = !!checkConnect4Win(r, c, 1);
+                    connect4State.grid[r][c] = 0;
+                    if (oppWins) { handleConnect4ColumnClick(c); return; }
+                }
+            }
+
+            // 3. 4-Ply Alpha-Beta Minimax on Hard (Grandmaster Engine)
+            if (aiDifficulty === 'hard') {
+                const evalWindow = (w) => {
+                    const aiC = w.filter(v => v === 2).length;
+                    const huC = w.filter(v => v === 1).length;
+                    const emC = w.filter(v => v === 0).length;
+                    if (aiC === 4) return 1000;
+                    if (huC === 4) return -1000;
+                    if (aiC === 3 && emC === 1) return 12;
+                    if (aiC === 2 && emC === 2) return 4;
+                    if (huC === 3 && emC === 1) return -25;
+                    return 0;
+                };
+
+                const scoreBoard = () => {
+                    let total = 0;
+                    for (let r = 0; r < connect4State.rows; r++) {
+                        if (connect4State.grid[r][3] === 2) total += 6;
+                    }
+                    for (let r = 0; r < connect4State.rows; r++) {
+                        for (let c = 0; c < connect4State.cols - 3; c++) {
+                            total += evalWindow([connect4State.grid[r][c], connect4State.grid[r][c + 1], connect4State.grid[r][c + 2], connect4State.grid[r][c + 3]]);
+                        }
+                    }
+                    for (let c = 0; c < connect4State.cols; c++) {
+                        for (let r = 0; r < connect4State.rows - 3; r++) {
+                            total += evalWindow([connect4State.grid[r][c], connect4State.grid[r + 1][c], connect4State.grid[r + 2][c], connect4State.grid[r + 3][c]]);
+                        }
+                    }
+                    for (let r = 0; r < connect4State.rows - 3; r++) {
+                        for (let c = 0; c < connect4State.cols - 3; c++) {
+                            total += evalWindow([connect4State.grid[r][c], connect4State.grid[r + 1][c + 1], connect4State.grid[r + 2][c + 2], connect4State.grid[r + 3][c + 3]]);
+                            total += evalWindow([connect4State.grid[r + 3][c], connect4State.grid[r + 2][c + 1], connect4State.grid[r + 1][c + 2], connect4State.grid[r][c + 3]]);
+                        }
+                    }
+                    return total;
+                };
+
+                const minimax = (depth, alpha, beta, maximizing) => {
+                    const open = [];
+                    for (let c = 0; c < connect4State.cols; c++) {
+                        if (connect4State.grid[connect4State.rows - 1][c] === 0) open.push(c);
+                    }
+                    if (depth === 0 || open.length === 0) return scoreBoard();
+
+                    if (maximizing) {
+                        let maxEval = -999999;
+                        for (const c of open) {
+                            const r = getDropRow(c);
+                            connect4State.grid[r][c] = 2;
+                            const val = checkConnect4Win(r, c, 2) ? 10000 + depth * 100 : minimax(depth - 1, alpha, beta, false);
+                            connect4State.grid[r][c] = 0;
+                            maxEval = Math.max(maxEval, val);
+                            alpha = Math.max(alpha, val);
+                            if (beta <= alpha) break;
+                        }
+                        return maxEval;
+                    } else {
+                        let minEval = 999999;
+                        for (const c of open) {
+                            const r = getDropRow(c);
+                            connect4State.grid[r][c] = 1;
+                            const val = checkConnect4Win(r, c, 1) ? -10000 - depth * 100 : minimax(depth - 1, alpha, beta, true);
+                            connect4State.grid[r][c] = 0;
+                            minEval = Math.min(minEval, val);
+                            beta = Math.min(beta, val);
+                            if (beta <= alpha) break;
+                        }
+                        return minEval;
+                    }
+                };
+
+                let bestCol = validCols[0];
+                let bestVal = -999999;
+                for (const c of validCols) {
+                    const r = getDropRow(c);
+                    connect4State.grid[r][c] = 2;
+                    const val = minimax(3, -999999, 999999, false);
+                    connect4State.grid[r][c] = 0;
+                    if (val > bestVal) {
+                        bestVal = val;
+                        bestCol = c;
+                    }
+                }
+                handleConnect4ColumnClick(bestCol);
+                return;
+            }
+
+            const orderedCols = [...validCols].sort((a, b) => Math.abs(3 - a) - Math.abs(3 - b));
+            handleConnect4ColumnClick(orderedCols[0]);
         }
 
         // --- MOVE HISTORY, SESSIONS, FAVORED PLAYERS & LIVE NOTIFICATIONS ---
@@ -4768,6 +5668,7 @@ function doPost(e) {
             updateMultiplayerInputs('menu');
             syncMenuModeOptionsForGame();
             renderMenuGameCards();
+            renderSavedGamesAndOnlineUI();
             updateDetectedDeviceHints();
 
             const cfg = getDriveSyncConfig();
@@ -5089,6 +5990,8 @@ function doPost(e) {
             closeInstructionsModal();
             const topRulesBtn = document.getElementById('top-rules-btn');
             if (topRulesBtn) topRulesBtn.classList.add('hidden');
+            const topPauseBtn = document.getElementById('top-pause-save-btn');
+            if (topPauseBtn) topPauseBtn.classList.add('hidden');
             const topLogoutBtn = document.getElementById('top-logout-btn');
             if (topLogoutBtn) topLogoutBtn.classList.add('hidden');
             const authLogoutField = document.getElementById('auth-logout-field');
@@ -5117,12 +6020,14 @@ function doPost(e) {
             container.innerHTML = '';
             container.appendChild(renderer.domElement);
 
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.07;
-            controls.maxPolarAngle = Math.PI / 2.05;
-            controls.minDistance = 6;
-            controls.maxDistance = 30;
+            if (typeof THREE.OrbitControls === 'function') {
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.07;
+                controls.maxPolarAngle = Math.PI / 2.05;
+                controls.minDistance = 6;
+                controls.maxDistance = 30;
+            }
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
             scene.add(ambientLight);
@@ -5177,6 +6082,8 @@ function doPost(e) {
                 const u = obj.userData;
                 if (u.type === 'perimeter_piece') selectPerimeterPiece(u.pieceId);
                 else if (u.type === 'board_square') handleBoardSquareClick(u.deck, u.x, u.z, obj);
+                else if (u.type === 'classic_chess_piece') handleClassicChessPieceClick(u.pieceId);
+                else if (u.type === 'classic_chess_square') handleClassicChessSquareClick(u.r, u.c, obj);
                 else if (u.type === 'chess_piece') handleChessPieceClick(u.pieceId);
                 else if (u.type === 'chess_square') handleChessSquareClick(u.boardId, u.r, u.c, obj);
                 else if (u.type === 'mensch_pawn') handleMenschPawnClick(u.pawnId);

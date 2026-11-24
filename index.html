@@ -55,7 +55,7 @@
     <!-- MAIN INTERACTIVE UI OVERLAY -->
     <div id="ui-overlay">
 
-        <!-- AUTHENTICATION GATEWAY SCREEN (LOGIN / REGISTER) -->
+        <!-- AUTHENTICATION GATEWAY SCREEN (LOGIN / REGISTER / LOG OUT) -->
         <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/95 backdrop-blur-lg p-4 interactive">
             <div class="glass-panel p-6 sm:p-8 rounded-2xl w-full max-w-md shadow-2xl border border-cyan-500/40 space-y-5">
                 <div class="text-center space-y-1.5">
@@ -131,6 +131,147 @@
             </div>
         </div>
 
+        <!-- POST-LOGIN GAME SELECTION LOBBY MODAL (VISUAL GAME TILES + PER-SEAT HUMAN/AI/ONLINE) -->
+        <div id="game-lobby-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/92 backdrop-blur-md hidden interactive p-3 sm:p-6 overflow-y-auto">
+            <div class="glass-panel p-5 sm:p-7 rounded-2xl w-full max-w-5xl shadow-2xl border border-cyan-500/40 space-y-5 my-auto max-h-[94vh] overflow-y-auto">
+                <div class="border-b border-gray-800 pb-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-xl font-extrabold text-white tracking-wide flex items-center">
+                            <i class="fa-solid fa-gamepad text-cyan-400 mr-2.5"></i> Select Your Match
+                        </h2>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="openDriveSyncModal()" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
+                                <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
+                            </button>
+                            <button type="button" onclick="logoutUser()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
+                                Log Out
+                            </button>
+                        </div>
+                    </div>
+                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Tap any game tile below, configure player count & Human/Computer per seat, and launch</p>
+                </div>
+
+                <!-- Visual Game Tiles Gallery (All 13 Games) -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Choose Game (All 13 Games)</label>
+                        <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
+                    </div>
+                    <input type="hidden" id="select-game" value="quarto">
+                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <div>
+                        <label class="block text-xs font-medium text-cyan-300 mb-1.5">Match Preset & Player Count</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="select-mode" onchange="applyModePresetToSlots('lobby')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                                <option value="pvp" selected>Local / Custom Mix</option>
+                                <option value="p2p">Online / Invite</option>
+                                <option value="pve">Vs Computer (AI)</option>
+                            </select>
+                            <select id="lobby-player-count" onchange="updateMultiplayerInputs('lobby')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                                <option value="2" selected>2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4">4 Players</option>
+                            </select>
+                        </div>
+                        <p id="lobby-mode-note" class="text-[10px] text-gray-400 mt-1">Set each player slot (2–4) as Human, Online, or Computer.</p>
+                    </div>
+
+                    <div id="ai-difficulty-container">
+                        <label class="block text-xs font-medium text-purple-300 mb-1.5">AI Difficulty (for Computer Seats)</label>
+                        <select id="select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="easy">Easy (Casual)</option>
+                            <option value="medium" selected>Medium (Tactical)</option>
+                            <option value="hard">Hard (Grandmaster)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-emerald-300 mb-1.5">
+                            Device & Display <span id="detected-device-hint" class="text-[10px] text-gray-400"></span>
+                        </label>
+                        <select id="select-display-profile" onchange="setDisplayProfile(this.value)" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <option value="auto" selected>Auto-Detect Display</option>
+                            <option value="mobile">Mobile / Phone (Compact)</option>
+                            <option value="tablet">Tablet (Balanced)</option>
+                            <option value="desktop">Desktop / Widescreen</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Per-Player Seat Configuration (Human / Online / Computer) -->
+                <div id="lobby-player-slots-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-gray-950/60 p-3 rounded-2xl border border-gray-800">
+                    <!-- Slot 1 -->
+                    <div class="bg-gray-900/90 p-2.5 rounded-xl border border-cyan-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-cyan-300">Player 1 (Cyan)</span>
+                            <span class="text-[10px] text-gray-400">Host</span>
+                        </div>
+                        <input type="text" id="lobby-p1-name" placeholder="Player 1" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+
+                    <!-- Slot 2 -->
+                    <div id="lobby-slot-2" class="bg-gray-900/90 p-2.5 rounded-xl border border-purple-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-purple-300">Player 2 (Red)</span>
+                            <select id="lobby-p2-type" onchange="toggleSlotTypeUI('lobby', 2)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-cyan-300">
+                                <option value="human" selected>Human (Local)</option>
+                                <option value="ai">Computer (AI)</option>
+                                <option value="online">Online Player</option>
+                            </select>
+                        </div>
+                        <input type="text" id="lobby-p2-name" placeholder="Player 2" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-purple-500">
+                        <select id="lobby-p2-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+
+                    <!-- Slot 3 -->
+                    <div id="lobby-slot-3" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-amber-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-amber-300">Player 3 (Gold)</span>
+                            <select id="lobby-p3-type" onchange="toggleSlotTypeUI('lobby', 3)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-amber-300">
+                                <option value="human" selected>Human (Local)</option>
+                                <option value="ai">Computer (AI)</option>
+                                <option value="online">Online Player</option>
+                            </select>
+                        </div>
+                        <input type="text" id="lobby-p3-name" placeholder="Player 3" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-amber-500">
+                        <select id="lobby-p3-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+
+                    <!-- Slot 4 -->
+                    <div id="lobby-slot-4" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-emerald-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-emerald-300">Player 4 (Emerald)</span>
+                            <select id="lobby-p4-type" onchange="toggleSlotTypeUI('lobby', 4)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-emerald-300">
+                                <option value="human" selected>Human (Local)</option>
+                                <option value="ai">Computer (AI)</option>
+                                <option value="online">Online Player</option>
+                            </select>
+                        </div>
+                        <input type="text" id="lobby-p4-name" placeholder="Player 4" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500">
+                        <select id="lobby-p4-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
+                    <button type="button" onclick="launchSelectedGame()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
+                        <i class="fa-solid fa-play mr-1.5"></i> Start Match
+                    </button>
+                    <button type="button" id="lobby-master-btn" onclick="openMasterMenuFromLobby()" class="hidden sm:w-auto px-5 py-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold rounded-xl text-xs transition">
+                        <i class="fa-solid fa-user-shield mr-1"></i> Manage Users
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- TOP HUD BAR -->
         <div id="top-hud-bar" class="w-full p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
             <div class="flex items-center space-x-2 pointer-events-auto">
@@ -145,6 +286,25 @@
                 <button type="button" id="top-logout-btn" onclick="logoutUser()" class="hidden interactive glass-panel px-3 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-rose-500/50 text-rose-300 transition" title="Log Out of Your Account">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i>
                     <span class="text-xs font-semibold hidden sm:inline">Log Out</span>
+                </button>
+            </div>
+
+            <div class="glass-panel px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto text-center flex items-center space-x-2">
+                <span id="mode-pill-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">2P HUMAN LOCAL</span>
+                <span id="turn-status" class="text-xs font-bold text-white">Player 1: Pick a piece around the board</span>
+            </div>
+
+            <div class="flex items-center space-x-2 pointer-events-auto">
+                <div class="glass-panel px-3 py-2.5 rounded-2xl shadow-xl hidden md:flex items-center space-x-1.5" title="Active Device & Display Profile">
+                    <i id="device-hud-icon" class="fa-solid fa-desktop text-emerald-400 text-xs"></i>
+                    <span id="device-hud-label" class="text-[11px] font-semibold text-emerald-300">Desktop</span>
+                </div>
+                <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl">
+                    <span id="score-display" class="text-xs font-extrabold text-purple-300">P1: 0 | P2: 0</span>
+                </div>
+                <button id="top-rules-btn" onclick="openInstructionsModal()" class="hidden interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-cyan-500/50 transition" title="View Rules & Specs for Active Game">
+                    <i class="fa-solid fa-circle-question text-cyan-400"></i>
+                    <span class="text-xs font-semibold text-gray-200 hidden sm:inline">Game Rules</span>
                 </button>
             </div>
         </div>
@@ -454,21 +614,21 @@
 
                 <div class="bg-gray-950/70 p-3.5 rounded-xl border border-gray-800 space-y-2">
                     <div class="flex items-center justify-between">
-                        <span class="font-bold text-cyan-300"><i class="fa-solid fa-table mr-1"></i> Google Sheet Setup Instructions (Auto-Creates 6 Tabs)</span>
+                        <span class="font-bold text-cyan-300"><i class="fa-solid fa-table mr-1"></i> Google Sheet Setup Instructions (Auto-Creates 8 Tabs)</span>
                         <button onclick="copyAppsScriptCode()" class="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-lg text-[10px] font-bold transition">
                             <i class="fa-solid fa-copy mr-1"></i> Copy Script
                         </button>
                     </div>
                     <ol class="list-decimal pl-5 space-y-1 text-[11px] text-gray-400">
-                        <li>Open <a href="https://sheets.new" target="_blank" rel="noopener" class="text-emerald-400 underline font-semibold">sheets.new</a> in your browser to create a new Google Sheet on your Drive (name it <em>Intelligames_3D_Sync</em>).</li>
+                        <li>Open <a href="https://sheets.new" target="_blank" rel="noopener" class="text-emerald-400 underline font-semibold">sheets.new</a> in your browser to create a new Google Sheet on your Drive.</li>
                         <li>In the Sheet menu, click <strong>Extensions → Apps Script</strong>, delete any starter code, and paste the script below.</li>
                         <li>Click <strong>Deploy → New deployment</strong> → Select type <strong>Web app</strong> → Set <em>Execute as</em>: <strong>Me</strong> and <em>Who has access</em>: <strong>Anyone</strong> → Click <strong>Deploy</strong>.</li>
-                        <li>Copy the generated <strong>Web app URL</strong>, paste it into the field above, and click <strong>Save & Push Now</strong>. Your Sheet will automatically create tabs for <code>Users</code>, <code>Sessions_Invites</code>, <code>Match_Scores</code> (2–4 players), <code>Move_History</code>, <code>Favorites</code>, and <code>Raw_JSON</code>.</li>
+                        <li>Copy the generated <strong>Web app URL</strong>, paste it into the field above, and click <strong>Save & Push Now</strong>.</li>
                     </ol>
                     <textarea id="apps-script-code-box" readonly rows="8" class="w-full p-2.5 bg-gray-900 border border-gray-800 rounded-lg text-[10px] font-mono text-emerald-300 focus:outline-none">function doGet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var rawSheet = ss.getSheetByName('Raw_JSON') || ss.insertSheet('Raw_JSON');
-  var raw = rawSheet.getRange('A1').getValue() || '{}';
+  var raw = rawSheet.getRange('A2').getValue() || '{}';
   return ContentService.createTextOutput(raw).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -477,12 +637,11 @@ function doPost(e) {
   var payloadStr = (e && e.postData && e.postData.contents) ? e.postData.contents : '{}';
   var data = JSON.parse(payloadStr);
 
-  // 1. Raw JSON snapshot for bidirectional state restore
   var rawSheet = ss.getSheetByName('Raw_JSON') || ss.insertSheet('Raw_JSON');
-  rawSheet.getRange('A1').setValue(payloadStr);
-  rawSheet.getRange('B1').setValue(new Date().toISOString());
+  if (rawSheet.getLastRow() === 0) rawSheet.appendRow(['Snapshot_JSON', 'Last_Updated']);
+  rawSheet.getRange('A2').setValue(payloadStr);
+  rawSheet.getRange('B2').setValue(new Date().toISOString());
 
-  // 2. Users Tab
   var uSheet = ss.getSheetByName('Users') || ss.insertSheet('Users');
   uSheet.clearContents();
   uSheet.appendRow(['Username', 'Role', 'Password_PIN', 'Synced_At']);
@@ -490,7 +649,6 @@ function doPost(e) {
     uSheet.appendRow([u.username, u.role || 'player', u.password, data.updatedAt]);
   });
 
-  // 3. Sessions & Invites Tab
   var sSheet = ss.getSheetByName('Sessions_Invites') || ss.insertSheet('Sessions_Invites');
   sSheet.clearContents();
   sSheet.appendRow(['Session_ID', 'Session_Name', 'Game', 'Host', 'Invited_Player', 'Accepted']);
@@ -498,7 +656,6 @@ function doPost(e) {
     sSheet.appendRow([s.id, s.name, s.game, s.host, s.invited || '', s.accepted ? 'Yes' : 'Pending']);
   });
 
-  // 4. Match Scores Log Tab (Supports 2 to 4 players)
   if (data.latestMatch) {
     var mSheet = ss.getSheetByName('Match_Scores') || ss.insertSheet('Match_Scores');
     if (mSheet.getLastRow() === 0) {
@@ -510,7 +667,6 @@ function doPost(e) {
     mSheet.appendRow([data.updatedAt, m.game, m.mode, m.numPlayers || 2, roster, sc.p1 || 0, sc.p2 || 0, sc.p3 || 0, sc.p4 || 0]);
   }
 
-  // 5. Move History Tab
   var hSheet = ss.getSheetByName('Move_History') || ss.insertSheet('Move_History');
   hSheet.clearContents();
   hSheet.appendRow(['Move_Number', 'Time', 'Action_Description']);
@@ -518,7 +674,6 @@ function doPost(e) {
     hSheet.appendRow([mv.num, mv.time, mv.text]);
   });
 
-  // 6. Favored Players Tab
   var fSheet = ss.getSheetByName('Favorites') || ss.insertSheet('Favorites');
   fSheet.clearContents();
   fSheet.appendRow(['Player', 'Favored_Players']);
@@ -613,8 +768,6 @@ function doPost(e) {
         </div>
     </div>
 
-    <!-- MASTER MENU MODAL -->
-    <div id="master-menu-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
     <!-- MASTER MENU MODAL (UNIFIED WITH VISUAL GAME TILES & MATCH LOBBY) -->
     <div id="master-menu-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-3 sm:p-6 overflow-y-auto">
         <div class="glass-panel p-5 sm:p-7 rounded-2xl w-full max-w-5xl shadow-2xl border border-cyan-500/40 space-y-5 my-auto max-h-[94vh] overflow-y-auto">
@@ -785,24 +938,6 @@ function doPost(e) {
         </div>
     </div>
 
-    <!-- COMPLETE RULES & FULL DOCUMENTATION MODAL -->
-    <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-3xl shadow-2xl border border-cyan-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center">
-                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Complete Documentation, Game Specs & Rules Manual
-                </h3>
-                <button onclick="closeInstructionsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <!-- Platform & Game Documentation Tabs -->
-            <div class="flex flex-wrap gap-1.5 border-b border-gray-800 pb-2.5">
-                <button onclick="selectInstructionTab('platform')" id="rule-tab-platform" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition"><i class="fa-solid fa-layer-group mr-1"></i> Platform & All Functions</button>
-                <button onclick="selectInstructionTab('quarto')" id="rule-tab-quarto" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Quarto 3D</button>
-                <button onclick="selectInstructionTab('azul')" id="rule-tab-azul" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Azul 3D (2–4P)</button>
-                <button onclick="selectInstructionTab('sevenwonders')" id="rule-tab-sevenwonders" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">7 Wonders 3D (2–4P)</button>
-                <button onclick="selectInstructionTab('hive')" id="rule-tab-hive" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Hive 3D</button>
-                <button onclick="selectInstructionTab('carcassonne')" id="rule-tab-carcassonne" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Carcassonne 3D (2–4P)</button>
     <!-- ACTIVE GAME RULES MODAL (SHOWS ONLY THE CURRENTLY ACTIVE GAME) -->
     <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
         <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-cyan-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
@@ -2901,6 +3036,11 @@ function doPost(e) {
             selectInstructionTab(activeGame);
             document.getElementById('instructions-modal').classList.remove('hidden');
         }
+
+        function closeInstructionsModal() {
+            document.getElementById('instructions-modal').classList.add('hidden');
+        }
+
         // --- ACTIVE GAME INSTRUCTIONS RENDERER (DISPLAYS ONLY THE CURRENT GAME) ---
         function selectInstructionTab(gameKey) {
             const specsCard = (boards, size, piecesInfo, players) => `
@@ -4335,186 +4475,6 @@ function doPost(e) {
                 const pick = validCols[Math.floor(Math.random() * validCols.length)];
                 handleConnect4ColumnClick(pick);
             }
-        }
-
-        // --- COMPLETE DOCUMENTATION & GAME INSTRUCTIONS TABS ---
-        function selectInstructionTab(gameKey) {
-            const allKeys = ['platform', 'quarto', 'azul', 'sevenwonders', 'hive', 'carcassonne', 'twixt', 'startrek', 'mensch', 'skribbl', 'hangman', 'yahtzee', 'muhle', 'fourgewinnt'];
-            allKeys.forEach(k => {
-                const btn = document.getElementById(`rule-tab-${k}`);
-                if (!btn) return;
-                if (k === gameKey) {
-                    btn.className = k === 'platform'
-                        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition"
-                        : "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition";
-                } else {
-                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition";
-                }
-            });
-
-            const specsCard = (boards, size, piecesInfo, players) => `
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-950/80 p-3 rounded-xl border border-cyan-500/25 text-[11px]">
-                    <div><span class="text-cyan-400 font-bold">Number of Boards:</span> <span class="text-white">${boards}</span></div>
-                    <div><span class="text-cyan-400 font-bold">Board Dimensions:</span> <span class="text-white">${size}</span></div>
-                    <div><span class="text-purple-400 font-bold">Pieces & Components:</span> <span class="text-white">${piecesInfo}</span></div>
-                    <div><span class="text-emerald-400 font-bold">Players & Modes:</span> <span class="text-white">${players}</span></div>
-                </div>
-            `;
-
-            const rulesHTML = {
-                platform: `
-                    <h4 class="font-bold text-emerald-300 text-sm">Intelligames 3D — Complete Platform & Function Guide</h4>
-                    <p>Welcome to <strong>Intelligames 3D</strong>, a full-featured WebGL 3D multi-game strategy & party arena with live WebRTC video/audio communication, per-seat Human/AI/Online configuration for 2–4 players, and automatic Google Drive Sheet synchronization.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <div class="bg-gray-950/80 p-3 rounded-xl border border-cyan-500/30 space-y-1">
-                            <div class="font-bold text-cyan-300"><i class="fa-solid fa-user-lock mr-1"></i> 1. Account Registration & Master Admin</div>
-                            <p class="text-[11px] text-gray-300">New players register on the gateway screen before logging in. Master accounts unlock <strong>Manage Users</strong> in the Master Menu to add, edit, or delete user profiles and PINs.</p>
-                        </div>
-                        <div class="bg-gray-950/80 p-3 rounded-xl border border-purple-500/30 space-y-1">
-                            <div class="font-bold text-purple-300"><i class="fa-solid fa-users mr-1"></i> 2. Per-Seat Human, AI & Online (2–4 Players)</div>
-                            <p class="text-[11px] text-gray-300">Choose 2, 3, or 4 players and assign each seat independently as <strong>Human (Local)</strong>, <strong>Computer (AI)</strong>, or <strong>Online Player</strong>—allowing mixed matches such as 1 Human vs. 3 AI bots or 2 Humans + 2 AI bots.</p>
-                        </div>
-                        <div class="bg-gray-950/80 p-3 rounded-xl border border-rose-500/30 space-y-1">
-                            <div class="font-bold text-rose-300"><i class="fa-solid fa-video mr-1"></i> 3. Live Audio & Video Call (WebRTC)</div>
-                            <p class="text-[11px] text-gray-300">Click <strong>Audio / Video</strong> in the bottom bar to start a camera + mic video call or audio-only voice call with mute controls, local Picture-in-Picture preview, and peer connection code exchange.</p>
-                        </div>
-                        <div class="bg-gray-950/80 p-3 rounded-xl border border-emerald-500/30 space-y-1">
-                            <div class="font-bold text-emerald-300"><i class="fa-brands fa-google-drive mr-1"></i> 4. Google Drive Sheet Sync</div>
-                            <p class="text-[11px] text-gray-300">Click <strong>Drive Sync</strong> to link your Google Sheet Web App URL. Automatically creates and updates 6 tabs: <code>Users</code>, <code>Sessions_Invites</code>, <code>Match_Scores</code> (2–4P), <code>Move_History</code>, <code>Favorites</code>, and <code>Raw_JSON</code>.</p>
-                        </div>
-                        <div class="bg-gray-950/80 p-3 rounded-xl border border-amber-500/30 space-y-1">
-                            <div class="font-bold text-amber-300"><i class="fa-solid fa-bell mr-1"></i> 5. Sessions, Favorites & Live Invites</div>
-                            <p class="text-[11px] text-gray-300">Open <strong>Sessions & Invites</strong> to star favored opponents, create named sessions, and send real-time match invitations with instant pop-up notifications.</p>
-                        </div>
-                        <div class="bg-gray-950/80 p-3 rounded-xl border border-sky-500/30 space-y-1">
-                            <div class="font-bold text-sky-300"><i class="fa-solid fa-mobile-screen mr-1"></i> 6. Adaptive Device & Display Selector</div>
-                            <p class="text-[11px] text-gray-300">Automatically detects Phone, Tablet, or Desktop screen resolution and adjusts 3D camera framing, or lets you manually switch profiles anytime. Top-left HUD cards include a <strong>Hide/Show</strong> toggle so 3D boards are never blocked.</p>
-                        </div>
-                    </div>
-                `,
-                quarto: `
-                    <h4 class="font-bold text-cyan-300 text-sm">Quarto 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Main Board + Perimeter Ring', '4 × 4 Grid (16 Squares)', '16 Unique Pieces (Tall/Short, Dark/Light, Square/Round, Solid/Hollow)', '2 Players (Human, Online, or Computer AI)')}
-                    <p><strong>Objective:</strong> Complete a line of 4 pieces (horizontal, vertical, or diagonal) sharing at least one common attribute: <strong>Tall or Short</strong>, <strong>Dark or Light</strong>, <strong>Square or Round</strong>, or <strong>Solid or Hollow</strong>.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Step 1 (Pick for Opponent):</strong> You never choose the piece you place yourself! Player 1 selects a piece from around the perimeter of the board to hand to Player 2.</li>
-                        <li><strong>Step 2 (Place & Hand Over):</strong> Player 2 places that floating piece onto any open square on the 4×4 board, and then selects the next piece from the perimeter for Player 1.</li>
-                        <li><strong>Victory:</strong> As soon as any 4 aligned pieces share a matching trait, the player who placed the 4th piece wins!</li>
-                    </ul>
-                `,
-                azul: `
-                    <h4 class="font-bold text-sky-300 text-sm">Azul 3D — Complete Specifications & Rules (2–4 Players)</h4>
-                    ${specsCard('2 to 4 Player Mosaic Boards + 5/7/9 Factory Displays', '5 × 5 Grids (25 Tiles per Player)', '20–36 Factory Tiles per Round across 5 Glazed Colors (Cobalt, Amber, Crimson, Obsidian, Teal)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
-                    <p><strong>Objective:</strong> Draft colored ceramic tiles from the Factory Displays to decorate your 5×5 3D Mosaic Wall and score the highest adjacency points.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Drafting:</strong> Click any colored tile inside a Factory Display to gather all matching tiles of that color from that factory.</li>
-                        <li><strong>Tiling Your Wall:</strong> Select Row 1–5 to glaze that color onto your 3D board. Adjacent horizontal and vertical tiles grant bonus combo points.</li>
-                        <li><strong>End of Game:</strong> Completing a full horizontal row of 5 glazed tiles triggers the end of the match and awards a +5 row bonus.</li>
-                    </ul>
-                `,
-                sevenwonders: `
-                    <h4 class="font-bold text-amber-300 text-sm">7 Wonders 3D — Complete Specifications & Rules (2–4 Players)</h4>
-                    ${specsCard('2 to 4 Civilization Wonder Boards', 'Up to 4 Monument Platforms (3 Tiers Each) + City Skylines', '6 Turns per Age across 2 Ages (Blue Civic, Red Military, Green Science, Yellow Commerce Cards)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
-                    <p><strong>Objective:</strong> Lead an ancient city across Ages by constructing Civic, Military, Science, and Commerce buildings or erecting your golden 3D Wonder Monument.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Drafting Cards:</strong> Each turn, choose 1 card from your 3-card hand to <strong>Build</strong> as a 3D city structure or sacrifice to raise a <strong>Wonder Stage</strong> (+4 VP).</li>
-                        <li><strong>Military & Science:</strong> Red Military Shields clash with neighboring civilizations at the end of each Age for bonus Victory Points, while Green Science symbols multiply quadratically.</li>
-                    </ul>
-                `,
-                hive: `
-                    <h4 class="font-bold text-amber-300 text-sm">Hive 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Hexagonal Arena Board', '61-Hex Grid (Radius 4)', '22 Insect Tiles (11 per Player: 1 Queen Bee, 2 Beetles, 3 Grasshoppers, 2 Spiders, 3 Soldier Ants)', '2 Players (Human, Online, or Computer AI)')}
-                    <p><strong>Objective:</strong> Surround your opponent's Queen Bee on all 6 hexagonal sides while keeping your own Queen Bee safe.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>One Hive Rule:</strong> Every insect placed onto the 3D hex arena must touch at least one existing tile in the Hive.</li>
-                        <li><strong>Insects:</strong> Deploy your Queen Bee, Beetles, Grasshoppers, Spiders, and Soldier Ants strategically to close the ring around the enemy Queen.</li>
-                    </ul>
-                `,
-                carcassonne: `
-                    <h4 class="font-bold text-emerald-300 text-sm">Carcassonne 3D — Complete Specifications & Rules (2–4 Players)</h4>
-                    ${specsCard('1 Expandable Countryside Board', '6 × 6 Landscape Grid (36 Tiles)', '36 Terrain Tiles (Walled Cities, Monasteries, Crossroads) + 7 Meeples per Player', '2–4 Players (Any mix of Human, Online & Computer AI)')}
-                    <p><strong>Objective:</strong> Expand a medieval 3D countryside tile-by-tile and deploy Meeples to claim bonus territory points.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Tile Placement:</strong> Click any slot orthogonally adjacent to an existing tile to expand Walled Cities, Monasteries, and Crossroads.</li>
-                        <li><strong>Meeples:</strong> Keep "Meeple" checked to station one of your 7 followers on your newly placed tile for +2 extra points.</li>
-                    </ul>
-                `,
-                twixt: `
-                    <h4 class="font-bold text-purple-300 text-sm">Twixt 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Pegboard Arena with 4 Goal Borders', '12 × 12 Grid (140 Peg Holes; 4 Corners Excluded)', 'Unlimited Cyan & Red Pegs + Auto-Linking Knight-Move 3D Bridges', '2 Players (Human, Online, or Computer AI)')}
-                    <p><strong>Objective:</strong> Build an unbroken chain of pegs and knight-move bridges connecting your two opposite goal borders.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Goal Borders:</strong> Player 1 (Cyan) connects North ↔ South; Player 2 (Red) connects West ↔ East.</li>
-                        <li><strong>Auto-Bridges:</strong> Planting two friendly pegs a chess knight's move apart (2 spaces by 1 space) automatically raises a 3D bridge between them.</li>
-                    </ul>
-                `,
-                startrek: `
-                    <h4 class="font-bold text-cyan-300 text-sm">Star Trek Tri-Dimensional Chess — Complete Specifications & Rules</h4>
-                    ${specsCard('7 Multi-Level Boards', '3 Stepped 4 × 4 Main Boards + 4 Suspended 2 × 2 Attack Boards (64 Squares Total)', '24 Pieces (12 per Side: 1 King, 1 Queen, 2 Rooks, 2 Bishops, 2 Knights, 4 Pawns)', '2 Players (Human, Online, or Computer AI)')}
-                    <p><strong>Objective:</strong> Capture the opponent's King across 3 stepped 4×4 main boards and 4 suspended 2×2 attack boards.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>3D Movement:</strong> Tap any friendly Starfleet (White) or Opponent (Red) piece to select it, then tap a destination square on the same level or an overlapping upper/lower level.</li>
-                        <li><strong>Victory:</strong> Capturing the opposing King wins the match immediately.</li>
-                    </ul>
-                `,
-                mensch: `
-                    <h4 class="font-bold text-amber-300 text-sm">Mensch ärgere Dich nicht 3D — Complete Specifications & Rules (2–4 Players)</h4>
-                    ${specsCard('1 Circular Circuit Board + Central Home Sanctuary', '40 Outer Circuit Spaces + Up to 4 Starting Yards', 'Up to 16 Conical Pawns (4 per Player in Cyan, Red, Gold, Emerald) + 1 Six-Sided Die', '2–4 Players (Any mix of Human, Online & Computer AI)')}
-                    <p><strong>Objective:</strong> Be the first player to race all 4 of your pawns around the 40-tile circuit into the central golden Home Sanctuary.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Entering Play:</strong> Roll a <strong>6</strong> to deploy a pawn from your starting yard onto the track and earn a bonus roll.</li>
-                        <li><strong>Captures:</strong> Landing on an opponent's pawn sends it straight back to their starting yard!</li>
-                    </ul>
-                `,
-                skribbl: `
-                    <h4 class="font-bold text-cyan-300 text-sm">Skribbl 3D — Complete Specifications & Rules (2–4 Players)</h4>
-                    ${specsCard('1 Interactive Neon Sketchpad Canvas', '520 × 210 px Multi-Color Drawing Board', 'Full RGB Color Picker, Touch/Mouse Brush & Secret Word Dictionary', '2–4 Players (Human or Online)')}
-                    <p><strong>Objective:</strong> Illustrate the secret word on the neon sketchpad while players type guesses in real time.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Drawing:</strong> Pick any color from the swatch picker and draw clues using mouse or touch.</li>
-                        <li><strong>Guessing:</strong> Type your answer into the guess box and press Guess to score points and rotate turns.</li>
-                    </ul>
-                `,
-                hangman: `
-                    <h4 class="font-bold text-rose-300 text-sm">Hangman 3D — Complete Specifications & Rules (1–4 Players)</h4>
-                    ${specsCard('1 3D Wooden Gallows Stage', '3.2 × 4.4 Unit 3D Scaffold Platform', '6-Part 3D Figure (Head, Torso, Left/Right Arms, Left/Right Legs) + 26-Letter Keyboard', '1–4 Players (Any mix of Human & Computer AI)')}
-                    <p><strong>Objective:</strong> Deduce the hidden word letter-by-letter before all 6 parts of the 3D figure appear on the gallows.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Letter Selection:</strong> Tap letters on the A–Z keyboard. Correct letters reveal their positions; wrong letters add a 3D piece to the scaffold (max 6 mistakes).</li>
-                    </ul>
-                `,
-                yahtzee: `
-                    <h4 class="font-bold text-amber-300 text-sm">Yahtzee 3D — Complete Specifications & Rules (2–4 Players)</h4>
-                    ${specsCard('1 3D Dice Arena + Multi-Player Scorecards', '5-Die Rolling Tray & 8-Category Scorecard per Player', '5 Interactive 3D Dice (Up to 3 Rolls per Turn)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
-                    <p><strong>Objective:</strong> Roll 5 dice up to 3 times per turn to achieve the highest total score across 8 scoring categories.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Holding Dice:</strong> Click any die between rolls to lock (HOLD) its value while re-rolling the remaining dice.</li>
-                        <li><strong>Scoring:</strong> Choose an open category on the scorecard (Ones through Sixes, 3 of a Kind, or 50-point Yahtzee!) to bank your points.</li>
-                    </ul>
-                `,
-                muhle: `
-                    <h4 class="font-bold text-amber-300 text-sm">Mühle 3D (Nine Men's Morris) — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Concentric Morris Board', '3 Concentric Squares / 24 Intersection Nodes', '18 Stones (9 Cyan for Player 1, 9 Amber for Player 2)', '2 Players (Human, Online, or Computer AI)')}
-                    <p><strong>Objective:</strong> Form "Mills" (3 of your stones in a straight line along the 3 concentric squares) to capture opponent stones until they have fewer than 3 left.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Phase 1 (Placing):</strong> Each player starts with 9 stones and takes turns placing them onto any of the 24 board intersections.</li>
-                        <li><strong>Phase 2 & 3 (Sliding & Flying):</strong> Once all 9 stones are placed, slide stones along lines to adjacent open points. When reduced to 3 stones, you may "fly" to any open point!</li>
-                        <li><strong>Forming a Mill:</strong> Completing 3 in a row lets you immediately click and remove one of your opponent's free stones.</li>
-                    </ul>
-                `,
-                fourgewinnt: `
-                    <h4 class="font-bold text-rose-300 text-sm">4gewinnt 3D (Connect 4) — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Standing Vertical Gravity Rack', '7 Columns × 6 Rows (42 Slots Total)', '42 Discs (21 Cyan for Player 1, 21 Red for Player 2)', '2 Players (Human, Online, or Computer AI)')}
-                    <p><strong>Objective:</strong> Be the first player to align 4 of your colored discs horizontally, vertically, or diagonally inside the standing 7×6 3D gravity rack.</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Gravity Drop:</strong> Click any of the 7 vertical columns (or top drop funnels); your disc drops to the lowest unoccupied slot in that column.</li>
-                        <li><strong>Victory Condition:</strong> The first player to connect 4 discs in an unbroken line wins the match!</li>
-                    </ul>
-                `
-            };
-
-            const box = document.getElementById('instruction-content-box');
-            if (box) box.innerHTML = rulesHTML[gameKey] || rulesHTML.platform;
         }
 
         // --- MOVE HISTORY, SESSIONS, FAVORED PLAYERS & LIVE NOTIFICATIONS ---

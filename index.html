@@ -763,106 +763,60 @@ function doPost(e) {
 
     <!-- MASTER MENU MODAL -->
     <div id="master-menu-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-lg shadow-2xl border border-cyan-500/40 space-y-5 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center">
-                    <i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> Master Game Menu
-                </h3>
-                <button onclick="closeMasterMenu()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- MASTER MENU MODAL (UNIFIED WITH VISUAL GAME TILES & MATCH LOBBY) -->
+    <div id="master-menu-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-3 sm:p-6 overflow-y-auto">
+        <div class="glass-panel p-5 sm:p-7 rounded-2xl w-full max-w-5xl shadow-2xl border border-cyan-500/40 space-y-5 my-auto max-h-[94vh] overflow-y-auto">
+            <div class="border-b border-gray-800 pb-3.5 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-lg font-extrabold text-white flex items-center">
+                        <i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> Master Game Menu
+                    </h3>
+                    <p class="text-[11px] text-cyan-300 mt-0.5">Switch game tiles, configure 2–4 seats (Human / AI / Online), or manage users</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button type="button" onclick="closeMasterMenu(); openInstructionsModal();" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold rounded-xl text-xs border border-cyan-500/40 transition">
+                        <i class="fa-solid fa-book-open mr-1"></i> Docs & Rules
+                    </button>
+                    <button type="button" onclick="closeMasterMenu(); openDriveSyncModal();" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
+                        <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
+                    </button>
+                    <button type="button" onclick="closeMasterMenu()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
+                        <i class="fa-solid fa-xmark mr-1"></i> Resume
+                    </button>
+                </div>
             </div>
 
-            <div class="space-y-4 text-xs">
-                <div>
-                    <label class="block font-medium text-gray-300 mb-1">Switch Game Type</label>
-                    <select id="menu-select-game" onchange="syncMenuModeOptionsForGame()" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
-                        <option value="quarto">Quarto 3D (Logic & Geometry)</option>
-                        <option value="azul">Azul 3D (Mosaic Tile Drafting • 2–4P)</option>
-                        <option value="sevenwonders">7 Wonders 3D (Civilization Drafting • 2–4P)</option>
-                        <option value="hive">Hive 3D (Hex Insect Strategy)</option>
-                        <option value="carcassonne">Carcassonne 3D (Landscape & Meeples • 2–4P)</option>
-                        <option value="twixt">Twixt 3D (Knight-Bridge Network)</option>
-                        <option value="startrek">Star Trek Tri-D Chess (3D Multi-Level)</option>
-                        <option value="mensch">Mensch ärgere Dich nicht 3D (Ludo Race • 2–4P)</option>
-                        <option value="skribbl">Skribbl 3D (Draw & Guess • 2–4P)</option>
-                        <option value="hangman">Hangman 3D (Word Deduction • 2–4P)</option>
-                        <option value="yahtzee">Yahtzee 3D (5-Dice Strategy • 2–4P)</option>
-                        <option value="muhle">Mühle 3D (Nine Men's Morris)</option>
-                        <option value="fourgewinnt">4gewinnt 3D (Connect 4)</option>
-                    </select>
+            <!-- Visual Game Tiles Gallery (Matches Start Match Lobby) -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Switch Game (All 13 Games)</label>
+                    <span id="menu-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
                 </div>
+                <input type="hidden" id="menu-select-game" value="quarto">
+                <div id="menu-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+            </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div>
-                    <label class="block font-medium text-gray-300 mb-1">Match Preset & Player Count</label>
+                    <label class="block font-medium text-cyan-300 mb-1.5">Match Preset & Player Count</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <select id="menu-select-mode" onchange="applyModePresetToSlots('menu')" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                        <select id="menu-select-mode" onchange="applyModePresetToSlots('menu')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
                             <option value="pvp">Local / Custom Mix</option>
                             <option value="p2p">Online / Invite</option>
                             <option value="pve">Vs Computer (AI)</option>
                         </select>
-                        <select id="menu-player-count" onchange="updateMultiplayerInputs('menu')" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                        <select id="menu-player-count" onchange="updateMultiplayerInputs('menu')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
                             <option value="2" selected>2 Players</option>
                             <option value="3">3 Players</option>
                             <option value="4">4 Players</option>
                         </select>
                     </div>
-                </div>
-
-                <!-- Per-Player Seat Configuration in Master Menu -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-950/60 p-3 rounded-xl border border-gray-800">
-                    <div class="bg-gray-900/90 p-2 rounded-lg border border-cyan-500/30 space-y-1">
-                        <div class="text-[11px] font-bold text-cyan-300">Player 1 (Host)</div>
-                        <input type="text" id="menu-p1-name" placeholder="Player 1" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
-                    </div>
-
-                    <div id="menu-slot-2" class="bg-gray-900/90 p-2 rounded-lg border border-purple-500/30 space-y-1">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-[11px] font-bold text-purple-300">Player 2</span>
-                            <select id="menu-p2-type" onchange="toggleSlotTypeUI('menu', 2)" class="px-1.5 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-cyan-300">
-                                <option value="human" selected>Human</option>
-                                <option value="ai">Computer</option>
-                                <option value="online">Online</option>
-                            </select>
-                        </div>
-                        <input type="text" id="menu-p2-name" placeholder="Player 2" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
-                        <select id="menu-p2-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded text-amber-200">
-                            <option value="">-- Open Invite / Any Player --</option>
-                        </select>
-                    </div>
-
-                    <div id="menu-slot-3" class="hidden bg-gray-900/90 p-2 rounded-lg border border-amber-500/30 space-y-1">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-[11px] font-bold text-amber-300">Player 3</span>
-                            <select id="menu-p3-type" onchange="toggleSlotTypeUI('menu', 3)" class="px-1.5 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-amber-300">
-                                <option value="human" selected>Human</option>
-                                <option value="ai">Computer</option>
-                                <option value="online">Online</option>
-                            </select>
-                        </div>
-                        <input type="text" id="menu-p3-name" placeholder="Player 3" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
-                        <select id="menu-p3-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded text-amber-200">
-                            <option value="">-- Open Invite / Any Player --</option>
-                        </select>
-                    </div>
-
-                    <div id="menu-slot-4" class="hidden bg-gray-900/90 p-2 rounded-lg border border-emerald-500/30 space-y-1">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-[11px] font-bold text-emerald-300">Player 4</span>
-                            <select id="menu-p4-type" onchange="toggleSlotTypeUI('menu', 4)" class="px-1.5 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-emerald-300">
-                                <option value="human" selected>Human</option>
-                                <option value="ai">Computer</option>
-                                <option value="online">Online</option>
-                            </select>
-                        </div>
-                        <input type="text" id="menu-p4-name" placeholder="Player 4" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
-                        <select id="menu-p4-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded text-amber-200">
-                            <option value="">-- Open Invite / Any Player --</option>
-                        </select>
-                    </div>
+                    <p id="menu-mode-note" class="text-[10px] text-gray-400 mt-1">Set each player seat (2–4) as Human, Online, or Computer.</p>
                 </div>
 
                 <div id="menu-ai-difficulty-container">
-                    <label class="block font-medium text-purple-300 mb-1">AI Difficulty Level (Computer Seats)</label>
-                    <select id="menu-select-ai-difficulty" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                    <label class="block font-medium text-purple-300 mb-1.5">AI Difficulty Level (Computer Seats)</label>
+                    <select id="menu-select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
                         <option value="easy">Easy (Casual)</option>
                         <option value="medium" selected>Medium (Tactical)</option>
                         <option value="hard">Hard (Grandmaster)</option>
@@ -870,25 +824,71 @@ function doPost(e) {
                 </div>
 
                 <div>
-                    <label class="block font-medium text-emerald-300 mb-1">
+                    <label class="block font-medium text-emerald-300 mb-1.5">
                         Device & Display Layout <span id="menu-detected-device-hint" class="text-[10px] text-gray-400"></span>
                     </label>
-                    <select id="menu-select-display-profile" onchange="setDisplayProfile(this.value)" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                    <select id="menu-select-display-profile" onchange="setDisplayProfile(this.value)" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-emerald-500">
                         <option value="auto">Auto-Detect Display</option>
                         <option value="mobile">Mobile / Phone (Compact)</option>
                         <option value="tablet">Tablet (Balanced)</option>
                         <option value="desktop">Desktop / Widescreen</option>
                     </select>
                 </div>
+            </div>
 
-                <div class="bg-gray-950/70 p-3 rounded-xl border border-emerald-500/30 flex items-center justify-between gap-2">
-                    <div>
-                        <div class="font-bold text-emerald-300"><i class="fa-brands fa-google-drive mr-1"></i> Google Drive Sheet Sync</div>
-                        <div id="menu-drive-sync-status" class="text-[10px] text-gray-400">Configure or sync Users, Invites & Scores</div>
+            <!-- Per-Player Seat Configuration in Master Menu (Matches Start Match Lobby) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-gray-950/60 p-3 rounded-2xl border border-gray-800 text-xs">
+                <div class="bg-gray-900/90 p-2.5 rounded-xl border border-cyan-500/30 space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-cyan-300">Player 1 (Cyan)</span>
+                        <span class="text-[10px] text-gray-400">Host</span>
                     </div>
-                    <button onclick="closeMasterMenu(); openDriveSyncModal();" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold rounded-lg text-xs transition">
-                        Configure Sync
-                    </button>
+                    <input type="text" id="menu-p1-name" placeholder="Player 1" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-cyan-500">
+                </div>
+
+                <div id="menu-slot-2" class="bg-gray-900/90 p-2.5 rounded-xl border border-purple-500/30 space-y-1.5">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="text-[11px] font-bold text-purple-300">Player 2 (Red)</span>
+                        <select id="menu-p2-type" onchange="toggleSlotTypeUI('menu', 2)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-cyan-300">
+                            <option value="human" selected>Human (Local)</option>
+                            <option value="ai">Computer (AI)</option>
+                            <option value="online">Online Player</option>
+                        </select>
+                    </div>
+                    <input type="text" id="menu-p2-name" placeholder="Player 2" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-purple-500">
+                    <select id="menu-p2-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-amber-200">
+                        <option value="">-- Open Invite / Any Player --</option>
+                    </select>
+                </div>
+
+                <div id="menu-slot-3" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-amber-500/30 space-y-1.5">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="text-[11px] font-bold text-amber-300">Player 3 (Gold)</span>
+                        <select id="menu-p3-type" onchange="toggleSlotTypeUI('menu', 3)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-amber-300">
+                            <option value="human" selected>Human (Local)</option>
+                            <option value="ai">Computer (AI)</option>
+                            <option value="online">Online Player</option>
+                        </select>
+                    </div>
+                    <input type="text" id="menu-p3-name" placeholder="Player 3" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-amber-500">
+                    <select id="menu-p3-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-amber-200">
+                        <option value="">-- Open Invite / Any Player --</option>
+                    </select>
+                </div>
+
+                <div id="menu-slot-4" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-emerald-500/30 space-y-1.5">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="text-[11px] font-bold text-emerald-300">Player 4 (Emerald)</span>
+                        <select id="menu-p4-type" onchange="toggleSlotTypeUI('menu', 4)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-emerald-300">
+                            <option value="human" selected>Human (Local)</option>
+                            <option value="ai">Computer (AI)</option>
+                            <option value="online">Online Player</option>
+                        </select>
+                    </div>
+                    <input type="text" id="menu-p4-name" placeholder="Player 4" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-emerald-500">
+                    <select id="menu-p4-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-amber-200">
+                        <option value="">-- Open Invite / Any Player --</option>
+                    </select>
                 </div>
             </div>
 
@@ -925,11 +925,11 @@ function doPost(e) {
                 <div id="admin-users-list" class="max-h-40 overflow-y-auto space-y-1.5 pr-1"></div>
             </div>
 
-            <div class="flex space-x-3 pt-2">
-                <button onclick="applyMasterMenuChanges()" class="flex-1 py-2.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-xs shadow transition">
-                    Apply & Restart Game
+            <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+                <button onclick="applyMasterMenuChanges()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
+                    <i class="fa-solid fa-play mr-1.5"></i> Apply & Start Match
                 </button>
-                <button onclick="logoutUser()" class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
+                <button onclick="logoutUser()" class="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
                     Log Out
                 </button>
             </div>
@@ -1633,11 +1633,13 @@ function doPost(e) {
             const hudIcon = document.getElementById('device-hud-icon');
             const hudLabel = document.getElementById('device-hud-label');
             const lobbyGrid = document.getElementById('lobby-game-cards-grid');
+            const menuGrid = document.getElementById('menu-game-cards-grid');
 
             if (resolved === 'mobile') {
                 if (hudIcon) hudIcon.className = 'fa-solid fa-mobile-screen-button text-emerald-400 text-xs';
                 if (hudLabel) hudLabel.innerText = `Mobile (${info.width}×${info.height})`;
                 if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 gap-2.5';
+                if (menuGrid) menuGrid.className = 'grid grid-cols-2 gap-2.5';
                 if (camera) {
                     camera.fov = 54;
                     camera.position.set(0, 15.5, 17.5);
@@ -1647,6 +1649,7 @@ function doPost(e) {
                 if (hudIcon) hudIcon.className = 'fa-solid fa-tablet-screen-button text-emerald-400 text-xs';
                 if (hudLabel) hudLabel.innerText = `Tablet (${info.width}×${info.height})`;
                 if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-3 gap-3';
+                if (menuGrid) menuGrid.className = 'grid grid-cols-3 gap-3';
                 if (camera) {
                     camera.fov = 48;
                     camera.position.set(0, 13.5, 15.5);
@@ -1656,6 +1659,7 @@ function doPost(e) {
                 if (hudIcon) hudIcon.className = 'fa-solid fa-desktop text-emerald-400 text-xs';
                 if (hudLabel) hudLabel.innerText = `Desktop (${info.width}×${info.height})`;
                 if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3';
+                if (menuGrid) menuGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3';
                 if (camera) {
                     camera.fov = 45;
                     camera.position.set(0, 12, 14);
@@ -1730,6 +1734,7 @@ function doPost(e) {
         function syncMenuModeOptionsForGame() {
             const gameId = document.getElementById('menu-select-game').value || 'quarto';
             const countSel = document.getElementById('menu-player-count');
+            const noteEl = document.getElementById('menu-mode-note');
             const supportsMulti = MULTIPLAYER_CAPABLE_GAMES.includes(gameId);
             if (countSel) {
                 Array.from(countSel.options).forEach(opt => {
@@ -1739,6 +1744,11 @@ function doPost(e) {
                     countSel.value = '2';
                     updateMultiplayerInputs('menu');
                 }
+            }
+            if (noteEl) {
+                noteEl.innerText = supportsMulti
+                    ? 'Configure 2–4 seats individually as Human, Online, or Computer (AI).'
+                    : '2-Player Duel — set Player 2 as Human, Online, or Computer (AI).';
             }
         }
 
@@ -1917,10 +1927,17 @@ function doPost(e) {
             renderLobbyGameCards();
         }
 
-        function renderLobbyGameCards() {
-            const grid = document.getElementById('lobby-game-cards-grid');
-            const hiddenInput = document.getElementById('select-game');
-            const labelEl = document.getElementById('lobby-selected-game-label');
+        function selectMenuGameCard(gameId) {
+            const hiddenInput = document.getElementById('menu-select-game');
+            if (hiddenInput) hiddenInput.value = gameId;
+            syncMenuModeOptionsForGame();
+            renderMenuGameCards();
+        }
+
+        function renderGameCardsIntoGrid(gridId, inputId, labelId, onSelectFn) {
+            const grid = document.getElementById(gridId);
+            const hiddenInput = document.getElementById(inputId);
+            const labelEl = document.getElementById(labelId);
             if (!grid || !hiddenInput) return;
 
             const selectedId = hiddenInput.value || 'quarto';
@@ -1932,7 +1949,7 @@ function doPost(e) {
                 const isSelected = game.id === selectedId;
                 const card = document.createElement('button');
                 card.type = 'button';
-                card.onclick = () => selectLobbyGameCard(game.id);
+                card.onclick = () => onSelectFn(game.id);
                 card.className = isSelected
                     ? "group relative flex flex-col items-center text-center p-3.5 rounded-2xl bg-gray-900/95 border-2 border-cyan-400 shadow-lg glow-cyan transition transform scale-[1.02]"
                     : "group relative flex flex-col items-center text-center p-3.5 rounded-2xl bg-gray-900/60 hover:bg-gray-900 border border-gray-800 hover:border-cyan-500/40 transition";
@@ -1947,6 +1964,14 @@ function doPost(e) {
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        function renderLobbyGameCards() {
+            renderGameCardsIntoGrid('lobby-game-cards-grid', 'select-game', 'lobby-selected-game-label', selectLobbyGameCard);
+        }
+
+        function renderMenuGameCards() {
+            renderGameCardsIntoGrid('menu-game-cards-grid', 'menu-select-game', 'menu-selected-game-label', selectMenuGameCard);
         }
 
         // --- GAME ARENA SETUP ---
@@ -4790,6 +4815,7 @@ function doPost(e) {
 
             updateMultiplayerInputs('menu');
             syncMenuModeOptionsForGame();
+            renderMenuGameCards();
             updateDetectedDeviceHints();
 
             const cfg = getDriveSyncConfig();

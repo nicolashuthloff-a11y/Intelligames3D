@@ -120,7 +120,251 @@
             </div>
         </div>
 
-        <!-- POST-LOGIN GAME SELECTION LOBBY MODAL -->
+        <!-- POST-LOGIN GAME SELECTION LOBBY MODAL (ALL 13 GAMES AS TILES + PER-SEAT HUMAN/AI/ONLINE) -->
+        <div id="game-lobby-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/92 backdrop-blur-md hidden interactive p-3 sm:p-6 overflow-y-auto">
+            <div class="glass-panel p-5 sm:p-7 rounded-2xl w-full max-w-5xl shadow-2xl border border-cyan-500/40 space-y-5 my-auto max-h-[94vh] overflow-y-auto">
+                <div class="border-b border-gray-800 pb-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-xl font-extrabold text-white tracking-wide flex items-center">
+                            <i class="fa-solid fa-gamepad text-cyan-400 mr-2.5"></i> Select Your Match
+                        </h2>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="openInstructionsModal()" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold rounded-xl text-xs border border-cyan-500/40 transition">
+                                <i class="fa-solid fa-book-open mr-1"></i> Documentation & Rules
+                            </button>
+                            <button type="button" onclick="openDriveSyncModal()" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
+                                <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
+                            </button>
+                            <button type="button" onclick="logoutUser()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl text-xs border border-gray-700 transition">
+                                Log Out
+                            </button>
+                        </div>
+                    </div>
+                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Tap any game tile below, set each seat as Human or Computer, and launch</p>
+                </div>
+
+                <!-- Visual Game Tiles Gallery (All 13 Games) -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Choose Game (All 13 Games)</label>
+                        <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
+                    </div>
+                    <input type="hidden" id="select-game" value="quarto">
+                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <div>
+                        <label class="block text-xs font-medium text-cyan-300 mb-1.5">Match Preset & Player Count</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="select-mode" onchange="applyModePresetToSlots('lobby')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                                <option value="pvp" selected>Local / Custom Mix</option>
+                                <option value="p2p">Online / Invite</option>
+                                <option value="pve">Vs Computer (AI)</option>
+                            </select>
+                            <select id="lobby-player-count" onchange="updateMultiplayerInputs('lobby')" class="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                                <option value="2" selected>2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4">4 Players</option>
+                            </select>
+                        </div>
+                        <p id="lobby-mode-note" class="text-[10px] text-gray-400 mt-1">Set each player seat (2–4) as Human, Online, or Computer.</p>
+                    </div>
+
+                    <div id="ai-difficulty-container">
+                        <label class="block text-xs font-medium text-purple-300 mb-1.5">AI Difficulty (for Computer Seats)</label>
+                        <select id="select-ai-difficulty" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="easy">Easy (Casual)</option>
+                            <option value="medium" selected>Medium (Tactical)</option>
+                            <option value="hard">Hard (Grandmaster)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-emerald-300 mb-1.5">
+                            Device & Display <span id="detected-device-hint" class="text-[10px] text-gray-400"></span>
+                        </label>
+                        <select id="select-display-profile" onchange="setDisplayProfile(this.value)" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <option value="auto" selected>Auto-Detect Display</option>
+                            <option value="mobile">Mobile / Phone (Compact)</option>
+                            <option value="tablet">Tablet (Balanced)</option>
+                            <option value="desktop">Desktop / Widescreen</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Per-Player Seat Configuration (Human / Computer / Online) -->
+                <div id="lobby-player-slots-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-gray-950/60 p-3 rounded-2xl border border-gray-800">
+                    <!-- Slot 1 -->
+                    <div class="bg-gray-900/90 p-2.5 rounded-xl border border-cyan-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-cyan-300">Player 1 (Cyan)</span>
+                            <span class="text-[10px] text-gray-400">Host</span>
+                        </div>
+                        <input type="text" id="lobby-p1-name" placeholder="Player 1" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+
+                    <!-- Slot 2 -->
+                    <div id="lobby-slot-2" class="bg-gray-900/90 p-2.5 rounded-xl border border-purple-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-purple-300">Player 2 (Red)</span>
+                            <select id="lobby-p2-type" onchange="toggleSlotTypeUI('lobby', 2)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-cyan-300">
+                                <option value="human" selected>Human (Local)</option>
+                                <option value="ai">Computer (AI)</option>
+                                <option value="online">Online Player</option>
+                            </select>
+                        </div>
+                        <input type="text" id="lobby-p2-name" placeholder="Player 2" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-purple-500">
+                        <select id="lobby-p2-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+
+                    <!-- Slot 3 -->
+                    <div id="lobby-slot-3" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-amber-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-amber-300">Player 3 (Gold)</span>
+                            <select id="lobby-p3-type" onchange="toggleSlotTypeUI('lobby', 3)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-amber-300">
+                                <option value="human" selected>Human (Local)</option>
+                                <option value="ai">Computer (AI)</option>
+                                <option value="online">Online Player</option>
+                            </select>
+                        </div>
+                        <input type="text" id="lobby-p3-name" placeholder="Player 3" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-amber-500">
+                        <select id="lobby-p3-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+
+                    <!-- Slot 4 -->
+                    <div id="lobby-slot-4" class="hidden bg-gray-900/90 p-2.5 rounded-xl border border-emerald-500/30 space-y-1.5">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-emerald-300">Player 4 (Emerald)</span>
+                            <select id="lobby-p4-type" onchange="toggleSlotTypeUI('lobby', 4)" class="px-2 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-emerald-300">
+                                <option value="human" selected>Human (Local)</option>
+                                <option value="ai">Computer (AI)</option>
+                                <option value="online">Online Player</option>
+                            </select>
+                        </div>
+                        <input type="text" id="lobby-p4-name" placeholder="Player 4" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500">
+                        <select id="lobby-p4-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded-lg text-xs text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
+                    <button type="button" onclick="launchSelectedGame()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
+                        <i class="fa-solid fa-play mr-1.5"></i> Start Match
+                    </button>
+                    <button type="button" id="lobby-master-btn" onclick="openMasterMenuFromLobby()" class="hidden sm:w-auto px-5 py-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold rounded-xl text-xs transition">
+                        <i class="fa-solid fa-user-shield mr-1"></i> Manage Users
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP HUD BAR -->
+        <div id="top-hud-bar" class="w-full p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+            <div class="flex items-center space-x-2 pointer-events-auto">
+                <button onclick="openMasterMenu()" class="interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-cyan-500/50 transition">
+                    <i class="fa-solid fa-bars text-cyan-400"></i>
+                    <span class="text-xs font-bold text-white">Menu</span>
+                </button>
+                <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2">
+                    <span id="current-game-title" class="text-xs font-extrabold text-cyan-300">Quarto 3D</span>
+                    <span id="user-display-badge" class="text-[11px] text-gray-400 hidden sm:inline"></span>
+                </div>
+            </div>
+
+            <div class="glass-panel px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto text-center flex items-center space-x-2">
+                <span id="mode-pill-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">2P HUMAN LOCAL</span>
+                <span id="turn-status" class="text-xs font-bold text-white">Player 1: Pick a piece around the board</span>
+            </div>
+
+            <div class="flex items-center space-x-2 pointer-events-auto">
+                <div class="glass-panel px-3 py-2.5 rounded-2xl shadow-xl hidden md:flex items-center space-x-1.5" title="Active Device & Display Profile">
+                    <i id="device-hud-icon" class="fa-solid fa-desktop text-emerald-400 text-xs"></i>
+                    <span id="device-hud-label" class="text-[11px] font-semibold text-emerald-300">Desktop</span>
+                </div>
+                <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl">
+                    <span id="score-display" class="text-xs font-extrabold text-purple-300">P1: 0 | P2: 0</span>
+                </div>
+                <button onclick="openInstructionsModal()" class="interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-cyan-500/50 transition" title="Complete Game Rules & Platform Documentation">
+                    <i class="fa-solid fa-book-open text-cyan-400"></i>
+                    <span class="text-xs font-semibold text-gray-200 hidden sm:inline">Docs & Rules</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- LIVE GAME INVITE NOTIFICATION BANNER -->
+        <div id="invite-notification-banner" class="fixed top-20 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] glass-panel p-4 rounded-2xl shadow-2xl border border-amber-400/60 hidden interactive transition-all">
+            <div class="flex items-start space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
+                    <i class="fa-solid fa-bell animate-bounce"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-extrabold text-amber-300 tracking-wide">New Game Invite!</div>
+                    <p id="invite-banner-text" class="text-xs text-gray-200 mt-0.5 leading-snug"></p>
+                    <div class="flex items-center space-x-2 mt-3">
+                        <button id="invite-banner-accept-btn" class="flex-1 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-gray-950 font-bold rounded-lg text-xs transition">
+                            Accept & Play
+                        </button>
+                        <button onclick="dismissInviteBanner()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg text-xs transition">
+                            Later
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXTRA GAMES INTERACTIVE HUD PANELS (TOP-LEFT DOCKED SO 3D BOARDS REMAIN UNOBSTRUCTED) -->
+        <div id="minigame-hud-container" class="w-full px-3 sm:px-4 flex justify-start items-start pointer-events-none">
+            <!-- Azul 3D HUD -->
+            <div id="hud-azul" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-cyan-500/40 w-full max-w-sm space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="text-[11px] font-bold text-cyan-300"><i class="fa-solid fa-table-cells mr-1"></i> Azul 3D — Factories & Rows</div>
+                    <button type="button" onclick="toggleHudPanelCollapse('hud-azul-body', this)" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[10px] font-semibold">Hide</button>
+                </div>
+                <div id="hud-azul-body" class="space-y-2">
+                    <div class="text-[10px] text-gray-300 leading-snug" id="azul-status-info">1. Pick a color from a Factory, then 2. Click Row 1–5 to draft!</div>
+                    <div id="azul-factories-row" class="flex flex-wrap gap-1.5 justify-start"></div>
+                    <div id="azul-pattern-rows" class="grid grid-cols-5 gap-1 pt-0.5"></div>
+                </div>
+            </div>
+
+            <!-- 7 Wonders 3D HUD -->
+            <div id="hud-sevenwonders" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-amber-500/40 w-full max-w-md space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="text-[11px] font-bold text-amber-300"><i class="fa-solid fa-landmark mr-1"></i> 7 Wonders 3D — Age <span id="sw-age">1</span>/2 | Turn <span id="sw-turn">1</span>/6</div>
+                    <button type="button" onclick="toggleHudPanelCollapse('hud-sw-body', this)" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[10px] font-semibold">Hide</button>
+                </div>
+                <div id="hud-sw-body" class="space-y-2">
+                    <div id="sw-resources-bar" class="text-[10px] text-cyan-200 font-semibold">Shields: 0 | Science: 0 | Coins: 3</div>
+                    <div id="sw-cards-row" class="grid grid-cols-1 sm:grid-cols-3 gap-1.5"></div>
+                </div>
+            </div>
+
+            <!-- Hive 3D HUD -->
+            <div id="hud-hive" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-amber-400/50 w-full max-w-sm space-y-1.5">
+                <div class="text-[11px] font-bold text-amber-300"><i class="fa-solid fa-bugs mr-1"></i> Hive 3D Insect Tray (11 Pieces)</div>
+                <div id="hive-insect-buttons" class="flex flex-wrap gap-1"></div>
+            </div>
+
+            <!-- Carcassonne 3D HUD -->
+            <div id="hud-carcassonne" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-emerald-500/40 w-full max-w-sm space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-bold text-emerald-300">Current Tile:</span>
+                    <span id="carc-current-tile" class="px-2 py-0.5 bg-emerald-500/20 border border-emerald-400/40 rounded text-[11px] font-extrabold text-white">City + Road</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <label class="flex items-center space-x-1.5 text-[11px] text-amber-300 cursor-pointer">
+                        <input type="checkbox" id="carc-place-meeple" checked class="rounded text-amber-500">
+                        <span>Meeple (<span id="carc-meeples-left">7</span> left)</span>
+                    </label>
+                    <button onclick="rotateCarcassonneTile()" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded-lg text-[11px] font-semibold">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Rotate
+                    </button>
                 </div>
             </div>
 
@@ -187,166 +431,6 @@
             </div>
         </div>
 
-        <!-- TOP HUD BAR -->
-        <div id="top-hud-bar" class="w-full p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-            <div class="flex items-center space-x-2 pointer-events-auto">
-                <button onclick="openMasterMenu()" class="interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-cyan-500/50 transition">
-                    <i class="fa-solid fa-bars text-cyan-400"></i>
-                    <span class="text-xs font-bold text-white">Menu</span>
-                </button>
-                <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2">
-                    <span id="current-game-title" class="text-xs font-extrabold text-cyan-300">Quarto 3D</span>
-                    <span id="user-display-badge" class="text-[11px] text-gray-400 hidden sm:inline"></span>
-                </div>
-            </div>
-
-            <div class="glass-panel px-4 py-2.5 rounded-2xl shadow-xl pointer-events-auto text-center flex items-center space-x-2">
-                <span id="mode-pill-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">2P SAME DEVICE</span>
-                <span id="turn-status" class="text-xs font-bold text-white">Player 1: Pick a piece around the board</span>
-            </div>
-
-            <div class="flex items-center space-x-2 pointer-events-auto">
-                <div class="glass-panel px-3 py-2.5 rounded-2xl shadow-xl hidden md:flex items-center space-x-1.5" title="Active Device & Display Profile">
-                    <i id="device-hud-icon" class="fa-solid fa-desktop text-emerald-400 text-xs"></i>
-                    <span id="device-hud-label" class="text-[11px] font-semibold text-emerald-300">Desktop</span>
-                </div>
-                <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl">
-                    <span id="score-display" class="text-xs font-extrabold text-purple-300">P1: 0 | P2: 0</span>
-                </div>
-                <button onclick="openInstructionsModal()" class="interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-cyan-500/50 transition">
-                    <i class="fa-solid fa-circle-question text-cyan-400"></i>
-                    <span class="text-xs font-semibold text-gray-200 hidden sm:inline">Rules</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- LIVE GAME INVITE NOTIFICATION BANNER -->
-        <div id="invite-notification-banner" class="fixed top-20 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] glass-panel p-4 rounded-2xl shadow-2xl border border-amber-400/60 hidden interactive transition-all">
-            <div class="flex items-start space-x-3">
-                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center shrink-0 text-amber-300">
-                    <i class="fa-solid fa-bell animate-bounce"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="text-xs font-extrabold text-amber-300 tracking-wide">New Game Invite!</div>
-                    <p id="invite-banner-text" class="text-xs text-gray-200 mt-0.5 leading-snug"></p>
-                    <div class="flex items-center space-x-2 mt-3">
-                        <button id="invite-banner-accept-btn" class="flex-1 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-gray-950 font-bold rounded-lg text-xs transition">
-                            Accept & Play
-                        </button>
-                        <button onclick="dismissInviteBanner()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg text-xs transition">
-                            Later
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- EXTRA GAMES INTERACTIVE HUD PANELS -->
-        <div id="minigame-hud-container" class="w-full px-4 flex justify-center pointer-events-none">
-            <!-- Azul 3D HUD -->
-            <div id="hud-azul" class="hidden interactive glass-panel p-4 rounded-2xl shadow-xl border border-cyan-500/40 w-full max-w-2xl space-y-2.5">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="text-xs font-bold text-cyan-300"><i class="fa-solid fa-table-cells mr-1"></i> Azul 3D — 5 Factory Displays & 5×5 Mosaic Wall</div>
-                    <div class="text-[11px] text-gray-300" id="azul-status-info">1. Pick a color from a Factory, then 2. Click a Pattern Row (1–5) to draft!</div>
-                </div>
-                <div id="azul-factories-row" class="flex flex-wrap gap-2 justify-center"></div>
-                <div id="azul-pattern-rows" class="grid grid-cols-5 gap-1.5 pt-1"></div>
-            </div>
-
-            <!-- 7 Wonders 3D HUD -->
-            <div id="hud-sevenwonders" class="hidden interactive glass-panel p-4 rounded-2xl shadow-xl border border-amber-500/40 w-full max-w-2xl space-y-2.5">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="text-xs font-bold text-amber-300"><i class="fa-solid fa-landmark mr-1"></i> 7 Wonders 3D — Age <span id="sw-age">1</span>/2 | Turn <span id="sw-turn">1</span>/6</div>
-                    <div id="sw-resources-bar" class="text-[11px] text-cyan-200 font-semibold">Shields: 0 | Science: 0 | Coins: 3</div>
-                </div>
-                <div id="sw-cards-row" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
-            </div>
-
-            <!-- Hive 3D HUD -->
-            <div id="hud-hive" class="hidden interactive glass-panel px-4 py-3 rounded-2xl shadow-xl border border-amber-400/50 flex flex-wrap items-center gap-3">
-                <span class="text-xs font-bold text-amber-300"><i class="fa-solid fa-bugs mr-1"></i> Hive 3D Insect Tray (11 Pieces):</span>
-                <div id="hive-insect-buttons" class="flex flex-wrap gap-1.5"></div>
-            </div>
-
-            <!-- Carcassonne 3D HUD -->
-            <div id="hud-carcassonne" class="hidden interactive glass-panel px-4 py-3 rounded-2xl shadow-xl border border-emerald-500/40 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold text-emerald-300">Current Tile:</span>
-                    <span id="carc-current-tile" class="px-2.5 py-1 bg-emerald-500/20 border border-emerald-400/40 rounded-lg text-xs font-extrabold text-white">City + Road</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <label class="flex items-center space-x-1.5 text-xs text-amber-300 cursor-pointer">
-                        <input type="checkbox" id="carc-place-meeple" checked class="rounded text-amber-500">
-                        <span>Deploy Meeple (<span id="carc-meeples-left">7</span> left)</span>
-                    </label>
-                    <button onclick="rotateCarcassonneTile()" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded-lg text-xs font-semibold">
-                        <i class="fa-solid fa-rotate-right mr-1"></i> Rotate
-                    </button>
-                </div>
-            </div>
-
-            <!-- Twixt 3D HUD -->
-            <div id="hud-twixt" class="hidden interactive glass-panel px-4 py-2.5 rounded-2xl shadow-xl border border-purple-500/40 flex flex-wrap items-center gap-3 text-xs">
-                <span class="font-bold text-cyan-300">Player 1 (Cyan): Connect North ↔ South</span>
-                <span class="text-gray-500">|</span>
-                <span class="font-bold text-rose-400">Player 2 (Red): Connect West ↔ East</span>
-                <span class="text-gray-300">(12×12 Pegboard • Knight-move pegs auto-link!)</span>
-            </div>
-
-            <!-- Mensch ärgere Dich nicht HUD -->
-            <div id="hud-mensch" class="hidden interactive glass-panel px-5 py-3 rounded-2xl shadow-xl border border-amber-500/40 flex flex-wrap items-center gap-4">
-                <div class="flex items-center space-x-2">
-                    <div id="mensch-dice-box" class="w-10 h-10 rounded-xl bg-white text-gray-950 font-extrabold text-lg flex items-center justify-center shadow">🎲</div>
-                    <button onclick="rollMenschDice()" id="mensch-roll-btn" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-gray-950 font-bold rounded-xl text-xs transition">
-                        Roll Die
-                    </button>
-                </div>
-                <div id="mensch-info" class="text-xs text-gray-200">Roll a 6 to bring one of your 4 pawns out, or click your pawn on the 40-tile track!</div>
-            </div>
-
-            <!-- Skribbl HUD -->
-            <div id="hud-skribbl" class="hidden interactive glass-panel p-4 rounded-2xl shadow-xl border border-cyan-500/40 w-full max-w-xl space-y-2.5">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="text-xs font-bold text-cyan-300">Word: <span id="skribbl-word-display" class="text-white tracking-widest uppercase">_ _ _ _ _</span></div>
-                    <div class="flex items-center space-x-1.5">
-                        <input type="color" id="skribbl-color" value="#22d3ee" class="w-7 h-7 rounded bg-transparent border-0 cursor-pointer">
-                        <button onclick="clearSkribblCanvas()" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-xs">Clear</button>
-                        <button onclick="nextSkribblRound()" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-xs">New Word</button>
-                    </div>
-                </div>
-                <canvas id="skribbl-canvas" width="520" height="210" class="w-full h-44 bg-gray-950 rounded-xl border border-gray-800 cursor-crosshair touch-none"></canvas>
-                <div class="flex space-x-2">
-                    <input type="text" id="skribbl-guess-input" onkeypress="if(event.key==='Enter') submitSkribblGuess()" placeholder="Type your guess here..." class="flex-1 px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                    <button onclick="submitSkribblGuess()" class="px-4 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs">Guess</button>
-                </div>
-            </div>
-
-            <!-- Hangman 3D HUD -->
-            <div id="hud-hangman" class="hidden interactive glass-panel p-4 rounded-2xl shadow-xl border border-rose-500/40 w-full max-w-xl space-y-3 text-center">
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-rose-300 font-bold">Mistakes: <span id="hangman-mistakes">0</span> / 6</span>
-                    <span id="hangman-category" class="text-gray-400">Category: Strategy & Space</span>
-                    <button onclick="initHangmanGame()" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded-lg font-semibold">New Word</button>
-                </div>
-                <div id="hangman-word-slots" class="text-xl sm:text-2xl font-extrabold tracking-[0.35em] text-white py-1">_ _ _ _ _</div>
-                <div id="hangman-keyboard" class="flex flex-wrap justify-center gap-1.5"></div>
-            </div>
-
-            <!-- Yahtzee 3D HUD -->
-            <div id="hud-yahtzee" class="hidden interactive glass-panel p-4 rounded-2xl shadow-xl border border-emerald-500/40 w-full max-w-2xl space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center space-x-2" id="yahtzee-dice-row"></div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xs text-emerald-300 font-semibold">Rolls left: <span id="yahtzee-rolls-left">3</span></span>
-                        <button onclick="rollYahtzeeDice()" id="yahtzee-roll-btn" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 font-bold rounded-xl text-xs transition">
-                            Roll Dice
-                        </button>
-                    </div>
-                </div>
-                <div id="yahtzee-scorecard" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px]"></div>
-            </div>
-        </div>
-
         <!-- FLOATING ACTION CHAT & CONTROLS -->
         <div class="w-full p-4 flex flex-wrap gap-2 justify-between items-end pointer-events-none">
             <div class="flex flex-wrap gap-2 pointer-events-auto">
@@ -372,6 +456,75 @@
                     <span id="drive-sync-hud-label" class="text-xs font-semibold text-gray-200">Drive Sync</span>
                     <span id="drive-sync-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
                 </button>
+                <!-- Audio & Video Call Toggle Button -->
+                <button onclick="toggleVideoCallDrawer()" class="interactive glass-panel px-4 py-2.5 rounded-2xl flex items-center space-x-2 shadow-xl hover:border-rose-500/50 transition relative" title="Start or join live Audio & Video Call">
+                    <i class="fa-solid fa-video text-rose-400"></i>
+                    <span class="text-xs font-semibold text-gray-200">Audio / Video</span>
+                    <span id="call-active-dot" class="hidden w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- LIVE AUDIO & VIDEO CALL DRAWER (WEBRTC PEER-TO-PEER) -->
+        <div id="video-call-drawer" class="fixed bottom-16 right-4 w-80 sm:w-96 max-w-[calc(100vw-2rem)] glass-panel rounded-2xl shadow-2xl border border-rose-500/40 flex flex-col hidden interactive z-40 overflow-hidden">
+            <div class="p-3 bg-gray-900/90 border-b border-gray-800 flex items-center justify-between">
+                <span class="text-xs font-bold text-rose-400 flex items-center">
+                    <i class="fa-solid fa-video mr-1.5"></i> Live Audio & Video Call
+                </span>
+                <div class="flex items-center space-x-2">
+                    <span id="webrtc-status-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 font-semibold">Standby</span>
+                    <button onclick="toggleVideoCallDrawer()" class="text-gray-400 hover:text-white text-xs"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- Video Streams Grid -->
+            <div class="p-3 space-y-2.5 bg-gray-950/80">
+                <div class="relative w-full h-44 bg-gray-900 rounded-xl overflow-hidden border border-gray-800 flex items-center justify-center">
+                    <video id="remote-video-el" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                    <div id="remote-video-placeholder" class="text-center space-y-1 p-3">
+                        <i class="fa-solid fa-user-astronaut text-2xl text-gray-600"></i>
+                        <div class="text-[11px] text-gray-400 font-medium">Opponent Audio / Video Feed</div>
+                        <div class="text-[10px] text-gray-500">Start Audio or Video Call below to connect</div>
+                    </div>
+                    <!-- Local PiP Preview -->
+                    <div class="absolute bottom-2 right-2 w-24 h-16 bg-gray-950 rounded-lg overflow-hidden border border-cyan-500/50 shadow-lg flex items-center justify-center">
+                        <video id="local-video-el" autoplay muted playsinline class="w-full h-full object-cover hidden"></video>
+                        <span id="local-video-placeholder" class="text-[9px] text-gray-400">You</span>
+                    </div>
+                </div>
+
+                <!-- Call Controls -->
+                <div class="grid grid-cols-4 gap-1.5">
+                    <button type="button" onclick="startLocalMediaCall(true)" class="py-2 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-bold rounded-lg text-[11px] transition flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-video mb-0.5"></i>
+                        <span>Video</span>
+                    </button>
+                    <button type="button" onclick="startLocalMediaCall(false)" class="py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-bold rounded-lg text-[11px] transition flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-phone mb-0.5"></i>
+                        <span>Audio Only</span>
+                    </button>
+                    <button type="button" id="btn-toggle-mic" onclick="toggleCallMic()" class="py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded-lg text-[11px] transition flex flex-col items-center justify-center">
+                        <i id="icon-toggle-mic" class="fa-solid fa-microphone mb-0.5 text-emerald-400"></i>
+                        <span id="label-toggle-mic">Mute</span>
+                    </button>
+                    <button type="button" onclick="endMediaCall()" class="py-2 bg-gray-900 hover:bg-rose-950 text-rose-400 border border-rose-500/30 font-bold rounded-lg text-[11px] transition flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-phone-slash mb-0.5"></i>
+                        <span>End</span>
+                    </button>
+                </div>
+
+                <!-- Peer-to-Peer Room / Manual Signaling Exchange -->
+                <details class="bg-gray-900/90 p-2.5 rounded-xl border border-gray-800 text-[11px]">
+                    <summary class="cursor-pointer font-semibold text-cyan-300">Peer Connection Code (2-Device Connect)</summary>
+                    <div class="mt-2 space-y-2 text-[10px] text-gray-400">
+                        <p>1. Click <strong>Video</strong> or <strong>Audio Only</strong>, then click <strong>Create Offer</strong> & send the code to your opponent (or open a 2nd browser tab to auto-pair).</p>
+                        <div class="flex space-x-1.5">
+                            <button type="button" onclick="createWebRTCOffer()" class="flex-1 py-1.5 bg-cyan-500 text-gray-950 font-bold rounded-lg">Create Offer</button>
+                            <button type="button" onclick="acceptRemoteSignalCode()" class="flex-1 py-1.5 bg-purple-500 text-white font-bold rounded-lg">Connect Code</button>
+                        </div>
+                        <textarea id="webrtc-signal-box" rows="2" placeholder="Paste opponent's Offer or Answer code here..." class="w-full p-1.5 bg-gray-950 border border-gray-800 rounded-lg text-[10px] font-mono text-emerald-300 focus:outline-none"></textarea>
+                    </div>
+                </details>
             </div>
         </div>
 
@@ -419,7 +572,7 @@
             </div>
 
             <div class="space-y-3 text-xs text-gray-300">
-                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Game Sessions, Invites, Favored Players, Match Scores, and Move History</strong> automatically sync across devices and populate structured spreadsheet tabs.</p>
+                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Game Sessions, Invites, Favored Players, Match Scores (2–4 Players), and Move History</strong> automatically sync across devices and populate structured spreadsheet tabs.</p>
 
                 <div class="bg-gray-950/80 p-3.5 rounded-xl border border-emerald-500/30 space-y-2.5">
                     <div>
@@ -458,7 +611,7 @@
                         <li>Open <a href="https://sheets.new" target="_blank" rel="noopener" class="text-emerald-400 underline font-semibold">sheets.new</a> in your browser to create a new Google Sheet on your Drive (name it <em>Intelligames_3D_Sync</em>).</li>
                         <li>In the Sheet menu, click <strong>Extensions → Apps Script</strong>, delete any starter code, and paste the script below.</li>
                         <li>Click <strong>Deploy → New deployment</strong> → Select type <strong>Web app</strong> → Set <em>Execute as</em>: <strong>Me</strong> and <em>Who has access</em>: <strong>Anyone</strong> → Click <strong>Deploy</strong>.</li>
-                        <li>Copy the generated <strong>Web app URL</strong>, paste it into the field above, and click <strong>Save & Push Now</strong>. Your Sheet will automatically create tabs for <code>Users</code>, <code>Sessions_Invites</code>, <code>Match_Scores</code>, <code>Move_History</code>, <code>Favorites</code>, and <code>Raw_JSON</code>.</li>
+                        <li>Copy the generated <strong>Web app URL</strong>, paste it into the field above, and click <strong>Save & Push Now</strong>. Your Sheet will automatically create tabs for <code>Users</code>, <code>Sessions_Invites</code>, <code>Match_Scores</code> (2–4 players), <code>Move_History</code>, <code>Favorites</code>, and <code>Raw_JSON</code>.</li>
                     </ol>
                     <textarea id="apps-script-code-box" readonly rows="8" class="w-full p-2.5 bg-gray-900 border border-gray-800 rounded-lg text-[10px] font-mono text-emerald-300 focus:outline-none">function doGet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -493,14 +646,16 @@ function doPost(e) {
     sSheet.appendRow([s.id, s.name, s.game, s.host, s.invited || '', s.accepted ? 'Yes' : 'Pending']);
   });
 
-  // 4. Match Scores Log Tab
+  // 4. Match Scores Log Tab (Supports 2 to 4 players)
   if (data.latestMatch) {
     var mSheet = ss.getSheetByName('Match_Scores') || ss.insertSheet('Match_Scores');
     if (mSheet.getLastRow() === 0) {
-      mSheet.appendRow(['Timestamp', 'Game', 'Mode', 'Player_1', 'Player_2', 'P1_Score', 'P2_Score']);
+      mSheet.appendRow(['Timestamp', 'Game', 'Mode', 'Player_Count', 'Players', 'P1_Score', 'P2_Score', 'P3_Score', 'P4_Score']);
     }
     var m = data.latestMatch;
-    mSheet.appendRow([data.updatedAt, m.game, m.mode, m.player1, m.player2, m.scores.p1, m.scores.p2]);
+    var sc = m.scores || {};
+    var roster = (m.players && m.players.length) ? m.players.join(', ') : (m.player1 + ', ' + m.player2);
+    mSheet.appendRow([data.updatedAt, m.game, m.mode, m.numPlayers || 2, roster, sc.p1 || 0, sc.p2 || 0, sc.p3 || 0, sc.p4 || 0]);
   }
 
   // 5. Move History Tab
@@ -621,52 +776,99 @@ function doPost(e) {
                     <label class="block font-medium text-gray-300 mb-1">Switch Game Type</label>
                     <select id="menu-select-game" onchange="syncMenuModeOptionsForGame()" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
                         <option value="quarto">Quarto 3D (Logic & Geometry)</option>
-                        <option value="azul">Azul 3D (Mosaic Tile Drafting)</option>
-                        <option value="sevenwonders">7 Wonders 3D (Civilization Drafting)</option>
+                        <option value="azul">Azul 3D (Mosaic Tile Drafting • 2–4P)</option>
+                        <option value="sevenwonders">7 Wonders 3D (Civilization Drafting • 2–4P)</option>
                         <option value="hive">Hive 3D (Hex Insect Strategy)</option>
-                        <option value="carcassonne">Carcassonne 3D (Landscape & Meeples)</option>
+                        <option value="carcassonne">Carcassonne 3D (Landscape & Meeples • 2–4P)</option>
                         <option value="twixt">Twixt 3D (Knight-Bridge Network)</option>
                         <option value="startrek">Star Trek Tri-D Chess (3D Multi-Level)</option>
-                        <option value="mensch">Mensch ärgere Dich nicht 3D (Ludo Race)</option>
-                        <option value="skribbl">Skribbl 3D (Draw & Guess)</option>
-                        <option value="hangman">Hangman 3D (Word Deduction)</option>
-                        <option value="yahtzee">Yahtzee 3D (5-Dice Strategy)</option>
+                        <option value="mensch">Mensch ärgere Dich nicht 3D (Ludo Race • 2–4P)</option>
+                        <option value="skribbl">Skribbl 3D (Draw & Guess • 2–4P)</option>
+                        <option value="hangman">Hangman 3D (Word Deduction • 2–4P)</option>
+                        <option value="yahtzee">Yahtzee 3D (5-Dice Strategy • 2–4P)</option>
                         <option value="muhle">Mühle 3D (Nine Men's Morris)</option>
                         <option value="fourgewinnt">4gewinnt 3D (Connect 4)</option>
                     </select>
                 </div>
+
                 <div>
-                    <label class="block font-medium text-gray-300 mb-1">Game Mode</label>
-                    <select id="menu-select-mode" onchange="toggleMenuModeFields()" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
-                        <option value="p2p">Player to Player (Online / Invite)</option>
-                        <option value="pvp">2 Players on Same Device</option>
-                        <option value="pve">Player vs Computer (PvE)</option>
-                    </select>
-                </div>
-                <div id="menu-p2p-opponent-container" class="hidden">
-                    <label class="block font-medium text-amber-300 mb-1">Opponent Username (Player to Player)</label>
-                    <select id="menu-p2p-opponent" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
-                        <option value="">-- Open Session / Any Player --</option>
-                    </select>
-                </div>
-                <div id="menu-pvp-names-container" class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium text-cyan-300 mb-1">Player 1 Name</label>
-                        <input type="text" id="menu-p1-name" placeholder="Player 1" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-purple-300 mb-1">Player 2 Name</label>
-                        <input type="text" id="menu-p2-name" placeholder="Player 2" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                    <label class="block font-medium text-gray-300 mb-1">Match Preset & Player Count</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="menu-select-mode" onchange="applyModePresetToSlots('menu')" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                            <option value="pvp">Local / Custom Mix</option>
+                            <option value="p2p">Online / Invite</option>
+                            <option value="pve">Vs Computer (AI)</option>
+                        </select>
+                        <select id="menu-player-count" onchange="updateMultiplayerInputs('menu')" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
+                            <option value="2" selected>2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                        </select>
                     </div>
                 </div>
-                <div id="menu-ai-difficulty-container" class="hidden">
-                    <label class="block font-medium text-purple-300 mb-1">AI Difficulty Level</label>
+
+                <!-- Per-Player Seat Configuration in Master Menu -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-950/60 p-3 rounded-xl border border-gray-800">
+                    <div class="bg-gray-900/90 p-2 rounded-lg border border-cyan-500/30 space-y-1">
+                        <div class="text-[11px] font-bold text-cyan-300">Player 1 (Host)</div>
+                        <input type="text" id="menu-p1-name" placeholder="Player 1" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
+                    </div>
+
+                    <div id="menu-slot-2" class="bg-gray-900/90 p-2 rounded-lg border border-purple-500/30 space-y-1">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-purple-300">Player 2</span>
+                            <select id="menu-p2-type" onchange="toggleSlotTypeUI('menu', 2)" class="px-1.5 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-cyan-300">
+                                <option value="human" selected>Human</option>
+                                <option value="ai">Computer</option>
+                                <option value="online">Online</option>
+                            </select>
+                        </div>
+                        <input type="text" id="menu-p2-name" placeholder="Player 2" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
+                        <select id="menu-p2-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+
+                    <div id="menu-slot-3" class="hidden bg-gray-900/90 p-2 rounded-lg border border-amber-500/30 space-y-1">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-amber-300">Player 3</span>
+                            <select id="menu-p3-type" onchange="toggleSlotTypeUI('menu', 3)" class="px-1.5 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-amber-300">
+                                <option value="human" selected>Human</option>
+                                <option value="ai">Computer</option>
+                                <option value="online">Online</option>
+                            </select>
+                        </div>
+                        <input type="text" id="menu-p3-name" placeholder="Player 3" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
+                        <select id="menu-p3-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+
+                    <div id="menu-slot-4" class="hidden bg-gray-900/90 p-2 rounded-lg border border-emerald-500/30 space-y-1">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[11px] font-bold text-emerald-300">Player 4</span>
+                            <select id="menu-p4-type" onchange="toggleSlotTypeUI('menu', 4)" class="px-1.5 py-0.5 bg-gray-950 border border-gray-700 rounded text-[10px] font-bold text-emerald-300">
+                                <option value="human" selected>Human</option>
+                                <option value="ai">Computer</option>
+                                <option value="online">Online</option>
+                            </select>
+                        </div>
+                        <input type="text" id="menu-p4-name" placeholder="Player 4" class="w-full px-2.5 py-1.5 bg-gray-950 border border-gray-800 rounded text-white">
+                        <select id="menu-p4-online" class="hidden w-full px-2.5 py-1.5 bg-gray-950 border border-amber-500/40 rounded text-amber-200">
+                            <option value="">-- Open Invite / Any Player --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="menu-ai-difficulty-container">
+                    <label class="block font-medium text-purple-300 mb-1">AI Difficulty Level (Computer Seats)</label>
                     <select id="menu-select-ai-difficulty" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white">
                         <option value="easy">Easy (Casual)</option>
                         <option value="medium" selected>Medium (Tactical)</option>
                         <option value="hard">Hard (Grandmaster)</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block font-medium text-emerald-300 mb-1">
                         Device & Display Layout <span id="menu-detected-device-hint" class="text-[10px] text-gray-400"></span>
@@ -678,6 +880,7 @@ function doPost(e) {
                         <option value="desktop">Desktop / Widescreen</option>
                     </select>
                 </div>
+
                 <div class="bg-gray-950/70 p-3 rounded-xl border border-emerald-500/30 flex items-center justify-between gap-2">
                     <div>
                         <div class="font-bold text-emerald-300"><i class="fa-brands fa-google-drive mr-1"></i> Google Drive Sheet Sync</div>
@@ -733,29 +936,30 @@ function doPost(e) {
         </div>
     </div>
 
-    <!-- INSTRUCTIONS MODAL -->
+    <!-- COMPLETE RULES & FULL DOCUMENTATION MODAL -->
     <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
-        <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-cyan-500/40 space-y-4 max-h-[88vh] overflow-y-auto">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-3xl shadow-2xl border border-cyan-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-gray-800 pb-3">
                 <h3 class="text-base font-bold text-white flex items-center">
-                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Complete Rules, Specs & Strategy Guide
+                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Complete Documentation, Game Specs & Rules Manual
                 </h3>
                 <button onclick="closeInstructionsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- Game Rule Tabs -->
+            <!-- Platform & Game Documentation Tabs -->
             <div class="flex flex-wrap gap-1.5 border-b border-gray-800 pb-2.5">
-                <button onclick="selectInstructionTab('quarto')" id="rule-tab-quarto" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">Quarto 3D</button>
-                <button onclick="selectInstructionTab('azul')" id="rule-tab-azul" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Azul 3D</button>
-                <button onclick="selectInstructionTab('sevenwonders')" id="rule-tab-sevenwonders" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">7 Wonders 3D</button>
+                <button onclick="selectInstructionTab('platform')" id="rule-tab-platform" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition"><i class="fa-solid fa-layer-group mr-1"></i> Platform & All Functions</button>
+                <button onclick="selectInstructionTab('quarto')" id="rule-tab-quarto" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Quarto 3D</button>
+                <button onclick="selectInstructionTab('azul')" id="rule-tab-azul" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Azul 3D (2–4P)</button>
+                <button onclick="selectInstructionTab('sevenwonders')" id="rule-tab-sevenwonders" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">7 Wonders 3D (2–4P)</button>
                 <button onclick="selectInstructionTab('hive')" id="rule-tab-hive" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Hive 3D</button>
-                <button onclick="selectInstructionTab('carcassonne')" id="rule-tab-carcassonne" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Carcassonne 3D</button>
+                <button onclick="selectInstructionTab('carcassonne')" id="rule-tab-carcassonne" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Carcassonne 3D (2–4P)</button>
                 <button onclick="selectInstructionTab('twixt')" id="rule-tab-twixt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Twixt 3D</button>
                 <button onclick="selectInstructionTab('startrek')" id="rule-tab-startrek" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Star Trek Chess</button>
-                <button onclick="selectInstructionTab('mensch')" id="rule-tab-mensch" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mensch ärgere Dich nicht</button>
+                <button onclick="selectInstructionTab('mensch')" id="rule-tab-mensch" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mensch ärgere Dich nicht (2–4P)</button>
                 <button onclick="selectInstructionTab('skribbl')" id="rule-tab-skribbl" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Skribbl 3D</button>
                 <button onclick="selectInstructionTab('hangman')" id="rule-tab-hangman" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Hangman 3D</button>
-                <button onclick="selectInstructionTab('yahtzee')" id="rule-tab-yahtzee" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Yahtzee 3D</button>
+                <button onclick="selectInstructionTab('yahtzee')" id="rule-tab-yahtzee" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Yahtzee 3D (2–4P)</button>
                 <button onclick="selectInstructionTab('muhle')" id="rule-tab-muhle" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mühle 3D</button>
                 <button onclick="selectInstructionTab('fourgewinnt')" id="rule-tab-fourgewinnt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">4gewinnt 3D</button>
             </div>
@@ -808,6 +1012,9 @@ function doPost(e) {
         let activeGame = 'quarto';
         let gameModeType = 'pvp';
         let aiDifficulty = 'medium';
+        let numPlayers = 2;
+        let playerTypes = ['human', 'human', 'human', 'human'];
+        let playerNames = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
         let player1Name = 'Player 1';
         let player2Name = 'Player 2';
         let displayProfileSetting = 'auto';
@@ -817,7 +1024,7 @@ function doPost(e) {
         let currentUserRole = 'player';
         let editingUsername = null;
         let gameOver = false;
-        let scores = { p1: 0, p2: 0 };
+        let scores = { p1: 0, p2: 0, p3: 0, p4: 0 };
         let chatMessages = [];
         let moveHistory = [];
         let winningPieces = [];
@@ -825,18 +1032,84 @@ function doPost(e) {
         let dismissedInviteIds = [];
         let lastNotifiedInviteId = null;
 
-        // Mini-game states
+        // WebRTC Audio / Video Call state
+        let localMediaStream = null;
+        let peerConnection = null;
+        let isMicMuted = false;
+
+        // Multi-player game state holders
         let menschState = { dice: null, rolled: false, trackCoords: [], pawns: [] };
         let skribblState = { drawing: false, currentWord: '', words: ['SPACESHIP', 'PYRAMID', 'DRAGON', 'CASTLE', 'VOLCANO', 'TELESCOPE', 'OCTOPUS', 'LIGHTHOUSE'] };
         let hangmanState = { word: '', guessed: [], mistakes: 0, scaffoldMeshes: [], words: ['QUARTO', 'STARSHIP', 'GALAXY', 'STRATEGY', 'DIMENSION', 'MONOLITH', 'ASTEROID', 'NEBULA'] };
-        let yahtzeeState = { dice: [1, 2, 3, 4, 5], held: [false, false, false, false, false], rollsLeft: 3, scoresP1: {}, scoresP2: {}, diceMeshes: [] };
-        let azulState = { colors: [], factories: [], selectedBatch: null, wallP1: [], wallP2: [], ptsP1: 0, ptsP2: 0 };
-        let swState = { age: 1, turn: 1, p1: {}, p2: {}, hand: [] };
+        let yahtzeeState = { dice: [1, 2, 3, 4, 5], held: [false, false, false, false, false], rollsLeft: 3, scoreCards: [{}, {}, {}, {}], diceMeshes: [] };
+        let azulState = { colors: [], factories: [], selectedBatch: null, walls: [], pts: [0, 0, 0, 0] };
+        let swState = { age: 1, turn: 1, players: [], hand: [] };
         let hiveState = { selectedInsect: 'Queen', placed: [], p1Hand: [], p2Hand: [] };
-        let carcState = { grid: {}, currentTile: null, rotation: 0, meeplesP1: 7, meeplesP2: 7, ptsP1: 0, ptsP2: 0 };
+        let carcState = { grid: {}, currentTile: null, rotation: 0, meeples: [7, 7, 7, 7], pts: [0, 0, 0, 0] };
         let twixtState = { size: 12, pegs: [], links: [] };
         let muhleState = { phase: 'place', p1Unplaced: 9, p2Unplaced: 9, nodes: [], selectedNode: null, mustRemove: false };
         let connect4State = { cols: 7, rows: 6, grid: [] };
+
+        const MULTIPLAYER_CAPABLE_GAMES = ['azul', 'sevenwonders', 'carcassonne', 'mensch', 'yahtzee', 'skribbl', 'hangman'];
+        const TEAM_HEX_COLORS = [0x22d3ee, 0xf43f5e, 0xfbbf24, 0x10b981];
+
+        function isCurrentPlayerAI() {
+            return playerTypes[currentPlayer - 1] === 'ai';
+        }
+
+        function isPlayerAI(pNum) {
+            return playerTypes[pNum - 1] === 'ai';
+        }
+
+        function nextTurnPlayer() {
+            currentPlayer = (currentPlayer % numPlayers) + 1;
+            return currentPlayer;
+        }
+
+        function toggleSlotTypeUI(prefix, slotNum) {
+            const typeSel = document.getElementById(`${prefix}-p${slotNum}-type`);
+            const nameInp = document.getElementById(`${prefix}-p${slotNum}-name`);
+            const onlineSel = document.getElementById(`${prefix}-p${slotNum}-online`);
+            if (!typeSel || !nameInp || !onlineSel) return;
+
+            const val = typeSel.value;
+            if (val === 'online') {
+                nameInp.classList.add('hidden');
+                onlineSel.classList.remove('hidden');
+            } else {
+                onlineSel.classList.add('hidden');
+                nameInp.classList.remove('hidden');
+                if (val === 'ai') {
+                    nameInp.value = `Computer ${slotNum - 1} (AI)`;
+                } else if (nameInp.value.includes('(AI)')) {
+                    nameInp.value = `Player ${slotNum}`;
+                }
+            }
+        }
+
+        function applyModePresetToSlots(prefix) {
+            const modeSel = document.getElementById(prefix === 'lobby' ? 'select-mode' : 'menu-select-mode');
+            if (!modeSel) return;
+            const preset = modeSel.value;
+            const targetType = preset === 'pve' ? 'ai' : (preset === 'p2p' ? 'online' : 'human');
+
+            [2, 3, 4].forEach(slotNum => {
+                const typeSel = document.getElementById(`${prefix}-p${slotNum}-type`);
+                if (typeSel) {
+                    typeSel.value = targetType;
+                    toggleSlotTypeUI(prefix, slotNum);
+                }
+            });
+        }
+
+        function updateMultiplayerInputs(prefix) {
+            const countSel = document.getElementById(`${prefix}-player-count`);
+            const count = countSel ? parseInt(countSel.value, 10) || 2 : 2;
+            const slot3 = document.getElementById(`${prefix}-slot-3`);
+            const slot4 = document.getElementById(`${prefix}-slot-4`);
+            if (slot3) slot3.classList.toggle('hidden', count < 3);
+            if (slot4) slot4.classList.toggle('hidden', count < 4);
+        }
 
         window.onload = function() {
             if (typeof THREE === 'undefined') {
@@ -848,10 +1121,234 @@ function doPost(e) {
             initDeviceAndDisplayDetection();
             setupSkribblCanvasEvents();
             loadChatHistory();
-            selectInstructionTab('quarto');
+            selectInstructionTab('platform');
             checkExistingSession();
             startInviteNotificationListener();
+            initWebRTCSignalingListener();
         };
+
+        // --- LIVE AUDIO & VIDEO CALL (WEBRTC) ---
+        function toggleVideoCallDrawer() {
+            const drawer = document.getElementById('video-call-drawer');
+            if (drawer) drawer.classList.toggle('hidden');
+        }
+
+        function updateCallStatusBadge(text, active = false) {
+            const badge = document.getElementById('webrtc-status-badge');
+            const dot = document.getElementById('call-active-dot');
+            if (badge) {
+                badge.innerText = text;
+                badge.className = active
+                    ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold'
+                    : 'text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 font-semibold';
+            }
+            if (dot) dot.classList.toggle('hidden', !active);
+        }
+
+        async function startLocalMediaCall(withVideo = true) {
+            try {
+                if (localMediaStream) {
+                    localMediaStream.getTracks().forEach(t => t.stop());
+                }
+                localMediaStream = await navigator.mediaDevices.getUserMedia({
+                    audio: { echoCancellation: true, noiseSuppression: true },
+                    video: withVideo ? { width: { ideal: 640 }, height: { ideal: 480 } } : false
+                });
+
+                const localVid = document.getElementById('local-video-el');
+                const localPh = document.getElementById('local-video-placeholder');
+                if (withVideo && localVid) {
+                    localVid.srcObject = localMediaStream;
+                    localVid.classList.remove('hidden');
+                    if (localPh) localPh.classList.add('hidden');
+                } else if (localVid) {
+                    localVid.classList.add('hidden');
+                    if (localPh) {
+                        localPh.innerText = 'Mic On';
+                        localPh.classList.remove('hidden');
+                    }
+                }
+
+                isMicMuted = false;
+                updateMicButtonUI();
+                setupPeerConnection();
+                updateCallStatusBadge(withVideo ? 'Camera & Mic Ready' : 'Audio Ready', true);
+                addChatSystemMessage(`${currentUser || 'Player'} started ${withVideo ? 'Video & Audio' : 'Audio'} call.`);
+            } catch (err) {
+                showToast("Camera/Microphone permission denied or unavailable on this device.");
+                updateCallStatusBadge('No Device Access', false);
+            }
+        }
+
+        function setupPeerConnection() {
+            if (peerConnection) {
+                try { peerConnection.close(); } catch (e) {}
+            }
+            peerConnection = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            });
+
+            if (localMediaStream) {
+                localMediaStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localMediaStream);
+                });
+            }
+
+            peerConnection.ontrack = (event) => {
+                const remoteVid = document.getElementById('remote-video-el');
+                const remotePh = document.getElementById('remote-video-placeholder');
+                if (remoteVid && event.streams && event.streams[0]) {
+                    remoteVid.srcObject = event.streams[0];
+                    remoteVid.classList.remove('hidden');
+                    if (remotePh) remotePh.classList.add('hidden');
+                    updateCallStatusBadge('Connected Live', true);
+                }
+            };
+
+            peerConnection.onconnectionstatechange = () => {
+                if (!peerConnection) return;
+                if (peerConnection.connectionState === 'connected') {
+                    updateCallStatusBadge('Connected Live', true);
+                } else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
+                    updateCallStatusBadge('Disconnected', false);
+                }
+            };
+        }
+
+        async function createWebRTCOffer() {
+            if (!localMediaStream) {
+                await startLocalMediaCall(true);
+            }
+            if (!peerConnection) setupPeerConnection();
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            await new Promise(resolve => {
+                if (peerConnection.iceGatheringState === 'complete') return resolve();
+                const checkState = () => {
+                    if (peerConnection.iceGatheringState === 'complete') {
+                        peerConnection.removeEventListener('icegatheringstatechange', checkState);
+                        resolve();
+                    }
+                };
+                peerConnection.addEventListener('icegatheringstatechange', checkState);
+                setTimeout(resolve, 1500);
+            });
+
+            const encoded = btoa(JSON.stringify(peerConnection.localDescription));
+            const box = document.getElementById('webrtc-signal-box');
+            if (box) {
+                box.value = encoded;
+                box.select();
+                document.execCommand('copy');
+            }
+            localStorage.setItem('intelligames_webrtc_signal', JSON.stringify({
+                sender: currentUser || 'Host',
+                sdp: encoded,
+                ts: Date.now()
+            }));
+            updateCallStatusBadge('Offer Copied', true);
+            showToast("Call Offer created & copied! Send it to your opponent or open a 2nd tab.");
+        }
+
+        async function acceptRemoteSignalCode() {
+            const box = document.getElementById('webrtc-signal-box');
+            const rawCode = (box ? box.value : '').trim();
+            if (!rawCode) {
+                showToast("Paste your opponent's Offer or Answer code first!");
+                return;
+            }
+            try {
+                const desc = JSON.parse(atob(rawCode));
+                if (!localMediaStream) {
+                    await startLocalMediaCall(true);
+                }
+                if (!peerConnection) setupPeerConnection();
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(desc));
+                if (desc.type === 'offer') {
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                    const ansEncoded = btoa(JSON.stringify(peerConnection.localDescription));
+                    if (box) {
+                        box.value = ansEncoded;
+                        box.select();
+                        document.execCommand('copy');
+                    }
+                    localStorage.setItem('intelligames_webrtc_signal', JSON.stringify({
+                        sender: currentUser || 'Guest',
+                        sdp: ansEncoded,
+                        ts: Date.now()
+                    }));
+                    updateCallStatusBadge('Answer Copied', true);
+                    showToast("Answer generated & copied! Paste it back on the host's device.");
+                } else {
+                    updateCallStatusBadge('Connected Live', true);
+                    showToast("Connected to opponent's Audio/Video stream!");
+                }
+            } catch (e) {
+                showToast("Invalid connection code. Ensure you copied the full code.");
+            }
+        }
+
+        function initWebRTCSignalingListener() {
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'intelligames_webrtc_signal' && e.newValue) {
+                    try {
+                        const data = JSON.parse(e.newValue);
+                        if (data && data.sender !== currentUser && data.sdp) {
+                            const box = document.getElementById('webrtc-signal-box');
+                            if (box) box.value = data.sdp;
+                            const drawer = document.getElementById('video-call-drawer');
+                            if (drawer) drawer.classList.remove('hidden');
+                            showToast(`Incoming call signal from ${data.sender} — click "Connect Code"!`);
+                        }
+                    } catch (err) {}
+                }
+            });
+        }
+
+        function toggleCallMic() {
+            if (!localMediaStream) return;
+            isMicMuted = !isMicMuted;
+            localMediaStream.getAudioTracks().forEach(track => {
+                track.enabled = !isMicMuted;
+            });
+            updateMicButtonUI();
+        }
+
+        function updateMicButtonUI() {
+            const icon = document.getElementById('icon-toggle-mic');
+            const label = document.getElementById('label-toggle-mic');
+            if (icon) {
+                icon.className = isMicMuted
+                    ? 'fa-solid fa-microphone-slash mb-0.5 text-rose-400'
+                    : 'fa-solid fa-microphone mb-0.5 text-emerald-400';
+            }
+            if (label) label.innerText = isMicMuted ? 'Unmute' : 'Mute';
+        }
+
+        function endMediaCall() {
+            if (localMediaStream) {
+                localMediaStream.getTracks().forEach(t => t.stop());
+                localMediaStream = null;
+            }
+            if (peerConnection) {
+                try { peerConnection.close(); } catch (e) {}
+                peerConnection = null;
+            }
+            const localVid = document.getElementById('local-video-el');
+            const localPh = document.getElementById('local-video-placeholder');
+            const remoteVid = document.getElementById('remote-video-el');
+            const remotePh = document.getElementById('remote-video-placeholder');
+            if (localVid) { localVid.srcObject = null; localVid.classList.add('hidden'); }
+            if (localPh) { localPh.innerText = 'You'; localPh.classList.remove('hidden'); }
+            if (remoteVid) { remoteVid.srcObject = null; remoteVid.classList.add('hidden'); }
+            if (remotePh) remotePh.classList.remove('hidden');
+            updateCallStatusBadge('Ended', false);
+        }
 
         // --- GOOGLE DRIVE SHEET SYNC ENGINE ---
         function getDriveSyncConfig() {
@@ -935,8 +1432,11 @@ function doPost(e) {
                 latestMatch: {
                     game: activeGame,
                     mode: gameModeType,
-                    player1: player1Name,
-                    player2: player2Name,
+                    numPlayers,
+                    players: playerNames.slice(0, numPlayers),
+                    playerTypes: playerTypes.slice(0, numPlayers),
+                    player1: playerNames[0],
+                    player2: playerNames[1],
                     scores,
                     moveHistory
                 }
@@ -1042,11 +1542,12 @@ function doPost(e) {
 
         function exportLocalBackupCSV() {
             const payload = buildDriveSyncPayload();
+            const sc = payload.latestMatch.scores || {};
             const rows = [
                 ['Section', 'Key_ID', 'Name_User', 'Details_Game', 'Extra_Score'],
                 ...payload.users.map(u => ['USER', u.username, u.role, u.password, '']),
                 ...payload.sessions.map(s => ['SESSION', s.id, s.name, s.game, `Host:${s.host} Invited:${s.invited || 'None'}`]),
-                ['MATCH', payload.latestMatch.game, `${payload.latestMatch.player1} vs ${payload.latestMatch.player2}`, payload.latestMatch.mode, `P1:${payload.latestMatch.scores.p1} P2:${payload.latestMatch.scores.p2}`],
+                ['MATCH', payload.latestMatch.game, payload.latestMatch.players.join(' vs '), payload.latestMatch.mode, `P1:${sc.p1 || 0} P2:${sc.p2 || 0} P3:${sc.p3 || 0} P4:${sc.p4 || 0}`],
                 ...payload.latestMatch.moveHistory.map(m => ['MOVE', m.num, m.time, m.text, ''])
             ];
             const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -1136,7 +1637,7 @@ function doPost(e) {
             if (resolved === 'mobile') {
                 if (hudIcon) hudIcon.className = 'fa-solid fa-mobile-screen-button text-emerald-400 text-xs';
                 if (hudLabel) hudLabel.innerText = `Mobile (${info.width}×${info.height})`;
-                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 gap-2 max-h-[42vh] overflow-y-auto pr-1';
+                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 gap-2.5';
                 if (camera) {
                     camera.fov = 54;
                     camera.position.set(0, 15.5, 17.5);
@@ -1145,7 +1646,7 @@ function doPost(e) {
             } else if (resolved === 'tablet') {
                 if (hudIcon) hudIcon.className = 'fa-solid fa-tablet-screen-button text-emerald-400 text-xs';
                 if (hudLabel) hudLabel.innerText = `Tablet (${info.width}×${info.height})`;
-                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-3 gap-2.5 max-h-[45vh] overflow-y-auto pr-1';
+                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-3 gap-3';
                 if (camera) {
                     camera.fov = 48;
                     camera.position.set(0, 13.5, 15.5);
@@ -1154,7 +1655,7 @@ function doPost(e) {
             } else {
                 if (hudIcon) hudIcon.className = 'fa-solid fa-desktop text-emerald-400 text-xs';
                 if (hudLabel) hudLabel.innerText = `Desktop (${info.width}×${info.height})`;
-                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[44vh] overflow-y-auto pr-1';
+                if (lobbyGrid) lobbyGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3';
                 if (camera) {
                     camera.fov = 45;
                     camera.position.set(0, 12, 14);
@@ -1168,11 +1669,11 @@ function doPost(e) {
             const favs = getFavoredPlayers();
             users.sort((a, b) => (favs.includes(b.username) ? 1 : 0) - (favs.includes(a.username) ? 1 : 0));
 
-            ['lobby-p2p-opponent', 'menu-p2p-opponent'].forEach(selId => {
+            ['lobby-p2-online', 'lobby-p3-online', 'lobby-p4-online', 'menu-p2-online', 'menu-p3-online', 'menu-p4-online'].forEach(selId => {
                 const sel = document.getElementById(selId);
                 if (!sel) return;
                 const prev = sel.value;
-                sel.innerHTML = '<option value="">-- Open Session / Any Player --</option>';
+                sel.innerHTML = '<option value="">-- Open Invite / Any Player --</option>';
                 users.forEach(u => {
                     const opt = document.createElement('option');
                     opt.value = u.username;
@@ -1185,13 +1686,15 @@ function doPost(e) {
 
         function openGameLobby() {
             const roleBadge = currentUserRole === 'master' ? ' [MASTER]' : '';
-            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Choose your game & settings`;
+            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Choose game, player count (2–4) & Human/Computer per seat`;
             const p1Inp = document.getElementById('lobby-p1-name');
             const p2Inp = document.getElementById('lobby-p2-name');
             if (p1Inp && !p1Inp.value) p1Inp.value = currentUser || 'Player 1';
             if (p2Inp && !p2Inp.value) p2Inp.value = 'Player 2';
             populatePlayerToPlayerSelects();
-            toggleLobbyModeFields();
+            syncLobbyModeOptionsForGame();
+            updateMultiplayerInputs('lobby');
+            [2, 3, 4].forEach(s => toggleSlotTypeUI('lobby', s));
             applyDisplayProfile();
             const masterBtn = document.getElementById('lobby-master-btn');
             if (currentUserRole === 'master') {
@@ -1204,163 +1707,204 @@ function doPost(e) {
         }
 
         function syncLobbyModeOptionsForGame() {
+            const gameId = document.getElementById('select-game').value || 'quarto';
             const noteEl = document.getElementById('lobby-mode-note');
-            if (noteEl) {
-                noteEl.innerText = 'Supports Player to Player, 2 Players on Same Device, and Player vs Computer.';
+            const countSel = document.getElementById('lobby-player-count');
+            const supportsMulti = MULTIPLAYER_CAPABLE_GAMES.includes(gameId);
+            if (countSel) {
+                Array.from(countSel.options).forEach(opt => {
+                    if (parseInt(opt.value, 10) > 2) opt.disabled = !supportsMulti;
+                });
+                if (!supportsMulti && parseInt(countSel.value, 10) > 2) {
+                    countSel.value = '2';
+                    updateMultiplayerInputs('lobby');
+                }
             }
-            toggleLobbyModeFields();
+            if (noteEl) {
+                noteEl.innerText = supportsMulti
+                    ? 'Configure 2–4 seats individually as Human, Online, or Computer (AI).'
+                    : '2-Player Duel — set Player 2 as Human, Online, or Computer (AI).';
+            }
         }
 
         function syncMenuModeOptionsForGame() {
-            toggleMenuModeFields();
+            const gameId = document.getElementById('menu-select-game').value || 'quarto';
+            const countSel = document.getElementById('menu-player-count');
+            const supportsMulti = MULTIPLAYER_CAPABLE_GAMES.includes(gameId);
+            if (countSel) {
+                Array.from(countSel.options).forEach(opt => {
+                    if (parseInt(opt.value, 10) > 2) opt.disabled = !supportsMulti;
+                });
+                if (!supportsMulti && parseInt(countSel.value, 10) > 2) {
+                    countSel.value = '2';
+                    updateMultiplayerInputs('menu');
+                }
+            }
         }
 
-        function toggleLobbyModeFields() {
-            const mode = document.getElementById('select-mode').value;
-            document.getElementById('p2p-opponent-container').classList.toggle('hidden', mode !== 'p2p');
-            document.getElementById('pvp-names-container').classList.toggle('hidden', mode !== 'pvp');
-            document.getElementById('ai-difficulty-container').classList.toggle('hidden', mode !== 'pve');
-        }
+        function readPlayerSlotsFromUI(prefix) {
+            const supportsMulti = MULTIPLAYER_CAPABLE_GAMES.includes(activeGame);
+            const rawCount = parseInt((document.getElementById(`${prefix}-player-count`) || {}).value || '2', 10);
+            numPlayers = supportsMulti ? Math.min(4, Math.max(2, rawCount)) : 2;
 
-        function toggleMenuModeFields() {
-            const mode = document.getElementById('menu-select-mode').value;
-            document.getElementById('menu-p2p-opponent-container').classList.toggle('hidden', mode !== 'p2p');
-            document.getElementById('menu-pvp-names-container').classList.toggle('hidden', mode !== 'pvp');
-            document.getElementById('menu-ai-difficulty-container').classList.toggle('hidden', mode !== 'pve');
+            playerTypes = ['human', 'human', 'human', 'human'];
+            playerNames[0] = (document.getElementById(`${prefix}-p1-name`).value || '').trim() || currentUser || 'Player 1';
+
+            const sessions = getSessionsRegistry();
+            let sessionsAdded = false;
+
+            [2, 3, 4].forEach(slotNum => {
+                const idx = slotNum - 1;
+                if (slotNum > numPlayers) {
+                    playerTypes[idx] = 'human';
+                    playerNames[idx] = `Player ${slotNum}`;
+                    return;
+                }
+                const typeSel = document.getElementById(`${prefix}-p${slotNum}-type`);
+                const sType = typeSel ? typeSel.value : 'human';
+                playerTypes[idx] = sType;
+
+                if (sType === 'ai') {
+                    const customAiName = (document.getElementById(`${prefix}-p${slotNum}-name`).value || '').trim();
+                    playerNames[idx] = customAiName || `AI ${slotNum - 1} (${aiDifficulty.toUpperCase()})`;
+                } else if (sType === 'online') {
+                    const onlineSel = document.getElementById(`${prefix}-p${slotNum}-online`);
+                    const opp = onlineSel ? onlineSel.value.trim() : '';
+                    playerNames[idx] = opp || `Online Player ${slotNum}`;
+                    if (opp) {
+                        sessions.push({
+                            id: 'sess_' + Date.now() + '_' + slotNum,
+                            name: `${playerNames[0]} vs ${opp}`,
+                            game: activeGame,
+                            host: playerNames[0],
+                            invited: opp,
+                            accepted: false
+                        });
+                        sessionsAdded = true;
+                    }
+                } else {
+                    playerNames[idx] = (document.getElementById(`${prefix}-p${slotNum}-name`).value || '').trim() || `Player ${slotNum}`;
+                }
+            });
+
+            if (sessionsAdded) saveSessionsRegistry(sessions);
+
+            player1Name = playerNames[0];
+            player2Name = playerNames[1];
+
+            const activeTypes = playerTypes.slice(0, numPlayers);
+            if (activeTypes.every(t => t === 'human')) gameModeType = 'pvp';
+            else if (activeTypes.includes('online')) gameModeType = 'p2p';
+            else gameModeType = 'pve';
         }
 
         function launchSelectedGame() {
             activeGame = document.getElementById('select-game').value || 'quarto';
-            gameModeType = document.getElementById('select-mode').value || 'pvp';
             aiDifficulty = document.getElementById('select-ai-difficulty').value || 'medium';
+            readPlayerSlotsFromUI('lobby');
 
-            if (gameModeType === 'p2p') {
-                const opp = (document.getElementById('lobby-p2p-opponent').value || '').trim();
-                player1Name = currentUser || 'Player 1';
-                player2Name = opp || 'Player 2 (Online)';
-                if (opp) {
-                    const sessions = getSessionsRegistry();
-                    sessions.push({
-                        id: 'sess_' + Date.now(),
-                        name: `${player1Name} vs ${opp}`,
-                        game: activeGame,
-                        host: player1Name,
-                        invited: opp,
-                        accepted: false
-                    });
-                    saveSessionsRegistry(sessions);
-                }
-            } else if (gameModeType === 'pvp') {
-                player1Name = (document.getElementById('lobby-p1-name').value || '').trim() || currentUser || 'Player 1';
-                player2Name = (document.getElementById('lobby-p2-name').value || '').trim() || 'Player 2';
-            } else {
-                player1Name = currentUser || 'Player 1';
-                player2Name = `AI (${aiDifficulty.toUpperCase()})`;
-            }
+            const activeRoster = Array.from({ length: numPlayers }, (_, i) =>
+                `${playerNames[i]} [${playerTypes[i] === 'ai' ? 'AI' : (playerTypes[i] === 'online' ? 'Online' : 'Human')}]`
+            ).join(' vs ');
 
-            const modeTextMap = {
-                p2p: 'Player to Player',
-                pvp: '2 Players Same Device',
-                pve: `Player vs Computer (${aiDifficulty.toUpperCase()})`
-            };
             document.getElementById('game-lobby-modal').classList.add('hidden');
             initGameArena();
-            addChatSystemMessage(`Started ${activeGame.toUpperCase()} — ${player1Name} vs ${player2Name} (${modeTextMap[gameModeType]}).`);
+            addChatSystemMessage(`Started ${activeGame.toUpperCase()} (${numPlayers}P) — ${activeRoster}.`);
         }
 
         function getPlayerLabel(pNum) {
-            return pNum === 1 ? player1Name : player2Name;
+            return playerNames[(pNum - 1)] || `Player ${pNum}`;
         }
 
         const GAME_CATALOG = [
             {
                 id: 'quarto',
                 name: 'Quarto 3D',
-                tag: 'Logic & Geometry',
+                tag: '2P • Logic & Geometry',
                 gradient: 'from-cyan-500 to-blue-600',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="10" y="22" width="16" height="30" rx="3" fill="#fef3c7" stroke="#0f172a" stroke-width="2"/><circle cx="18" cy="30" r="3.5" fill="#0f172a"/><rect x="34" y="12" width="18" height="40" rx="9" fill="#b45309" stroke="#fef3c7" stroke-width="2"/><circle cx="43" cy="22" r="4" fill="#0f172a"/></svg>`
             },
             {
                 id: 'azul',
                 name: 'Azul 3D',
-                tag: 'Mosaic Drafting',
+                tag: '2–4P • Mosaic Drafting',
                 gradient: 'from-sky-400 to-indigo-600',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="10" y="10" width="20" height="20" rx="4" fill="#38bdf8"/><rect x="34" y="10" width="20" height="20" rx="4" fill="#fbbf24"/><rect x="10" y="34" width="20" height="20" rx="4" fill="#f43f5e"/><rect x="34" y="34" width="20" height="20" rx="4" fill="#10b981"/><circle cx="20" cy="20" r="4" fill="#fff" opacity="0.7"/><circle cx="44" cy="44" r="4" fill="#fff" opacity="0.7"/></svg>`
             },
             {
                 id: 'sevenwonders',
                 name: '7 Wonders 3D',
-                tag: 'Civilization',
+                tag: '2–4P • Civilization',
                 gradient: 'from-amber-400 to-orange-600',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><polygon points="32,10 54,50 10,50" fill="#fbbf24" stroke="#78350f" stroke-width="2"/><line x1="16" y1="38" x2="48" y2="38" stroke="#78350f" stroke-width="2.5"/><line x1="23" y1="25" x2="41" y2="25" stroke="#78350f" stroke-width="2.5"/></svg>`
             },
             {
                 id: 'hive',
                 name: 'Hive 3D',
-                tag: 'Hex Insect Strategy',
+                tag: '2P • Hex Insect Strategy',
                 gradient: 'from-yellow-400 to-amber-600',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><polygon points="32,8 50,18 50,38 32,48 14,38 14,18" fill="#fef3c7" stroke="#d97706" stroke-width="3"/><circle cx="32" cy="28" r="7" fill="#f59e0b"/><path d="M22 22 L17 16 M42 22 L47 16 M22 34 L17 40 M42 34 L47 40" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/></svg>`
             },
             {
                 id: 'carcassonne',
                 name: 'Carcassonne 3D',
-                tag: 'Landscape & Meeples',
+                tag: '2–4P • Landscape',
                 gradient: 'from-emerald-400 to-green-700',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="10" y="14" width="44" height="36" rx="6" fill="#16a34a"/><path d="M10 34 Q32 24 54 36" stroke="#f8fafc" stroke-width="5" fill="none"/><path d="M32 16 L36 22 L42 22 L38 27 L40 34 L32 30 L24 34 L26 27 L22 22 L28 22 Z" fill="#22d3ee" stroke="#0f172a" stroke-width="1.5"/></svg>`
             },
             {
                 id: 'twixt',
                 name: 'Twixt 3D',
-                tag: 'Knight-Bridge Network',
+                tag: '2P • Bridge Network',
                 gradient: 'from-purple-500 to-indigo-700',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><line x1="16" y1="46" x2="48" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><circle cx="16" cy="46" r="6" fill="#22d3ee" stroke="#0f172a" stroke-width="2"/><circle cx="48" cy="20" r="6" fill="#22d3ee" stroke="#0f172a" stroke-width="2"/><circle cx="44" cy="46" r="5" fill="#f43f5e"/></svg>`
             },
             {
                 id: 'startrek',
                 name: 'Star Trek Tri-D Chess',
-                tag: '3D Multi-Level',
+                tag: '2P • 3D Multi-Level',
                 gradient: 'from-cyan-400 to-slate-700',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><polygon points="14,18 42,14 48,22 20,26" fill="#38bdf8" opacity="0.85"/><polygon points="18,32 46,28 52,36 24,40" fill="#94a3b8" opacity="0.9"/><polygon points="22,46 50,42 56,50 28,54" fill="#38bdf8" opacity="0.85"/><line x1="34" y1="12" x2="34" y2="54" stroke="#f8fafc" stroke-width="3"/></svg>`
             },
             {
                 id: 'mensch',
                 name: 'Mensch ärgere Dich nicht',
-                tag: '3D Ludo Race',
+                tag: '2–4P • 3D Ludo Race',
                 gradient: 'from-rose-500 to-amber-500',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><circle cx="32" cy="18" r="8" fill="#22d3ee" stroke="#fff" stroke-width="2"/><path d="M20 50 L25 27 L39 27 L44 50 Z" fill="#22d3ee" stroke="#fff" stroke-width="2"/></svg>`
             },
             {
                 id: 'skribbl',
                 name: 'Skribbl 3D',
-                tag: 'Draw & Guess',
+                tag: '2–4P • Draw & Guess',
                 gradient: 'from-pink-500 to-cyan-500',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><path d="M14 46 L20 34 L42 12 L52 22 L30 44 Z" fill="#fbbf24" stroke="#0f172a" stroke-width="2"/><polygon points="14,46 20,34 26,40" fill="#f43f5e"/><path d="M14 52 Q32 48 50 52" stroke="#22d3ee" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>`
             },
             {
                 id: 'hangman',
                 name: 'Hangman 3D',
-                tag: 'Word Deduction',
+                tag: '1–4P • Word Deduction',
                 gradient: 'from-rose-600 to-slate-800',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><path d="M16 52 H34 M22 52 V14 H44 V22" stroke="#fbbf24" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="44" cy="28" r="5" stroke="#f43f5e" stroke-width="3" fill="none"/><path d="M44 33 V43 M39 37 H49" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round"/></svg>`
             },
             {
                 id: 'yahtzee',
                 name: 'Yahtzee 3D',
-                tag: '5-Dice Strategy',
+                tag: '2–4P • 5-Dice Strategy',
                 gradient: 'from-emerald-500 to-teal-700',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="12" y="12" width="40" height="40" rx="8" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/><circle cx="23" cy="23" r="3.5" fill="#0f172a"/><circle cx="41" cy="23" r="3.5" fill="#0f172a"/><circle cx="32" cy="32" r="3.5" fill="#e11d48"/><circle cx="23" cy="41" r="3.5" fill="#0f172a"/><circle cx="41" cy="41" r="3.5" fill="#0f172a"/></svg>`
             },
             {
                 id: 'muhle',
                 name: 'Mühle 3D',
-                tag: "Nine Men's Morris",
+                tag: "2P • Nine Men's Morris",
                 gradient: 'from-amber-500 to-stone-700',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="12" y="12" width="40" height="40" fill="none" stroke="#fbbf24" stroke-width="2.5"/><rect x="22" y="22" width="20" height="20" fill="none" stroke="#fbbf24" stroke-width="2.5"/><circle cx="12" cy="12" r="4" fill="#22d3ee"/><circle cx="32" cy="12" r="4" fill="#22d3ee"/><circle cx="52" cy="12" r="4" fill="#22d3ee"/></svg>`
             },
             {
                 id: 'fourgewinnt',
                 name: '4gewinnt 3D',
-                tag: 'Connect 4 Arena',
+                tag: '2P • Connect 4 Arena',
                 gradient: 'from-blue-500 to-purple-700',
                 svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><circle cx="16" cy="48" r="5.5" fill="#22d3ee"/><circle cx="27" cy="37" r="5.5" fill="#22d3ee"/><circle cx="38" cy="26" r="5.5" fill="#22d3ee"/><circle cx="49" cy="15" r="5.5" fill="#22d3ee"/><circle cx="27" cy="48" r="5.5" fill="#a855f7"/><circle cx="38" cy="48" r="5.5" fill="#a855f7"/></svg>`
             }
@@ -1443,9 +1987,12 @@ function doPost(e) {
             document.getElementById('current-game-title').innerText = titles[activeGame] || "Intelligames";
             const modePill = document.getElementById('mode-pill-badge');
             if (modePill) {
-                if (gameModeType === 'p2p') modePill.innerText = 'PLAYER TO PLAYER';
-                else if (gameModeType === 'pvp') modePill.innerText = '2P SAME DEVICE';
-                else modePill.innerText = `VS AI (${aiDifficulty.toUpperCase()})`;
+                const aiCount = playerTypes.slice(0, numPlayers).filter(t => t === 'ai').length;
+                const onlineCount = playerTypes.slice(0, numPlayers).filter(t => t === 'online').length;
+                if (onlineCount > 0) modePill.innerText = `${numPlayers}P ONLINE / MIX`;
+                else if (aiCount > 0 && aiCount === numPlayers - 1) modePill.innerText = `${numPlayers}P VS AI (${aiDifficulty.toUpperCase()})`;
+                else if (aiCount > 0) modePill.innerText = `${numPlayers}P HUMAN + AI`;
+                else modePill.innerText = `${numPlayers}P HUMAN LOCAL`;
             }
             updateScoreDisplay();
 
@@ -1474,7 +2021,7 @@ function doPost(e) {
                 initYahtzeeGame();
             } else if (activeGame === 'azul') {
                 applyDisplayProfile();
-                controls.target.set(0, 0, 0);
+                controls.target.set(0, 0, 1.4);
                 document.getElementById('hud-azul').classList.remove('hidden');
                 initAzulGame();
             } else if (activeGame === 'sevenwonders') {
@@ -1549,7 +2096,7 @@ function doPost(e) {
 
             [base, post, beam, rope].forEach(m => { scene.add(m); boardSquareMeshes.push(m); });
             renderHangmanUI();
-            document.getElementById('turn-status').innerText = `Hangman 3D — Deduce the secret word!`;
+            document.getElementById('turn-status').innerText = `Hangman 3D — ${getPlayerLabel(currentPlayer)}: Deduce the secret word!`;
         }
 
         function renderHangmanUI() {
@@ -1575,7 +2122,7 @@ function doPost(e) {
         function guessHangmanLetter(letter) {
             if (gameOver || hangmanState.guessed.includes(letter)) return;
             hangmanState.guessed.push(letter);
-            recordMove(`Hangman letter guessed: ${letter}`);
+            recordMove(`${getPlayerLabel(currentPlayer)} guessed letter: ${letter}`);
 
             if (!hangmanState.word.includes(letter)) {
                 hangmanState.mistakes++;
@@ -1594,25 +2141,35 @@ function doPost(e) {
             const solved = hangmanState.word.split('').every(ch => hangmanState.guessed.includes(ch));
             if (solved) {
                 gameOver = true;
-                scores.p1++;
+                scores[`p${currentPlayer}`]++;
                 updateScoreDisplay();
-                showPostGameModal("Word Solved!", `You decoded "${hangmanState.word}" with ${hangmanState.mistakes} mistake(s)!`);
+                showPostGameModal(`${getPlayerLabel(currentPlayer)} Solved the Word!`, `Decoded "${hangmanState.word}" with ${hangmanState.mistakes} mistake(s)!`);
+                return;
             } else if (hangmanState.mistakes >= 6) {
                 gameOver = true;
-                scores.p2++;
-                updateScoreDisplay();
                 showPostGameModal("Out of Attempts!", `The secret word was "${hangmanState.word}".`);
+                return;
+            }
+
+            if (numPlayers > 1) {
+                nextTurnPlayer();
+                document.getElementById('turn-status').innerText = `Hangman 3D — ${getPlayerLabel(currentPlayer)}'s Turn`;
+                if (isCurrentPlayerAI() && !gameOver) {
+                    setTimeout(() => {
+                        const avail = 'ETAOINSHRDLCUMWFGYPBVKJXQZ'.split('').filter(l => !hangmanState.guessed.includes(l));
+                        if (avail.length > 0) guessHangmanLetter(avail[0]);
+                    }, 650);
+                }
             }
         }
 
-        // --- YAHTZEE 3D ---
+        // --- YAHTZEE 3D (SUPPORTS 2–4 PLAYERS WITH HUMAN OR COMPUTER SEATS) ---
         function initYahtzeeGame() {
             yahtzeeState = {
                 dice: [1, 2, 3, 4, 5],
                 held: [false, false, false, false, false],
                 rollsLeft: 3,
-                scoresP1: {},
-                scoresP2: {},
+                scoreCards: [{}, {}, {}, {}],
                 diceMeshes: []
             };
 
@@ -1628,7 +2185,7 @@ function doPost(e) {
             }
 
             renderYahtzeeUI();
-            document.getElementById('turn-status').innerText = `Yahtzee 3D — ${getPlayerLabel(1)}: Roll the dice!`;
+            document.getElementById('turn-status').innerText = `Yahtzee 3D (${numPlayers}P) — ${getPlayerLabel(1)}: Roll the dice!`;
         }
 
         function toggleYahtzeeHold(idx) {
@@ -1676,7 +2233,7 @@ function doPost(e) {
                 showToast("Roll the dice at least once before scoring!");
                 return;
             }
-            const card = currentPlayer === 1 ? yahtzeeState.scoresP1 : yahtzeeState.scoresP2;
+            const card = yahtzeeState.scoreCards[currentPlayer - 1];
             if (card[cat] !== undefined) return;
 
             const pts = calculateYahtzeeCategory(cat, yahtzeeState.dice);
@@ -1684,46 +2241,56 @@ function doPost(e) {
             recordMove(`${getPlayerLabel(currentPlayer)} scored ${pts} pts in ${cat}`);
 
             const cats = ['Ones', 'Twos', 'Threes', 'Fours', 'Fives', 'Sixes', '3 of a Kind', 'Yahtzee'];
-            const p1Done = cats.every(c => yahtzeeState.scoresP1[c] !== undefined);
-            const p2Done = cats.every(c => yahtzeeState.scoresP2[c] !== undefined);
+            const allDone = Array.from({ length: numPlayers }, (_, idx) =>
+                cats.every(c => yahtzeeState.scoreCards[idx][c] !== undefined)
+            ).every(Boolean);
 
-            if (p1Done && p2Done) {
-                const tot1 = Object.values(yahtzeeState.scoresP1).reduce((a, b) => a + b, 0);
-                const tot2 = Object.values(yahtzeeState.scoresP2).reduce((a, b) => a + b, 0);
+            if (allDone) {
+                const totals = Array.from({ length: numPlayers }, (_, idx) =>
+                    Object.values(yahtzeeState.scoreCards[idx]).reduce((a, b) => a + b, 0)
+                );
+                let bestIdx = 0;
+                totals.forEach((t, i) => { if (t > totals[bestIdx]) bestIdx = i; });
+                const winner = bestIdx + 1;
                 gameOver = true;
-                const winner = tot1 >= tot2 ? 1 : 2;
                 scores[`p${winner}`]++;
                 updateScoreDisplay();
-                showPostGameModal(`${getPlayerLabel(winner)} Wins Yahtzee 3D!`, `Final Score — ${getPlayerLabel(1)}: ${tot1} | ${getPlayerLabel(2)}: ${tot2}`);
+                const summary = totals.map((t, i) => `${getPlayerLabel(i + 1)}: ${t}`).join(' | ');
+                showPostGameModal(`${getPlayerLabel(winner)} Wins Yahtzee 3D!`, `Final Score — ${summary}`);
                 return;
             }
 
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            nextTurnPlayer();
             yahtzeeState.held = [false, false, false, false, false];
             yahtzeeState.rollsLeft = 3;
             yahtzeeState.diceMeshes.forEach(m => m.material.color.setHex(0xf8fafc));
 
-            if (gameModeType === 'pve' && currentPlayer === 2) {
-                const aiDice = Array.from({ length: 5 }, () => Math.floor(Math.random() * 6) + 1);
-                const openCat = cats.find(c => yahtzeeState.scoresP2[c] === undefined);
-                if (openCat) {
-                    yahtzeeState.scoresP2[openCat] = calculateYahtzeeCategory(openCat, aiDice);
-                }
-                currentPlayer = 1;
-                if (cats.every(c => yahtzeeState.scoresP1[c] !== undefined) && cats.every(c => yahtzeeState.scoresP2[c] !== undefined)) {
-                    const tot1 = Object.values(yahtzeeState.scoresP1).reduce((a, b) => a + b, 0);
-                    const tot2 = Object.values(yahtzeeState.scoresP2).reduce((a, b) => a + b, 0);
-                    gameOver = true;
-                    const winner = tot1 >= tot2 ? 1 : 2;
-                    scores[`p${winner}`]++;
-                    updateScoreDisplay();
-                    showPostGameModal(`${getPlayerLabel(winner)} Wins Yahtzee 3D!`, `Final Score — ${getPlayerLabel(1)}: ${tot1} | ${getPlayerLabel(2)}: ${tot2}`);
-                    return;
-                }
-            }
-
             renderYahtzeeUI();
             document.getElementById('turn-status').innerText = `Yahtzee 3D — ${getPlayerLabel(currentPlayer)}'s Turn`;
+
+            if (isCurrentPlayerAI() && !gameOver) {
+                setTimeout(triggerYahtzeeAITurn, 750);
+            }
+        }
+
+        function triggerYahtzeeAITurn() {
+            if (gameOver || activeGame !== 'yahtzee' || !isCurrentPlayerAI()) return;
+            const cats = ['Ones', 'Twos', 'Threes', 'Fours', 'Fives', 'Sixes', '3 of a Kind', 'Yahtzee'];
+            rollYahtzeeDice();
+            if (aiDifficulty !== 'easy') {
+                const bestVal = yahtzeeState.dice.reduce((best, v) => {
+                    const c = yahtzeeState.dice.filter(x => x === v).length;
+                    return c > best.c ? { v, c } : best;
+                }, { v: 1, c: 0 }).v;
+                yahtzeeState.dice.forEach((v, idx) => { yahtzeeState.held[idx] = (v === bestVal); });
+                rollYahtzeeDice();
+            }
+            const pCard = yahtzeeState.scoreCards[currentPlayer - 1];
+            const openCats = cats.filter(c => pCard[c] === undefined);
+            if (openCats.length > 0) {
+                openCats.sort((a, b) => calculateYahtzeeCategory(b, yahtzeeState.dice) - calculateYahtzeeCategory(a, yahtzeeState.dice));
+                scoreYahtzeeCategory(openCats[0]);
+            }
         }
 
         function renderYahtzeeUI() {
@@ -1741,7 +2308,7 @@ function doPost(e) {
             });
 
             const cats = ['Ones', 'Twos', 'Threes', 'Fours', 'Fives', 'Sixes', '3 of a Kind', 'Yahtzee'];
-            const card = currentPlayer === 1 ? yahtzeeState.scoresP1 : yahtzeeState.scoresP2;
+            const card = yahtzeeState.scoreCards[currentPlayer - 1] || {};
             const scEl = document.getElementById('yahtzee-scorecard');
             scEl.innerHTML = '';
             cats.forEach(cat => {
@@ -1758,7 +2325,7 @@ function doPost(e) {
             });
         }
 
-        // --- MENSCH ÄRGERE DICH NICHT 3D (40-TILE CIRCUIT + 4 PAWNS PER PLAYER) ---
+        // --- MENSCH ÄRGERE DICH NICHT 3D (SUPPORTS 2–4 PLAYERS ON 40-TILE CIRCUIT) ---
         function initMenschGame() {
             menschState = { dice: null, rolled: false, trackCoords: [], pawns: [] };
             const totalTiles = 40;
@@ -1777,7 +2344,10 @@ function doPost(e) {
                 const x = Math.cos(ang) * radius;
                 const z = Math.sin(ang) * radius;
                 menschState.trackCoords.push({ x, z });
-                const tileCol = i === 0 ? 0x22d3ee : (i === 20 ? 0xf43f5e : (i % 10 === 0 ? 0xfbbf24 : 0x334155));
+                const startEntryTeam = i % 10 === 0 ? (i / 10) + 1 : 0;
+                const tileCol = (startEntryTeam > 0 && startEntryTeam <= numPlayers)
+                    ? TEAM_HEX_COLORS[startEntryTeam - 1]
+                    : (i % 10 === 0 ? 0xfbbf24 : 0x334155);
                 const tile = new THREE.Mesh(
                     new THREE.CylinderGeometry(0.32, 0.34, 0.14, 16),
                     new THREE.MeshStandardMaterial({ color: tileCol })
@@ -1787,14 +2357,22 @@ function doPost(e) {
                 boardSquareMeshes.push(tile);
             }
 
+            const yardAnchors = [
+                { baseX: -6.7, baseZ: -2.2, dx: 0, dz: 1.0 },
+                { baseX: 6.7, baseZ: -2.2, dx: 0, dz: 1.0 },
+                { baseX: -2.2, baseZ: -6.7, dx: 1.0, dz: 0 },
+                { baseX: -2.2, baseZ: 6.7, dx: 1.0, dz: 0 }
+            ];
+
             let pid = 1;
-            [1, 2].forEach(team => {
+            for (let team = 1; team <= numPlayers; team++) {
+                const anchor = yardAnchors[team - 1];
                 for (let k = 0; k < 4; k++) {
-                    const yardX = team === 1 ? -6.7 : 6.7;
-                    const yardZ = (k - 1.5) * 1.05;
+                    const yardX = anchor.baseX + anchor.dx * k;
+                    const yardZ = anchor.baseZ + anchor.dz * k;
                     const mesh = new THREE.Mesh(
                         new THREE.ConeGeometry(0.3, 0.88, 16),
-                        new THREE.MeshStandardMaterial({ color: team === 1 ? 0x22d3ee : 0xf43f5e })
+                        new THREE.MeshStandardMaterial({ color: TEAM_HEX_COLORS[team - 1] })
                     );
                     mesh.position.set(yardX, 0.5, yardZ);
                     mesh.userData = { type: 'mensch_pawn', pawnId: pid };
@@ -1802,9 +2380,9 @@ function doPost(e) {
                     pieceMeshes.push(mesh);
                     menschState.pawns.push({ id: pid++, team, steps: -1, yardPos: { x: yardX, z: yardZ }, mesh });
                 }
-            });
+            }
 
-            document.getElementById('turn-status').innerText = `Mensch ärgere Dich nicht — ${getPlayerLabel(1)} (4 Pawns): Roll the Die!`;
+            document.getElementById('turn-status').innerText = `Mensch ärgere Dich nicht (${numPlayers}P) — ${getPlayerLabel(1)}: Roll the Die!`;
         }
 
         function rollMenschDice() {
@@ -1821,13 +2399,13 @@ function doPost(e) {
                 document.getElementById('mensch-info').innerText = `Rolled ${roll} — No valid move! Passing turn...`;
                 setTimeout(() => {
                     menschState.rolled = false;
-                    currentPlayer = currentPlayer === 1 ? 2 : 1;
+                    nextTurnPlayer();
                     document.getElementById('turn-status').innerText = `Mensch ärgere Dich nicht — ${getPlayerLabel(currentPlayer)}'s Turn`;
-                    if (gameModeType === 'pve' && currentPlayer === 2) setTimeout(triggerMenschAITurn, 700);
+                    if (isCurrentPlayerAI()) setTimeout(triggerMenschAITurn, 700);
                 }, 900);
             } else {
                 document.getElementById('mensch-info').innerText = `Rolled ${roll}! Click one of your pawns to move.`;
-                if (gameModeType === 'pve' && currentPlayer === 2) {
+                if (isCurrentPlayerAI()) {
                     setTimeout(() => handleMenschPawnClick(movable[0].id), 700);
                 }
             }
@@ -1852,18 +2430,18 @@ function doPost(e) {
             if (pawn.steps === 40) {
                 pawn.mesh.position.set((Math.random() - 0.5) * 0.85, 0.65, (Math.random() - 0.5) * 0.85);
             } else {
-                const startOffset = pawn.team === 1 ? 0 : 20;
+                const startOffset = ((pawn.team - 1) * 10) % 40;
                 const trackIdx = (startOffset + pawn.steps) % 40;
                 const coord = menschState.trackCoords[trackIdx];
                 pawn.mesh.position.set(coord.x, 0.5, coord.z);
 
                 menschState.pawns.forEach(other => {
                     if (other.team !== pawn.team && other.steps >= 0 && other.steps < 40) {
-                        const otherIdx = ((other.team === 1 ? 0 : 20) + other.steps) % 40;
+                        const otherIdx = (((other.team - 1) * 10) + other.steps) % 40;
                         if (otherIdx === trackIdx) {
                             other.steps = -1;
                             other.mesh.position.set(other.yardPos.x, 0.5, other.yardPos.z);
-                            addChatSystemMessage(`${getPlayerLabel(currentPlayer)} captured an opponent pawn!`);
+                            addChatSystemMessage(`${getPlayerLabel(currentPlayer)} captured ${getPlayerLabel(other.team)}'s pawn!`);
                         }
                     }
                 });
@@ -1879,16 +2457,16 @@ function doPost(e) {
 
             menschState.rolled = false;
             if (roll !== 6) {
-                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                nextTurnPlayer();
             }
             document.getElementById('turn-status').innerText = `Mensch ärgere Dich nicht — ${getPlayerLabel(currentPlayer)}: Roll the Die!`;
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerMenschAITurn, 800);
             }
         }
 
         function triggerMenschAITurn() {
-            if (gameOver || activeGame !== 'mensch' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'mensch' || !isCurrentPlayerAI()) return;
             rollMenschDice();
         }
 
@@ -1948,7 +2526,7 @@ function doPost(e) {
             skribblState.currentWord = pool[Math.floor(Math.random() * pool.length)];
             const masked = skribblState.currentWord.split('').map((ch, idx) => idx === 0 ? ch : '_').join(' ');
             document.getElementById('skribbl-word-display').innerText = masked;
-            document.getElementById('turn-status').innerText = `Skribbl 3D — Draw & Guess! (Hint starts with ${skribblState.currentWord[0]})`;
+            document.getElementById('turn-status').innerText = `Skribbl 3D — ${getPlayerLabel(currentPlayer)} Drawing! (Hint starts with ${skribblState.currentWord[0]})`;
         }
 
         function submitSkribblGuess() {
@@ -1962,6 +2540,7 @@ function doPost(e) {
                 scores[`p${currentPlayer}`]++;
                 updateScoreDisplay();
                 addChatSystemMessage(`Correct! "${skribblState.currentWord}" was guessed!`);
+                nextTurnPlayer();
                 nextSkribblRound();
             } else {
                 addChatSystemMessage(`Guess "${guess}" — not quite!`);
@@ -2129,13 +2708,13 @@ function doPost(e) {
             currentPlayer = currentPlayer === 1 ? 2 : 1;
             document.getElementById('turn-status').innerText = `${getPlayerLabel(currentPlayer)}'s Turn: Select a piece`;
 
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerChessAITurn, 800);
             }
         }
 
         function triggerChessAITurn() {
-            if (gameOver || activeGame !== 'startrek' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'startrek' || !isCurrentPlayerAI()) return;
             const aiPieces = pieces.filter(p => p.team === 2);
             const openSquares = boardSquareMeshes.filter(m => m.userData && m.userData.type === 'chess_square');
             if (aiPieces.length > 0 && openSquares.length > 0) {
@@ -2227,7 +2806,7 @@ function doPost(e) {
                 quartoPhase = 'place_piece';
                 recordMove(`${giver} handed Piece #${id} to ${getPlayerLabel(currentPlayer)}`);
                 document.getElementById('turn-status').innerText = `${getPlayerLabel(currentPlayer)}: Tap an open board square to place Piece #${id}!`;
-                if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+                if (isCurrentPlayerAI() && !gameOver) {
                     setTimeout(triggerQuartoAIPlacement, 850);
                 }
             } else {
@@ -2324,20 +2903,20 @@ function doPost(e) {
                 quartoPhase = 'pick_for_opponent';
                 const nextPlayer = currentPlayer === 1 ? 2 : 1;
                 document.getElementById('turn-status').innerText = `${getPlayerLabel(currentPlayer)}: Now pick a piece around the board for ${getPlayerLabel(nextPlayer)}`;
-                if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+                if (isCurrentPlayerAI() && !gameOver) {
                     setTimeout(triggerQuartoAIPick, 850);
                 }
             } else {
                 currentPlayer = currentPlayer === 1 ? 2 : 1;
                 document.getElementById('turn-status').innerText = `${getPlayerLabel(currentPlayer)}'s turn: Select piece & place on board`;
-                if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+                if (isCurrentPlayerAI() && !gameOver) {
                     setTimeout(triggerStandardAITurn, 850);
                 }
             }
         }
 
         function triggerQuartoAIPlacement() {
-            if (gameOver || activeGame !== 'quarto' || currentPlayer !== 2 || quartoPhase !== 'place_piece') return;
+            if (gameOver || activeGame !== 'quarto' || !isCurrentPlayerAI() || quartoPhase !== 'place_piece') return;
             const openSquares = boardSquareMeshes.filter(m =>
                 m.userData && m.userData.type === 'board_square' &&
                 !pieces.some(p => p.placed && p.position && p.position.x === m.userData.x && p.position.z === m.userData.z)
@@ -2349,7 +2928,7 @@ function doPost(e) {
         }
 
         function triggerQuartoAIPick() {
-            if (gameOver || activeGame !== 'quarto' || currentPlayer !== 2 || quartoPhase !== 'pick_for_opponent') return;
+            if (gameOver || activeGame !== 'quarto' || !isCurrentPlayerAI() || quartoPhase !== 'pick_for_opponent') return;
             const unplaced = pieces.filter(p => !p.placed);
             if (unplaced.length > 0) {
                 const chosen = unplaced[Math.floor(Math.random() * unplaced.length)];
@@ -2358,7 +2937,7 @@ function doPost(e) {
         }
 
         function triggerStandardAITurn() {
-            if (gameOver || currentPlayer !== 2) return;
+            if (gameOver || !isCurrentPlayerAI()) return;
             const unplaced = pieces.filter(p => !p.placed);
             const openSquares = boardSquareMeshes.filter(m =>
                 m.userData && m.userData.type === 'board_square' &&
@@ -2434,7 +3013,7 @@ function doPost(e) {
         }
 
         function openInstructionsModal() {
-            selectInstructionTab(activeGame || 'quarto');
+            selectInstructionTab(activeGame || 'platform');
             document.getElementById('instructions-modal').classList.remove('hidden');
         }
 
@@ -2548,7 +3127,7 @@ function doPost(e) {
             });
         }
 
-        // --- AZUL 3D (2× 5×5 MOSAIC WALLS + 5 FACTORY DISPLAYS) ---
+        // --- AZUL 3D (SUPPORTS 2–4 PLAYER MOSAIC WALLS + FACTORY DISPLAYS) ---
         function initAzulGame() {
             const tileColors = [
                 { name: 'Cobalt', hex: 0x0284c7, css: 'bg-sky-500 text-white' },
@@ -2563,19 +3142,27 @@ function doPost(e) {
                 colors: tileColors,
                 factories: [],
                 selectedBatch: null,
-                wallP1: makeWall(),
-                wallP2: makeWall(),
-                ptsP1: 0,
-                ptsP2: 0
+                walls: [makeWall(), makeWall(), makeWall(), makeWall()],
+                pts: [0, 0, 0, 0]
             };
 
-            // Offset both 5×5 3D Mosaic Walls slightly forward (+1.8 Z) so the top-left HUD never overlaps them
-            [-3.4, 3.4].forEach((offsetX, pIdx) => {
+            const boardPositions = numPlayers === 2
+                ? [{ x: -3.4, z: 1.8 }, { x: 3.4, z: 1.8 }]
+                : [
+                    { x: -3.2, z: -1.4 },
+                    { x: 3.2, z: -1.4 },
+                    { x: -3.2, z: 4.4 },
+                    { x: 3.2, z: 4.4 }
+                ];
+            azulState.boardPositions = boardPositions;
+
+            for (let pIdx = 0; pIdx < numPlayers; pIdx++) {
+                const pos = boardPositions[pIdx];
                 const boardBase = new THREE.Mesh(
                     new THREE.BoxGeometry(5.2, 0.25, 5.2),
-                    new THREE.MeshStandardMaterial({ color: pIdx === 0 ? 0x0f172a : 0x1e1b4b, metalness: 0.5, roughness: 0.3 })
+                    new THREE.MeshStandardMaterial({ color: TEAM_HEX_COLORS[pIdx], metalness: 0.45, roughness: 0.35 })
                 );
-                boardBase.position.set(offsetX, -0.15, 1.8);
+                boardBase.position.set(pos.x, -0.15, pos.z);
                 scene.add(boardBase);
                 boardSquareMeshes.push(boardBase);
 
@@ -2586,22 +3173,23 @@ function doPost(e) {
                             new THREE.BoxGeometry(0.85, 0.08, 0.85),
                             new THREE.MeshStandardMaterial({ color: expectedColor.hex, transparent: true, opacity: 0.32 })
                         );
-                        slot.position.set(offsetX + (c - 2) * 0.96, 0.03, (r - 2) * 0.96 + 1.8);
+                        slot.position.set(pos.x + (c - 2) * 0.96, 0.03, (r - 2) * 0.96 + pos.z);
                         scene.add(slot);
                         boardSquareMeshes.push(slot);
                     }
                 }
-            });
+            }
 
-            if (controls) controls.target.set(0, 0, 1.2);
+            if (controls) controls.target.set(0, 0, 1.4);
             refillAzulFactories();
             renderAzulHUD();
-            document.getElementById('turn-status').innerText = `Azul 3D — ${getPlayerLabel(1)}: Draft tiles from a Factory!`;
+            document.getElementById('turn-status').innerText = `Azul 3D (${numPlayers}P) — ${getPlayerLabel(1)}: Draft tiles from a Factory!`;
         }
 
         function refillAzulFactories() {
+            const factoryCount = numPlayers === 2 ? 5 : (numPlayers === 3 ? 7 : 9);
             azulState.factories = [];
-            for (let f = 0; f < 5; f++) {
+            for (let f = 0; f < factoryCount; f++) {
                 const tiles = [];
                 for (let t = 0; t < 4; t++) {
                     tiles.push(Math.floor(Math.random() * 5));
@@ -2626,7 +3214,8 @@ function doPost(e) {
                 return;
             }
             const { factoryIdx, colorIdx, count } = azulState.selectedBatch;
-            const wall = currentPlayer === 1 ? azulState.wallP1 : azulState.wallP2;
+            const pIdx = currentPlayer - 1;
+            const wall = azulState.walls[pIdx];
             const colIdx = (colorIdx - rowIdx + 5) % 5;
 
             if (wall[rowIdx][colIdx]) {
@@ -2638,12 +3227,12 @@ function doPost(e) {
             azulState.factories[factoryIdx] = azulState.factories[factoryIdx].filter(c => c !== colorIdx);
             azulState.selectedBatch = null;
 
-            const offsetX = currentPlayer === 1 ? -3.4 : 3.4;
+            const bPos = azulState.boardPositions[pIdx];
             const tileMesh = new THREE.Mesh(
                 new THREE.BoxGeometry(0.82, 0.24, 0.82),
                 new THREE.MeshStandardMaterial({ color: azulState.colors[colorIdx].hex, roughness: 0.15, metalness: 0.4 })
             );
-            tileMesh.position.set(offsetX + (colIdx - 2) * 0.96, 0.16, (rowIdx - 2) * 0.96 + 1.8);
+            tileMesh.position.set(bPos.x + (colIdx - 2) * 0.96, 0.16, (rowIdx - 2) * 0.96 + bPos.z);
             scene.add(tileMesh);
             pieceMeshes.push(tileMesh);
 
@@ -2653,19 +3242,22 @@ function doPost(e) {
             if (rowIdx > 0 && wall[rowIdx - 1][colIdx]) gained += 2;
             if (rowIdx < 4 && wall[rowIdx + 1][colIdx]) gained += 2;
 
-            if (currentPlayer === 1) azulState.ptsP1 += gained;
-            else azulState.ptsP2 += gained;
-
+            azulState.pts[pIdx] += gained;
             recordMove(`${getPlayerLabel(currentPlayer)} placed ${azulState.colors[colorIdx].name} tile in Row ${rowIdx + 1} (+${gained} pts)`);
 
             const completedRow = wall[rowIdx].every(Boolean);
             if (completedRow) {
                 gameOver = true;
-                if (currentPlayer === 1) azulState.ptsP1 += 5; else azulState.ptsP2 += 5;
-                const winner = azulState.ptsP1 >= azulState.ptsP2 ? 1 : 2;
+                azulState.pts[pIdx] += 5;
+                let bestIdx = 0;
+                for (let i = 1; i < numPlayers; i++) {
+                    if (azulState.pts[i] > azulState.pts[bestIdx]) bestIdx = i;
+                }
+                const winner = bestIdx + 1;
                 scores[`p${winner}`]++;
                 updateScoreDisplay();
-                showPostGameModal(`${getPlayerLabel(winner)} Wins Azul 3D!`, `Final Mosaic Score — P1: ${azulState.ptsP1} pts | P2: ${azulState.ptsP2} pts`);
+                const scoreSummary = Array.from({ length: numPlayers }, (_, i) => `${getPlayerLabel(i + 1)}: ${azulState.pts[i]} pts`).join(' | ');
+                showPostGameModal(`${getPlayerLabel(winner)} Wins Azul 3D!`, `Final Mosaic Score — ${scoreSummary}`);
                 return;
             }
 
@@ -2674,24 +3266,26 @@ function doPost(e) {
                 addChatSystemMessage("Azul 3D: Factories refilled for the next round!");
             }
 
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            nextTurnPlayer();
             renderAzulHUD();
-            document.getElementById('turn-status').innerText = `Azul 3D — P1: ${azulState.ptsP1} pts | P2: ${azulState.ptsP2} pts (${getPlayerLabel(currentPlayer)}'s Turn)`;
+            const liveScores = Array.from({ length: numPlayers }, (_, i) => `P${i + 1}: ${azulState.pts[i]}`).join(' | ');
+            document.getElementById('turn-status').innerText = `Azul 3D — ${liveScores} (${getPlayerLabel(currentPlayer)}'s Turn)`;
 
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerAzulAITurn, 800);
             }
         }
 
         function triggerAzulAITurn() {
-            if (gameOver || activeGame !== 'azul' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'azul' || !isCurrentPlayerAI()) return;
+            const pIdx = currentPlayer - 1;
             for (let f = 0; f < azulState.factories.length; f++) {
                 if (azulState.factories[f].length > 0) {
                     const colorIdx = azulState.factories[f][0];
                     selectAzulFactoryColor(f, colorIdx);
                     for (let r = 0; r < 5; r++) {
                         const colIdx = (colorIdx - r + 5) % 5;
-                        if (!azulState.wallP2[r][colIdx]) {
+                        if (!azulState.walls[pIdx][r][colIdx]) {
                             placeAzulInRow(r);
                             return;
                         }
@@ -2724,7 +3318,7 @@ function doPost(e) {
 
             const rowsEl = document.getElementById('azul-pattern-rows');
             rowsEl.innerHTML = '';
-            const wall = currentPlayer === 1 ? azulState.wallP1 : azulState.wallP2;
+            const wall = azulState.walls[currentPlayer - 1];
             for (let r = 0; r < 5; r++) {
                 const filledCount = wall[r].filter(Boolean).length;
                 const btn = document.createElement('button');
@@ -2735,29 +3329,34 @@ function doPost(e) {
             }
         }
 
-        // --- 7 WONDERS 3D (2 WONDER BOARDS + CIVILIZATION DRAFTING) ---
+        // --- 7 WONDERS 3D (SUPPORTS 2–4 CIVILIZATION BOARDS) ---
         function initSevenWondersGame() {
             swState = {
                 age: 1,
                 turn: 1,
-                p1: { coins: 3, shields: 0, science: 0, victory: 0, stages: 0 },
-                p2: { coins: 3, shields: 0, science: 0, victory: 0, stages: 0 },
+                players: Array.from({ length: 4 }, () => ({ coins: 3, shields: 0, science: 0, victory: 0, stages: 0 })),
                 hand: []
             };
 
-            [-3.5, 3.5].forEach((xPos, idx) => {
+            const wonderCoords = numPlayers === 2
+                ? [{ x: -3.5, z: 0 }, { x: 3.5, z: 0 }]
+                : [{ x: -3.2, z: -2.2 }, { x: 3.2, z: -2.2 }, { x: -3.2, z: 2.2 }, { x: 3.2, z: 2.2 }];
+            swState.wonderCoords = wonderCoords;
+
+            for (let idx = 0; idx < numPlayers; idx++) {
+                const pos = wonderCoords[idx];
                 const base = new THREE.Mesh(
-                    new THREE.BoxGeometry(4.2, 0.3, 3.2),
-                    new THREE.MeshStandardMaterial({ color: idx === 0 ? 0x1e3a8a : 0x7f1d1d, metalness: 0.5 })
+                    new THREE.BoxGeometry(4.0, 0.3, 3.0),
+                    new THREE.MeshStandardMaterial({ color: TEAM_HEX_COLORS[idx], metalness: 0.45 })
                 );
-                base.position.set(xPos, 0, 0);
+                base.position.set(pos.x, 0, pos.z);
                 scene.add(base);
                 boardSquareMeshes.push(base);
-            });
+            }
 
             dealSevenWondersHand();
             renderSevenWondersHUD();
-            document.getElementById('turn-status').innerText = `7 Wonders 3D — Age 1: Draft a structure or build Wonder Stage!`;
+            document.getElementById('turn-status').innerText = `7 Wonders 3D (${numPlayers}P) — Age 1: Draft a structure or build Wonder Stage!`;
         }
 
         function dealSevenWondersHand() {
@@ -2776,8 +3375,9 @@ function doPost(e) {
             if (gameOver) return;
             const card = swState.hand[cardIdx];
             if (!card) return;
-            const st = currentPlayer === 1 ? swState.p1 : swState.p2;
-            const xBase = currentPlayer === 1 ? -3.5 : 3.5;
+            const pIdx = currentPlayer - 1;
+            const st = swState.players[pIdx];
+            const wPos = swState.wonderCoords[pIdx];
 
             if (mode === 'wonder') {
                 st.stages++;
@@ -2786,7 +3386,7 @@ function doPost(e) {
                     new THREE.CylinderGeometry(1.3 - st.stages * 0.15, 1.5 - st.stages * 0.15, 0.55, 4),
                     new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.7, roughness: 0.2 })
                 );
-                tierMesh.position.set(xBase, 0.35 + (st.stages - 1) * 0.55, 0);
+                tierMesh.position.set(wPos.x, 0.35 + (st.stages - 1) * 0.55, wPos.z);
                 tierMesh.rotation.y = Math.PI / 4;
                 scene.add(tierMesh);
                 pieceMeshes.push(tierMesh);
@@ -2798,43 +3398,52 @@ function doPost(e) {
                 st.coins += card.coins;
                 const colMap = { Blue: 0x0284c7, Red: 0xe11d48, Green: 0x10b981, Yellow: 0xf59e0b };
                 const bldg = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.65, 0.8 + card.vp * 0.1, 0.65),
+                    new THREE.BoxGeometry(0.6, 0.8 + card.vp * 0.1, 0.6),
                     new THREE.MeshStandardMaterial({ color: colMap[card.type] || 0x38bdf8 })
                 );
-                const countOffset = (swState.turn - 3.5) * 0.65;
-                bldg.position.set(xBase + countOffset, 0.45, 1.0);
+                const countOffset = (swState.turn - 3.5) * 0.6;
+                bldg.position.set(wPos.x + countOffset, 0.45, wPos.z + 0.95);
                 scene.add(bldg);
                 pieceMeshes.push(bldg);
                 recordMove(`${getPlayerLabel(currentPlayer)} constructed ${card.name}`);
             }
 
-            if (currentPlayer === 1 && (gameModeType === 'pvp' || gameModeType === 'p2p')) {
-                currentPlayer = 2;
+            if (currentPlayer < numPlayers) {
+                currentPlayer++;
                 dealSevenWondersHand();
                 renderSevenWondersHUD();
+                if (isCurrentPlayerAI() && !gameOver) {
+                    setTimeout(() => {
+                        const pickIdx = Math.floor(Math.random() * swState.hand.length);
+                        playSevenWondersCard(pickIdx, Math.random() < 0.25 ? 'wonder' : 'build');
+                    }, 650);
+                }
                 return;
-            }
-
-            if (gameModeType === 'pve') {
-                swState.p2.victory += 2 + Math.floor(Math.random() * 3);
-                swState.p2.shields += Math.random() < 0.4 ? 2 : 0;
-                swState.p2.science += Math.random() < 0.35 ? 1 : 0;
             }
 
             currentPlayer = 1;
             swState.turn++;
             if (swState.turn > 6) {
-                if (swState.p1.shields > swState.p2.shields) swState.p1.victory += swState.age * 2;
-                else if (swState.p2.shields > swState.p1.shields) swState.p2.victory += swState.age * 2;
+                for (let i = 0; i < numPlayers; i++) {
+                    const left = (i + numPlayers - 1) % numPlayers;
+                    const right = (i + 1) % numPlayers;
+                    if (swState.players[i].shields > swState.players[left].shields) swState.players[i].victory += swState.age * 2;
+                    if (numPlayers > 2 && swState.players[i].shields > swState.players[right].shields) swState.players[i].victory += swState.age * 2;
+                }
 
                 if (swState.age >= 2) {
-                    const tot1 = swState.p1.victory + swState.p1.science * swState.p1.science + Math.floor(swState.p1.coins / 3);
-                    const tot2 = swState.p2.victory + swState.p2.science * swState.p2.science + Math.floor(swState.p2.coins / 3);
+                    const totals = Array.from({ length: numPlayers }, (_, i) => {
+                        const p = swState.players[i];
+                        return p.victory + p.science * p.science + Math.floor(p.coins / 3);
+                    });
+                    let bestIdx = 0;
+                    totals.forEach((t, i) => { if (t > totals[bestIdx]) bestIdx = i; });
+                    const winner = bestIdx + 1;
                     gameOver = true;
-                    const winner = tot1 >= tot2 ? 1 : 2;
                     scores[`p${winner}`]++;
                     updateScoreDisplay();
-                    showPostGameModal(`${getPlayerLabel(winner)} Rules the Ancient World!`, `Civilization Score — P1: ${tot1} VP | P2: ${tot2} VP`);
+                    const summary = totals.map((t, i) => `${getPlayerLabel(i + 1)}: ${t} VP`).join(' | ');
+                    showPostGameModal(`${getPlayerLabel(winner)} Rules the Ancient World!`, `Civilization Score — ${summary}`);
                     return;
                 }
                 swState.age++;
@@ -2849,7 +3458,7 @@ function doPost(e) {
         function renderSevenWondersHUD() {
             document.getElementById('sw-age').innerText = swState.age;
             document.getElementById('sw-turn').innerText = swState.turn;
-            const st = currentPlayer === 1 ? swState.p1 : swState.p2;
+            const st = swState.players[currentPlayer - 1];
             document.getElementById('sw-resources-bar').innerText = `${getPlayerLabel(currentPlayer)} — VP: ${st.victory} | Shields: ${st.shields} | Science: ${st.science} | Coins: ${st.coins}`;
 
             const row = document.getElementById('sw-cards-row');
@@ -3004,13 +3613,13 @@ function doPost(e) {
             renderHiveHUD();
             document.getElementById('turn-status').innerText = `Hive 3D — ${getPlayerLabel(currentPlayer)} (${currentPlayer === 1 ? 'Ivory' : 'Obsidian'}) Turn`;
 
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerHiveAITurn, 800);
             }
         }
 
         function triggerHiveAITurn() {
-            if (gameOver || activeGame !== 'hive' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'hive' || !isCurrentPlayerAI()) return;
             const openHexes = boardSquareMeshes.filter(m =>
                 m.userData && m.userData.type === 'hive_hex' &&
                 !hiveState.placed.some(p => p.q === m.userData.q && p.r === m.userData.r) &&
@@ -3022,16 +3631,14 @@ function doPost(e) {
             }
         }
 
-        // --- CARCASSONNE 3D (6×6 36-TILE LANDSCAPE & 7 MEEPLES PER PLAYER) ---
+        // --- CARCASSONNE 3D (SUPPORTS 2–4 PLAYERS ON 6×6 36-TILE LANDSCAPE & 7 MEEPLES EACH) ---
         function initCarcassonneGame() {
             carcState = {
                 grid: {},
                 currentTile: null,
                 rotation: 0,
-                meeplesP1: 7,
-                meeplesP2: 7,
-                ptsP1: 0,
-                ptsP2: 0
+                meeples: [7, 7, 7, 7],
+                pts: [0, 0, 0, 0]
             };
 
             const spacing = 1.48;
@@ -3051,7 +3658,7 @@ function doPost(e) {
             const centerSlot = boardSquareMeshes.find(m => m.userData && m.userData.gx === 0 && m.userData.gz === 0);
             placeCarcassonneTileVisual(0, 0, centerSlot, { name: 'Starting Abbey', type: 'city', pts: 3 }, false);
             drawNextCarcassonneTile();
-            document.getElementById('turn-status').innerText = `Carcassonne 3D (6×6 / 7 Meeples) — P1: 0 pts | P2: 0 pts`;
+            document.getElementById('turn-status').innerText = `Carcassonne 3D (${numPlayers}P / 7 Meeples) — ${getPlayerLabel(1)}'s Turn`;
         }
 
         function drawNextCarcassonneTile() {
@@ -3064,7 +3671,7 @@ function doPost(e) {
             carcState.currentTile = tileDeck[Math.floor(Math.random() * tileDeck.length)];
             carcState.rotation = 0;
             document.getElementById('carc-current-tile').innerText = `${carcState.currentTile.name} (+${carcState.currentTile.pts} pts)`;
-            document.getElementById('carc-meeples-left').innerText = currentPlayer === 1 ? carcState.meeplesP1 : carcState.meeplesP2;
+            document.getElementById('carc-meeples-left').innerText = carcState.meeples[currentPlayer - 1];
         }
 
         function rotateCarcassonneTile() {
@@ -3106,7 +3713,7 @@ function doPost(e) {
             if (withMeeple) {
                 const meeple = new THREE.Mesh(
                     new THREE.CylinderGeometry(0.15, 0.2, 0.45, 12),
-                    new THREE.MeshStandardMaterial({ color: currentPlayer === 1 ? 0x22d3ee : 0xf43f5e })
+                    new THREE.MeshStandardMaterial({ color: TEAM_HEX_COLORS[currentPlayer - 1] })
                 );
                 meeple.position.set(0.32, 0.32, 0.32);
                 grp.add(meeple);
@@ -3127,41 +3734,48 @@ function doPost(e) {
                 return;
             }
 
+            const pIdx = currentPlayer - 1;
             const wantMeeple = document.getElementById('carc-place-meeple').checked;
-            const availMeeples = currentPlayer === 1 ? carcState.meeplesP1 : carcState.meeplesP2;
+            const availMeeples = carcState.meeples[pIdx];
             const deploy = wantMeeple && availMeeples > 0;
 
             if (deploy) {
-                if (currentPlayer === 1) carcState.meeplesP1--; else carcState.meeplesP2--;
+                carcState.meeples[pIdx]--;
             }
 
             const tile = carcState.currentTile;
             placeCarcassonneTileVisual(gx, gz, slotMesh, tile, deploy);
 
             const earned = tile.pts + (deploy ? 2 : 0);
-            if (currentPlayer === 1) carcState.ptsP1 += earned; else carcState.ptsP2 += earned;
+            carcState.pts[pIdx] += earned;
             recordMove(`${getPlayerLabel(currentPlayer)} placed ${tile.name} at (${gx}, ${gz})${deploy ? ' + Meeple' : ''} (+${earned} pts)`);
 
             if (Object.keys(carcState.grid).length >= 36) {
                 gameOver = true;
-                const winner = carcState.ptsP1 >= carcState.ptsP2 ? 1 : 2;
+                let bestIdx = 0;
+                for (let i = 1; i < numPlayers; i++) {
+                    if (carcState.pts[i] > carcState.pts[bestIdx]) bestIdx = i;
+                }
+                const winner = bestIdx + 1;
                 scores[`p${winner}`]++;
                 updateScoreDisplay();
-                showPostGameModal(`${getPlayerLabel(winner)} Wins Carcassonne 3D!`, `All 36 Landscape Tiles Placed — P1: ${carcState.ptsP1} pts | P2: ${carcState.ptsP2} pts`);
+                const scoreSummary = Array.from({ length: numPlayers }, (_, i) => `${getPlayerLabel(i + 1)}: ${carcState.pts[i]} pts`).join(' | ');
+                showPostGameModal(`${getPlayerLabel(winner)} Wins Carcassonne 3D!`, `All 36 Landscape Tiles Placed — ${scoreSummary}`);
                 return;
             }
 
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            nextTurnPlayer();
             drawNextCarcassonneTile();
-            document.getElementById('turn-status').innerText = `Carcassonne 3D — P1: ${carcState.ptsP1} pts | P2: ${carcState.ptsP2} pts (${getPlayerLabel(currentPlayer)}'s Turn)`;
+            const livePts = Array.from({ length: numPlayers }, (_, i) => `P${i + 1}: ${carcState.pts[i]}`).join(' | ');
+            document.getElementById('turn-status').innerText = `Carcassonne 3D — ${livePts} (${getPlayerLabel(currentPlayer)}'s Turn)`;
 
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerCarcassonneAITurn, 800);
             }
         }
 
         function triggerCarcassonneAITurn() {
-            if (gameOver || activeGame !== 'carcassonne' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'carcassonne' || !isCurrentPlayerAI()) return;
             const openSlots = boardSquareMeshes.filter(m =>
                 m.userData && m.userData.type === 'carc_slot' &&
                 !carcState.grid[`${m.userData.gx},${m.userData.gz}`] &&
@@ -3273,7 +3887,7 @@ function doPost(e) {
             currentPlayer = currentPlayer === 1 ? 2 : 1;
             document.getElementById('turn-status').innerText = `Twixt 3D — ${getPlayerLabel(currentPlayer)} (${currentPlayer === 1 ? 'Cyan' : 'Red'}): Tap a hole to plant a peg!`;
 
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerTwixtAITurn, 800);
             }
         }
@@ -3305,7 +3919,7 @@ function doPost(e) {
         }
 
         function triggerTwixtAITurn() {
-            if (gameOver || activeGame !== 'twixt' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'twixt' || !isCurrentPlayerAI()) return;
             const openHoles = boardSquareMeshes.filter(m =>
                 m.userData && m.userData.type === 'twixt_hole' &&
                 m.userData.r > 0 && m.userData.r < twixtState.size - 1 &&
@@ -3471,7 +4085,7 @@ function doPost(e) {
                 if (checkMuhleMill(idx, currentPlayer)) {
                     muhleState.mustRemove = true;
                     document.getElementById('turn-status').innerText = `MÜHLE! ${getPlayerLabel(currentPlayer)}: Click an opponent stone to capture!`;
-                    if (gameModeType === 'pve' && currentPlayer === 2) {
+                    if (isCurrentPlayerAI()) {
                         setTimeout(triggerMuhleAICapture, 700);
                     }
                     return;
@@ -3511,7 +4125,7 @@ function doPost(e) {
                 if (checkMuhleMill(idx, currentPlayer)) {
                     muhleState.mustRemove = true;
                     document.getElementById('turn-status').innerText = `MÜHLE! ${getPlayerLabel(currentPlayer)}: Click an opponent stone to capture!`;
-                    if (gameModeType === 'pve' && currentPlayer === 2) {
+                    if (isCurrentPlayerAI()) {
                         setTimeout(triggerMuhleAICapture, 700);
                     }
                     return;
@@ -3525,13 +4139,13 @@ function doPost(e) {
             const rem = currentPlayer === 1 ? muhleState.p1Unplaced : muhleState.p2Unplaced;
             const actionHint = rem > 0 ? `Place stone (${rem} left)` : `Select & slide a stone`;
             document.getElementById('turn-status').innerText = `Mühle 3D — ${getPlayerLabel(currentPlayer)}: ${actionHint}`;
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerMuhleAITurn, 800);
             }
         }
 
         function triggerMuhleAICapture() {
-            if (gameOver || !muhleState.mustRemove || currentPlayer !== 2) return;
+            if (gameOver || !muhleState.mustRemove || !isCurrentPlayerAI()) return;
             const targets = muhleState.nodes.filter(n => n.owner === 1);
             const nonMill = targets.filter(n => !checkMuhleMill(n.idx, 1));
             const pool = nonMill.length > 0 ? nonMill : targets;
@@ -3539,7 +4153,7 @@ function doPost(e) {
         }
 
         function triggerMuhleAITurn() {
-            if (gameOver || activeGame !== 'muhle' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'muhle' || !isCurrentPlayerAI()) return;
             if (muhleState.p2Unplaced > 0) {
                 const open = muhleState.nodes.filter(n => n.owner === 0);
                 if (open.length > 0) {
@@ -3667,7 +4281,7 @@ function doPost(e) {
             currentPlayer = currentPlayer === 1 ? 2 : 1;
             document.getElementById('turn-status').innerText = `4gewinnt 3D — ${getPlayerLabel(currentPlayer)} (${currentPlayer === 1 ? 'Cyan' : 'Red'}): Tap a column to drop!`;
 
-            if (gameModeType === 'pve' && currentPlayer === 2 && !gameOver) {
+            if (isCurrentPlayerAI() && !gameOver) {
                 setTimeout(triggerConnect4AITurn, 750);
             }
         }
@@ -3695,7 +4309,7 @@ function doPost(e) {
         }
 
         function triggerConnect4AITurn() {
-            if (gameOver || activeGame !== 'fourgewinnt' || currentPlayer !== 2) return;
+            if (gameOver || activeGame !== 'fourgewinnt' || !isCurrentPlayerAI()) return;
             const validCols = [];
             for (let c = 0; c < connect4State.cols; c++) {
                 if (connect4State.grid[connect4State.rows - 1][c] === 0) validCols.push(c);
@@ -3706,14 +4320,16 @@ function doPost(e) {
             }
         }
 
-        // --- DETAILED INSTRUCTIONS TABS (WITH FULL SPECIFICATIONS FOR ALL 13 GAMES) ---
+        // --- COMPLETE DOCUMENTATION & GAME INSTRUCTIONS TABS ---
         function selectInstructionTab(gameKey) {
-            const allKeys = ['quarto', 'azul', 'sevenwonders', 'hive', 'carcassonne', 'twixt', 'startrek', 'mensch', 'skribbl', 'hangman', 'yahtzee', 'muhle', 'fourgewinnt'];
+            const allKeys = ['platform', 'quarto', 'azul', 'sevenwonders', 'hive', 'carcassonne', 'twixt', 'startrek', 'mensch', 'skribbl', 'hangman', 'yahtzee', 'muhle', 'fourgewinnt'];
             allKeys.forEach(k => {
                 const btn = document.getElementById(`rule-tab-${k}`);
                 if (!btn) return;
                 if (k === gameKey) {
-                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition";
+                    btn.className = k === 'platform'
+                        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition"
+                        : "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition";
                 } else {
                     btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition";
                 }
@@ -3729,9 +4345,39 @@ function doPost(e) {
             `;
 
             const rulesHTML = {
+                platform: `
+                    <h4 class="font-bold text-emerald-300 text-sm">Intelligames 3D — Complete Platform & Function Guide</h4>
+                    <p>Welcome to <strong>Intelligames 3D</strong>, a full-featured WebGL 3D multi-game strategy & party arena with live WebRTC video/audio communication, per-seat Human/AI/Online configuration for 2–4 players, and automatic Google Drive Sheet synchronization.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="bg-gray-950/80 p-3 rounded-xl border border-cyan-500/30 space-y-1">
+                            <div class="font-bold text-cyan-300"><i class="fa-solid fa-user-lock mr-1"></i> 1. Account Registration & Master Admin</div>
+                            <p class="text-[11px] text-gray-300">New players register on the gateway screen before logging in. Master accounts unlock <strong>Manage Users</strong> in the Master Menu to add, edit, or delete user profiles and PINs.</p>
+                        </div>
+                        <div class="bg-gray-950/80 p-3 rounded-xl border border-purple-500/30 space-y-1">
+                            <div class="font-bold text-purple-300"><i class="fa-solid fa-users mr-1"></i> 2. Per-Seat Human, AI & Online (2–4 Players)</div>
+                            <p class="text-[11px] text-gray-300">Choose 2, 3, or 4 players and assign each seat independently as <strong>Human (Local)</strong>, <strong>Computer (AI)</strong>, or <strong>Online Player</strong>—allowing mixed matches such as 1 Human vs. 3 AI bots or 2 Humans + 2 AI bots.</p>
+                        </div>
+                        <div class="bg-gray-950/80 p-3 rounded-xl border border-rose-500/30 space-y-1">
+                            <div class="font-bold text-rose-300"><i class="fa-solid fa-video mr-1"></i> 3. Live Audio & Video Call (WebRTC)</div>
+                            <p class="text-[11px] text-gray-300">Click <strong>Audio / Video</strong> in the bottom bar to start a camera + mic video call or audio-only voice call with mute controls, local Picture-in-Picture preview, and peer connection code exchange.</p>
+                        </div>
+                        <div class="bg-gray-950/80 p-3 rounded-xl border border-emerald-500/30 space-y-1">
+                            <div class="font-bold text-emerald-300"><i class="fa-brands fa-google-drive mr-1"></i> 4. Google Drive Sheet Sync</div>
+                            <p class="text-[11px] text-gray-300">Click <strong>Drive Sync</strong> to link your Google Sheet Web App URL. Automatically creates and updates 6 tabs: <code>Users</code>, <code>Sessions_Invites</code>, <code>Match_Scores</code> (2–4P), <code>Move_History</code>, <code>Favorites</code>, and <code>Raw_JSON</code>.</p>
+                        </div>
+                        <div class="bg-gray-950/80 p-3 rounded-xl border border-amber-500/30 space-y-1">
+                            <div class="font-bold text-amber-300"><i class="fa-solid fa-bell mr-1"></i> 5. Sessions, Favorites & Live Invites</div>
+                            <p class="text-[11px] text-gray-300">Open <strong>Sessions & Invites</strong> to star favored opponents, create named sessions, and send real-time match invitations with instant pop-up notifications.</p>
+                        </div>
+                        <div class="bg-gray-950/80 p-3 rounded-xl border border-sky-500/30 space-y-1">
+                            <div class="font-bold text-sky-300"><i class="fa-solid fa-mobile-screen mr-1"></i> 6. Adaptive Device & Display Selector</div>
+                            <p class="text-[11px] text-gray-300">Automatically detects Phone, Tablet, or Desktop screen resolution and adjusts 3D camera framing, or lets you manually switch profiles anytime. Top-left HUD cards include a <strong>Hide/Show</strong> toggle so 3D boards are never blocked.</p>
+                        </div>
+                    </div>
+                `,
                 quarto: `
                     <h4 class="font-bold text-cyan-300 text-sm">Quarto 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Main Board + Perimeter Ring', '4 × 4 Grid (16 Squares)', '16 Unique Pieces (Tall/Short, Dark/Light, Square/Round, Solid/Hollow)', 'Player to Player, 2P Same Device, or vs AI')}
+                    ${specsCard('1 Main Board + Perimeter Ring', '4 × 4 Grid (16 Squares)', '16 Unique Pieces (Tall/Short, Dark/Light, Square/Round, Solid/Hollow)', '2 Players (Human, Online, or Computer AI)')}
                     <p><strong>Objective:</strong> Complete a line of 4 pieces (horizontal, vertical, or diagonal) sharing at least one common attribute: <strong>Tall or Short</strong>, <strong>Dark or Light</strong>, <strong>Square or Round</strong>, or <strong>Solid or Hollow</strong>.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Step 1 (Pick for Opponent):</strong> You never choose the piece you place yourself! Player 1 selects a piece from around the perimeter of the board to hand to Player 2.</li>
@@ -3740,9 +4386,9 @@ function doPost(e) {
                     </ul>
                 `,
                 azul: `
-                    <h4 class="font-bold text-sky-300 text-sm">Azul 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('2 Player Mosaic Boards + 5 Factory Displays', 'Two 5 × 5 Grids (25 Tiles Each)', '20 Factory Tiles per Round across 5 Glazed Colors (Cobalt, Amber, Crimson, Obsidian, Teal)', 'Player to Player, 2P Same Device, or vs AI')}
-                    <p><strong>Objective:</strong> Draft colored ceramic tiles from the 5 Factory Displays to decorate your 5×5 3D Mosaic Wall and score the highest adjacency points.</p>
+                    <h4 class="font-bold text-sky-300 text-sm">Azul 3D — Complete Specifications & Rules (2–4 Players)</h4>
+                    ${specsCard('2 to 4 Player Mosaic Boards + 5/7/9 Factory Displays', '5 × 5 Grids (25 Tiles per Player)', '20–36 Factory Tiles per Round across 5 Glazed Colors (Cobalt, Amber, Crimson, Obsidian, Teal)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
+                    <p><strong>Objective:</strong> Draft colored ceramic tiles from the Factory Displays to decorate your 5×5 3D Mosaic Wall and score the highest adjacency points.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Drafting:</strong> Click any colored tile inside a Factory Display to gather all matching tiles of that color from that factory.</li>
                         <li><strong>Tiling Your Wall:</strong> Select Row 1–5 to glaze that color onto your 3D board. Adjacent horizontal and vertical tiles grant bonus combo points.</li>
@@ -3750,17 +4396,17 @@ function doPost(e) {
                     </ul>
                 `,
                 sevenwonders: `
-                    <h4 class="font-bold text-amber-300 text-sm">7 Wonders 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('2 Civilization Wonder Boards', '2 Monument Platforms (3 Tiers Each) + City Skyline', '6 Turns per Age across 2 Ages (Blue Civic, Red Military, Green Science, Yellow Commerce Cards)', 'Player to Player, 2P Same Device, or vs AI')}
+                    <h4 class="font-bold text-amber-300 text-sm">7 Wonders 3D — Complete Specifications & Rules (2–4 Players)</h4>
+                    ${specsCard('2 to 4 Civilization Wonder Boards', 'Up to 4 Monument Platforms (3 Tiers Each) + City Skylines', '6 Turns per Age across 2 Ages (Blue Civic, Red Military, Green Science, Yellow Commerce Cards)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
                     <p><strong>Objective:</strong> Lead an ancient city across Ages by constructing Civic, Military, Science, and Commerce buildings or erecting your golden 3D Wonder Monument.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Drafting Cards:</strong> Each turn, choose 1 card from your 3-card hand to <strong>Build</strong> as a 3D city structure or sacrifice to raise a <strong>Wonder Stage</strong> (+4 VP).</li>
-                        <li><strong>Military & Science:</strong> Red Military Shields clash at the end of each Age for bonus Victory Points, while Green Science symbols multiply quadratically.</li>
+                        <li><strong>Military & Science:</strong> Red Military Shields clash with neighboring civilizations at the end of each Age for bonus Victory Points, while Green Science symbols multiply quadratically.</li>
                     </ul>
                 `,
                 hive: `
                     <h4 class="font-bold text-amber-300 text-sm">Hive 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Hexagonal Arena Board', '61-Hex Grid (Radius 4)', '22 Insect Tiles (11 per Player: 1 Queen Bee, 2 Beetles, 3 Grasshoppers, 2 Spiders, 3 Soldier Ants)', 'Player to Player, 2P Same Device, or vs AI')}
+                    ${specsCard('1 Hexagonal Arena Board', '61-Hex Grid (Radius 4)', '22 Insect Tiles (11 per Player: 1 Queen Bee, 2 Beetles, 3 Grasshoppers, 2 Spiders, 3 Soldier Ants)', '2 Players (Human, Online, or Computer AI)')}
                     <p><strong>Objective:</strong> Surround your opponent's Queen Bee on all 6 hexagonal sides while keeping your own Queen Bee safe.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>One Hive Rule:</strong> Every insect placed onto the 3D hex arena must touch at least one existing tile in the Hive.</li>
@@ -3768,17 +4414,17 @@ function doPost(e) {
                     </ul>
                 `,
                 carcassonne: `
-                    <h4 class="font-bold text-emerald-300 text-sm">Carcassonne 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Expandable Countryside Board', '6 × 6 Landscape Grid (36 Tiles)', '36 Terrain Tiles (Walled Cities, Monasteries, Crossroads) + 14 Meeples (7 per Player)', 'Player to Player, 2P Same Device, or vs AI')}
+                    <h4 class="font-bold text-emerald-300 text-sm">Carcassonne 3D — Complete Specifications & Rules (2–4 Players)</h4>
+                    ${specsCard('1 Expandable Countryside Board', '6 × 6 Landscape Grid (36 Tiles)', '36 Terrain Tiles (Walled Cities, Monasteries, Crossroads) + 7 Meeples per Player', '2–4 Players (Any mix of Human, Online & Computer AI)')}
                     <p><strong>Objective:</strong> Expand a medieval 3D countryside tile-by-tile and deploy Meeples to claim bonus territory points.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Tile Placement:</strong> Click any slot orthogonally adjacent to an existing tile to expand Walled Cities, Monasteries, and Crossroads.</li>
-                        <li><strong>Meeples:</strong> Keep "Deploy Meeple" checked to station one of your 7 followers on your newly placed tile for +2 extra points.</li>
+                        <li><strong>Meeples:</strong> Keep "Meeple" checked to station one of your 7 followers on your newly placed tile for +2 extra points.</li>
                     </ul>
                 `,
                 twixt: `
                     <h4 class="font-bold text-purple-300 text-sm">Twixt 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Pegboard Arena with 4 Goal Borders', '12 × 12 Grid (140 Peg Holes; 4 Corners Excluded)', 'Unlimited Cyan & Red Pegs + Auto-Linking Knight-Move 3D Bridges', 'Player to Player, 2P Same Device, or vs AI')}
+                    ${specsCard('1 Pegboard Arena with 4 Goal Borders', '12 × 12 Grid (140 Peg Holes; 4 Corners Excluded)', 'Unlimited Cyan & Red Pegs + Auto-Linking Knight-Move 3D Bridges', '2 Players (Human, Online, or Computer AI)')}
                     <p><strong>Objective:</strong> Build an unbroken chain of pegs and knight-move bridges connecting your two opposite goal borders.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Goal Borders:</strong> Player 1 (Cyan) connects North ↔ South; Player 2 (Red) connects West ↔ East.</li>
@@ -3787,7 +4433,7 @@ function doPost(e) {
                 `,
                 startrek: `
                     <h4 class="font-bold text-cyan-300 text-sm">Star Trek Tri-Dimensional Chess — Complete Specifications & Rules</h4>
-                    ${specsCard('7 Multi-Level Boards', '3 Stepped 4 × 4 Main Boards + 4 Suspended 2 × 2 Attack Boards (64 Squares Total)', '24 Pieces (12 per Side: 1 King, 1 Queen, 2 Rooks, 2 Bishops, 2 Knights, 4 Pawns)', 'Player to Player, 2P Same Device, or vs AI')}
+                    ${specsCard('7 Multi-Level Boards', '3 Stepped 4 × 4 Main Boards + 4 Suspended 2 × 2 Attack Boards (64 Squares Total)', '24 Pieces (12 per Side: 1 King, 1 Queen, 2 Rooks, 2 Bishops, 2 Knights, 4 Pawns)', '2 Players (Human, Online, or Computer AI)')}
                     <p><strong>Objective:</strong> Capture the opponent's King across 3 stepped 4×4 main boards and 4 suspended 2×2 attack boards.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>3D Movement:</strong> Tap any friendly Starfleet (White) or Opponent (Red) piece to select it, then tap a destination square on the same level or an overlapping upper/lower level.</li>
@@ -3795,8 +4441,8 @@ function doPost(e) {
                     </ul>
                 `,
                 mensch: `
-                    <h4 class="font-bold text-amber-300 text-sm">Mensch ärgere Dich nicht 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Circular Circuit Board + Central Home Sanctuary', '40 Outer Circuit Spaces + 2 Starting Yards', '8 Conical Pawns (4 Cyan for Player 1, 4 Red for Player 2) + 1 Six-Sided Die', 'Player to Player, 2P Same Device, or vs AI')}
+                    <h4 class="font-bold text-amber-300 text-sm">Mensch ärgere Dich nicht 3D — Complete Specifications & Rules (2–4 Players)</h4>
+                    ${specsCard('1 Circular Circuit Board + Central Home Sanctuary', '40 Outer Circuit Spaces + Up to 4 Starting Yards', 'Up to 16 Conical Pawns (4 per Player in Cyan, Red, Gold, Emerald) + 1 Six-Sided Die', '2–4 Players (Any mix of Human, Online & Computer AI)')}
                     <p><strong>Objective:</strong> Be the first player to race all 4 of your pawns around the 40-tile circuit into the central golden Home Sanctuary.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Entering Play:</strong> Roll a <strong>6</strong> to deploy a pawn from your starting yard onto the track and earn a bonus roll.</li>
@@ -3804,25 +4450,25 @@ function doPost(e) {
                     </ul>
                 `,
                 skribbl: `
-                    <h4 class="font-bold text-cyan-300 text-sm">Skribbl 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Interactive Neon Sketchpad Canvas', '520 × 210 px Multi-Color Drawing Board', 'Full RGB Color Picker, Touch/Mouse Brush & Secret Word Dictionary', 'Player to Player, 2P Same Device, or vs AI')}
+                    <h4 class="font-bold text-cyan-300 text-sm">Skribbl 3D — Complete Specifications & Rules (2–4 Players)</h4>
+                    ${specsCard('1 Interactive Neon Sketchpad Canvas', '520 × 210 px Multi-Color Drawing Board', 'Full RGB Color Picker, Touch/Mouse Brush & Secret Word Dictionary', '2–4 Players (Human or Online)')}
                     <p><strong>Objective:</strong> Illustrate the secret word on the neon sketchpad while players type guesses in real time.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Drawing:</strong> Pick any color from the swatch picker and draw clues using mouse or touch.</li>
-                        <li><strong>Guessing:</strong> Type your answer into the guess box and press Guess to score points and advance to a new word.</li>
+                        <li><strong>Guessing:</strong> Type your answer into the guess box and press Guess to score points and rotate turns.</li>
                     </ul>
                 `,
                 hangman: `
-                    <h4 class="font-bold text-rose-300 text-sm">Hangman 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 3D Wooden Gallows Stage', '3.2 × 4.4 Unit 3D Scaffold Platform', '6-Part 3D Figure (Head, Torso, Left/Right Arms, Left/Right Legs) + 26-Letter Keyboard', 'Player to Player, 2P Same Device, or vs AI')}
+                    <h4 class="font-bold text-rose-300 text-sm">Hangman 3D — Complete Specifications & Rules (1–4 Players)</h4>
+                    ${specsCard('1 3D Wooden Gallows Stage', '3.2 × 4.4 Unit 3D Scaffold Platform', '6-Part 3D Figure (Head, Torso, Left/Right Arms, Left/Right Legs) + 26-Letter Keyboard', '1–4 Players (Any mix of Human & Computer AI)')}
                     <p><strong>Objective:</strong> Deduce the hidden word letter-by-letter before all 6 parts of the 3D figure appear on the gallows.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Letter Selection:</strong> Tap letters on the A–Z keyboard. Correct letters reveal their positions; wrong letters add a 3D piece to the scaffold (max 6 mistakes).</li>
                     </ul>
                 `,
                 yahtzee: `
-                    <h4 class="font-bold text-amber-300 text-sm">Yahtzee 3D — Complete Specifications & Rules</h4>
-                    ${specsCard('1 3D Dice Arena + Dual Scorecards', '5-Die Rolling Tray & 8-Category Scorecard', '5 Interactive 3D Dice (Up to 3 Rolls per Turn)', 'Player to Player, 2P Same Device, or vs AI')}
+                    <h4 class="font-bold text-amber-300 text-sm">Yahtzee 3D — Complete Specifications & Rules (2–4 Players)</h4>
+                    ${specsCard('1 3D Dice Arena + Multi-Player Scorecards', '5-Die Rolling Tray & 8-Category Scorecard per Player', '5 Interactive 3D Dice (Up to 3 Rolls per Turn)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
                     <p><strong>Objective:</strong> Roll 5 dice up to 3 times per turn to achieve the highest total score across 8 scoring categories.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Holding Dice:</strong> Click any die between rolls to lock (HOLD) its value while re-rolling the remaining dice.</li>
@@ -3831,7 +4477,7 @@ function doPost(e) {
                 `,
                 muhle: `
                     <h4 class="font-bold text-amber-300 text-sm">Mühle 3D (Nine Men's Morris) — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Concentric Morris Board', '3 Concentric Squares / 24 Intersection Nodes', '18 Stones (9 Cyan for Player 1, 9 Amber for Player 2)', 'Player to Player, 2P Same Device, or vs AI')}
+                    ${specsCard('1 Concentric Morris Board', '3 Concentric Squares / 24 Intersection Nodes', '18 Stones (9 Cyan for Player 1, 9 Amber for Player 2)', '2 Players (Human, Online, or Computer AI)')}
                     <p><strong>Objective:</strong> Form "Mills" (3 of your stones in a straight line along the 3 concentric squares) to capture opponent stones until they have fewer than 3 left.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Phase 1 (Placing):</strong> Each player starts with 9 stones and takes turns placing them onto any of the 24 board intersections.</li>
@@ -3841,7 +4487,7 @@ function doPost(e) {
                 `,
                 fourgewinnt: `
                     <h4 class="font-bold text-rose-300 text-sm">4gewinnt 3D (Connect 4) — Complete Specifications & Rules</h4>
-                    ${specsCard('1 Standing Vertical Gravity Rack', '7 Columns × 6 Rows (42 Slots Total)', '42 Discs (21 Cyan for Player 1, 21 Red for Player 2)', 'Player to Player, 2P Same Device, or vs AI')}
+                    ${specsCard('1 Standing Vertical Gravity Rack', '7 Columns × 6 Rows (42 Slots Total)', '42 Discs (21 Cyan for Player 1, 21 Red for Player 2)', '2 Players (Human, Online, or Computer AI)')}
                     <p><strong>Objective:</strong> Be the first player to align 4 of your colored discs horizontally, vertically, or diagonally inside the standing 7×6 3D gravity rack.</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>Gravity Drop:</strong> Click any of the 7 vertical columns (or top drop funnels); your disc drops to the lowest unoccupied slot in that column.</li>
@@ -3851,7 +4497,7 @@ function doPost(e) {
             };
 
             const box = document.getElementById('instruction-content-box');
-            if (box) box.innerHTML = rulesHTML[gameKey] || rulesHTML.quarto;
+            if (box) box.innerHTML = rulesHTML[gameKey] || rulesHTML.platform;
         }
 
         // --- MOVE HISTORY, SESSIONS, FAVORED PLAYERS & LIVE NOTIFICATIONS ---
@@ -4098,6 +4744,11 @@ function doPost(e) {
 
             activeGame = found.game;
             activeSessionName = found.name;
+            numPlayers = 2;
+            playerTypes = ['human', 'human', 'human', 'human'];
+            playerNames = [found.host || 'Player 1', found.invited || currentUser || 'Player 2', 'Player 3', 'Player 4'];
+            player1Name = playerNames[0];
+            player2Name = playerNames[1];
             closeSessionsHub();
             document.getElementById('game-lobby-modal').classList.add('hidden');
             initGameArena();
@@ -4106,7 +4757,11 @@ function doPost(e) {
 
         // --- UI & MODAL HELPERS ---
         function updateScoreDisplay() {
-            document.getElementById('score-display').innerText = `${player1Name}: ${scores.p1} | ${player2Name}: ${scores.p2}`;
+            const parts = [];
+            for (let i = 1; i <= numPlayers; i++) {
+                parts.push(`${getPlayerLabel(i)}: ${scores[`p${i}`] || 0}`);
+            }
+            document.getElementById('score-display').innerText = parts.join(' | ');
         }
 
         function toggleChatWindow() {
@@ -4120,10 +4775,21 @@ function doPost(e) {
             document.getElementById('menu-select-mode').value = gameModeType;
             document.getElementById('menu-select-ai-difficulty').value = aiDifficulty;
             document.getElementById('menu-select-display-profile').value = displayProfileSetting;
-            document.getElementById('menu-p1-name').value = player1Name;
-            document.getElementById('menu-p2-name').value = gameModeType === 'pvp' ? player2Name : 'Player 2';
+            const menuCountSel = document.getElementById('menu-player-count');
+            if (menuCountSel) menuCountSel.value = String(numPlayers);
+
+            document.getElementById('menu-p1-name').value = playerNames[0] || player1Name;
+            [2, 3, 4].forEach(slotNum => {
+                const idx = slotNum - 1;
+                const typeSel = document.getElementById(`menu-p${slotNum}-type`);
+                const nameInp = document.getElementById(`menu-p${slotNum}-name`);
+                if (typeSel) typeSel.value = playerTypes[idx] || 'human';
+                if (nameInp) nameInp.value = playerNames[idx] || `Player ${slotNum}`;
+                toggleSlotTypeUI('menu', slotNum);
+            });
+
+            updateMultiplayerInputs('menu');
             syncMenuModeOptionsForGame();
-            toggleMenuModeFields();
             updateDetectedDeviceHints();
 
             const cfg = getDriveSyncConfig();
@@ -4256,43 +4922,17 @@ function doPost(e) {
 
         function applyMasterMenuChanges() {
             activeGame = document.getElementById('menu-select-game').value;
-            gameModeType = document.getElementById('menu-select-mode').value;
             aiDifficulty = document.getElementById('menu-select-ai-difficulty').value;
             setDisplayProfile(document.getElementById('menu-select-display-profile').value);
-
-            if (gameModeType === 'p2p') {
-                const opp = (document.getElementById('menu-p2p-opponent').value || '').trim();
-                player1Name = currentUser || 'Player 1';
-                player2Name = opp || 'Player 2 (Online)';
-                if (opp) {
-                    const sessions = getSessionsRegistry();
-                    sessions.push({
-                        id: 'sess_' + Date.now(),
-                        name: `${player1Name} vs ${opp}`,
-                        game: activeGame,
-                        host: player1Name,
-                        invited: opp,
-                        accepted: false
-                    });
-                    saveSessionsRegistry(sessions);
-                }
-            } else if (gameModeType === 'pvp') {
-                player1Name = (document.getElementById('menu-p1-name').value || '').trim() || currentUser || 'Player 1';
-                player2Name = (document.getElementById('menu-p2-name').value || '').trim() || 'Player 2';
-            } else {
-                player1Name = currentUser || 'Player 1';
-                player2Name = `AI (${aiDifficulty.toUpperCase()})`;
-            }
+            readPlayerSlotsFromUI('menu');
 
             closeMasterMenu();
             document.getElementById('game-lobby-modal').classList.add('hidden');
             initGameArena();
-            const modeInfoMap = {
-                p2p: ' (Player to Player)',
-                pvp: ' (2 Players Same Device)',
-                pve: `, AI: ${aiDifficulty.toUpperCase()}`
-            };
-            addChatSystemMessage(`Game reconfigured to ${activeGame.toUpperCase()} — ${player1Name} vs ${player2Name}${modeInfoMap[gameModeType]} [${activeResolvedDisplay.toUpperCase()} view].`);
+            const rosterStr = Array.from({ length: numPlayers }, (_, i) =>
+                `${playerNames[i]} [${playerTypes[i] === 'ai' ? 'AI' : (playerTypes[i] === 'online' ? 'Online' : 'Human')}]`
+            ).join(' vs ');
+            addChatSystemMessage(`Game reconfigured to ${activeGame.toUpperCase()} (${numPlayers}P) — ${rosterStr} [${activeResolvedDisplay.toUpperCase()} view].`);
         }
 
         function openMasterMenuFromLobby() {
@@ -4402,7 +5042,6 @@ function doPost(e) {
                 users.push({ username: regUser, password: regPass, role });
                 saveUsersRegistry(users);
 
-                // Clear registration inputs and switch to Log In with username pre-filled
                 document.getElementById('reg-user').value = '';
                 document.getElementById('reg-pass').value = '';
                 document.getElementById('reg-pass-confirm').value = '';

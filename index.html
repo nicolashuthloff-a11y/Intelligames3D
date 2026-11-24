@@ -129,9 +129,6 @@
                             <i class="fa-solid fa-gamepad text-cyan-400 mr-2.5"></i> Select Your Match
                         </h2>
                         <div class="flex items-center space-x-2">
-                            <button type="button" onclick="openInstructionsModal()" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold rounded-xl text-xs border border-cyan-500/40 transition">
-                                <i class="fa-solid fa-book-open mr-1"></i> Documentation & Rules
-                            </button>
                             <button type="button" onclick="openDriveSyncModal()" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
                                 <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
                             </button>
@@ -290,9 +287,9 @@
                 <div class="glass-panel px-3.5 py-2.5 rounded-2xl shadow-xl">
                     <span id="score-display" class="text-xs font-extrabold text-purple-300">P1: 0 | P2: 0</span>
                 </div>
-                <button onclick="openInstructionsModal()" class="interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-cyan-500/50 transition" title="Complete Game Rules & Platform Documentation">
+                <button id="top-rules-btn" onclick="openInstructionsModal()" class="hidden interactive glass-panel px-3.5 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-cyan-500/50 transition" title="Rules for the Active Game">
                     <i class="fa-solid fa-book-open text-cyan-400"></i>
-                    <span class="text-xs font-semibold text-gray-200 hidden sm:inline">Docs & Rules</span>
+                    <span class="text-xs font-semibold text-gray-200 hidden sm:inline">Game Rules</span>
                 </button>
             </div>
         </div>
@@ -774,9 +771,6 @@ function doPost(e) {
                     <p class="text-[11px] text-cyan-300 mt-0.5">Switch game tiles, configure 2–4 seats (Human / AI / Online), or manage users</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button type="button" onclick="closeMasterMenu(); openInstructionsModal();" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold rounded-xl text-xs border border-cyan-500/40 transition">
-                        <i class="fa-solid fa-book-open mr-1"></i> Docs & Rules
-                    </button>
                     <button type="button" onclick="closeMasterMenu(); openDriveSyncModal();" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold rounded-xl text-xs border border-emerald-500/40 transition">
                         <i class="fa-brands fa-google-drive mr-1"></i> Sheet Sync
                     </button>
@@ -954,20 +948,20 @@ function doPost(e) {
                 <button onclick="selectInstructionTab('sevenwonders')" id="rule-tab-sevenwonders" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">7 Wonders 3D (2–4P)</button>
                 <button onclick="selectInstructionTab('hive')" id="rule-tab-hive" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Hive 3D</button>
                 <button onclick="selectInstructionTab('carcassonne')" id="rule-tab-carcassonne" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Carcassonne 3D (2–4P)</button>
-                <button onclick="selectInstructionTab('twixt')" id="rule-tab-twixt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Twixt 3D</button>
-                <button onclick="selectInstructionTab('startrek')" id="rule-tab-startrek" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Star Trek Chess</button>
-                <button onclick="selectInstructionTab('mensch')" id="rule-tab-mensch" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mensch ärgere Dich nicht (2–4P)</button>
-                <button onclick="selectInstructionTab('skribbl')" id="rule-tab-skribbl" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Skribbl 3D</button>
-                <button onclick="selectInstructionTab('hangman')" id="rule-tab-hangman" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Hangman 3D</button>
-                <button onclick="selectInstructionTab('yahtzee')" id="rule-tab-yahtzee" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Yahtzee 3D (2–4P)</button>
-                <button onclick="selectInstructionTab('muhle')" id="rule-tab-muhle" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">Mühle 3D</button>
-                <button onclick="selectInstructionTab('fourgewinnt')" id="rule-tab-fourgewinnt" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-gray-400 border border-gray-800 transition">4gewinnt 3D</button>
+    <!-- ACTIVE GAME RULES MODAL (SHOWS ONLY THE CURRENTLY ACTIVE GAME) -->
+    <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-cyan-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <h3 id="instruction-modal-title" class="text-base font-bold text-white flex items-center">
+                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Game Rules & Specifications
+                </h3>
+                <button onclick="closeInstructionsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
             <div id="instruction-content-box" class="space-y-3 text-xs text-gray-300 leading-relaxed"></div>
 
             <button onclick="closeInstructionsModal()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
-                Got It, Let's Play!
+                Got It, Back to Game
             </button>
         </div>
     </div>
@@ -1121,7 +1115,6 @@ function doPost(e) {
             initDeviceAndDisplayDetection();
             setupSkribblCanvasEvents();
             loadChatHistory();
-            selectInstructionTab('platform');
             checkExistingSession();
             startInviteNotificationListener();
             initWebRTCSignalingListener();
@@ -1689,6 +1682,9 @@ function doPost(e) {
         }
 
         function openGameLobby() {
+            const topRulesBtn = document.getElementById('top-rules-btn');
+            if (topRulesBtn) topRulesBtn.classList.add('hidden');
+            closeInstructionsModal();
             const roleBadge = currentUserRole === 'master' ? ' [MASTER]' : '';
             document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Choose game, player count (2–4) & Human/Computer per seat`;
             const p1Inp = document.getElementById('lobby-p1-name');
@@ -2010,6 +2006,8 @@ function doPost(e) {
                 fourgewinnt: "4gewinnt 3D" 
             };
             document.getElementById('current-game-title').innerText = titles[activeGame] || "Intelligames";
+            const topRulesBtn = document.getElementById('top-rules-btn');
+            if (topRulesBtn) topRulesBtn.classList.remove('hidden');
             const modePill = document.getElementById('mode-pill-badge');
             if (modePill) {
                 const aiCount = playerTypes.slice(0, numPlayers).filter(t => t === 'ai').length;
@@ -3038,12 +3036,151 @@ function doPost(e) {
         }
 
         function openInstructionsModal() {
-            selectInstructionTab(activeGame || 'platform');
+            const lobbyModal = document.getElementById('game-lobby-modal');
+            if (lobbyModal && !lobbyModal.classList.contains('hidden')) return;
+            const gameTitle = document.getElementById('current-game-title')?.innerText || activeGame.toUpperCase();
+            const modalTitleEl = document.getElementById('instruction-modal-title');
+            if (modalTitleEl) {
+                modalTitleEl.innerHTML = `<i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> ${gameTitle} — Rules & Specifications`;
+            }
+            selectInstructionTab(activeGame);
             document.getElementById('instructions-modal').classList.remove('hidden');
         }
+        // --- ACTIVE GAME INSTRUCTIONS RENDERER (DISPLAYS ONLY THE CURRENT GAME) ---
+        function selectInstructionTab(gameKey) {
+            const specsCard = (boards, size, piecesInfo, players) => `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-950/80 p-3 rounded-xl border border-cyan-500/25 text-[11px]">
+                    <div><span class="text-cyan-400 font-bold">Number of Boards:</span> <span class="text-white">${boards}</span></div>
+                    <div><span class="text-cyan-400 font-bold">Board Dimensions:</span> <span class="text-white">${size}</span></div>
+                    <div><span class="text-purple-400 font-bold">Pieces & Components:</span> <span class="text-white">${piecesInfo}</span></div>
+                    <div><span class="text-emerald-400 font-bold">Players & Modes:</span> <span class="text-white">${players}</span></div>
+                </div>
+            `;
 
-        function closeInstructionsModal() {
-            document.getElementById('instructions-modal').classList.add('hidden');
+            const rulesHTML = {
+                quarto: `
+                    <h4 class="font-bold text-cyan-300 text-sm">Quarto 3D — Rules & Specifications</h4>
+                    ${specsCard('1 Main Board + Perimeter Ring', '4 × 4 Grid (16 Squares)', '16 Unique Pieces (Tall/Short, Dark/Light, Square/Round, Solid/Hollow)', '2 Players (Human, Online, or Computer AI)')}
+                    <p><strong>Objective:</strong> Complete a line of 4 pieces (horizontal, vertical, or diagonal) sharing at least one common attribute: <strong>Tall or Short</strong>, <strong>Dark or Light</strong>, <strong>Square or Round</strong>, or <strong>Solid or Hollow</strong>.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Step 1 (Pick for Opponent):</strong> You never choose the piece you place yourself! Player 1 selects a piece from around the perimeter of the board to hand to Player 2.</li>
+                        <li><strong>Step 2 (Place & Hand Over):</strong> Player 2 places that floating piece onto any open square on the 4×4 board, and then selects the next piece from the perimeter for Player 1.</li>
+                        <li><strong>Victory:</strong> As soon as any 4 aligned pieces share a matching trait, the player who placed the 4th piece wins!</li>
+                    </ul>
+                `,
+                azul: `
+                    <h4 class="font-bold text-sky-300 text-sm">Azul 3D — Rules & Specifications (2–4 Players)</h4>
+                    ${specsCard('2 to 4 Player Mosaic Boards + 5/7/9 Factory Displays', '5 × 5 Grids (25 Tiles per Player)', '20–36 Factory Tiles per Round across 5 Glazed Colors (Cobalt, Amber, Crimson, Obsidian, Teal)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
+                    <p><strong>Objective:</strong> Draft colored ceramic tiles from the Factory Displays to decorate your 5×5 3D Mosaic Wall and score the highest adjacency points.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Drafting:</strong> Click any colored tile inside a Factory Display to gather all matching tiles of that color from that factory.</li>
+                        <li><strong>Tiling Your Wall:</strong> Select Row 1–5 to glaze that color onto your 3D board. Adjacent horizontal and vertical tiles grant bonus combo points.</li>
+                        <li><strong>End of Game:</strong> Completing a full horizontal row of 5 glazed tiles triggers the end of the match and awards a +5 row bonus.</li>
+                    </ul>
+                `,
+                sevenwonders: `
+                    <h4 class="font-bold text-amber-300 text-sm">7 Wonders 3D — Rules & Specifications (2–4 Players)</h4>
+                    ${specsCard('2 to 4 Civilization Wonder Boards', 'Up to 4 Monument Platforms (3 Tiers Each) + City Skylines', '6 Turns per Age across 2 Ages (Blue Civic, Red Military, Green Science, Yellow Commerce Cards)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
+                    <p><strong>Objective:</strong> Lead an ancient city across Ages by constructing Civic, Military, Science, and Commerce buildings or erecting your golden 3D Wonder Monument.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Drafting Cards:</strong> Each turn, choose 1 card from your 3-card hand to <strong>Build</strong> as a 3D city structure or sacrifice to raise a <strong>Wonder Stage</strong> (+4 VP).</li>
+                        <li><strong>Military & Science:</strong> Red Military Shields clash with neighboring civilizations at the end of each Age for bonus Victory Points, while Green Science symbols multiply quadratically.</li>
+                    </ul>
+                `,
+                hive: `
+                    <h4 class="font-bold text-amber-300 text-sm">Hive 3D — Rules & Specifications</h4>
+                    ${specsCard('1 Hexagonal Arena Board', '61-Hex Grid (Radius 4)', '22 Insect Tiles (11 per Player: 1 Queen Bee, 2 Beetles, 3 Grasshoppers, 2 Spiders, 3 Soldier Ants)', '2 Players (Human, Online, or Computer AI)')}
+                    <p><strong>Objective:</strong> Surround your opponent's Queen Bee on all 6 hexagonal sides while keeping your own Queen Bee safe.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>One Hive Rule:</strong> Every insect placed onto the 3D hex arena must touch at least one existing tile in the Hive.</li>
+                        <li><strong>Insects:</strong> Deploy your Queen Bee, Beetles, Grasshoppers, Spiders, and Soldier Ants strategically to close the ring around the enemy Queen.</li>
+                    </ul>
+                `,
+                carcassonne: `
+                    <h4 class="font-bold text-emerald-300 text-sm">Carcassonne 3D — Rules & Specifications (2–4 Players)</h4>
+                    ${specsCard('1 Expandable Countryside Board', '6 × 6 Landscape Grid (36 Tiles)', '36 Terrain Tiles (Walled Cities, Monasteries, Crossroads) + 7 Meeples per Player', '2–4 Players (Any mix of Human, Online & Computer AI)')}
+                    <p><strong>Objective:</strong> Expand a medieval 3D countryside tile-by-tile and deploy Meeples to claim bonus territory points.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Tile Placement:</strong> Click any slot orthogonally adjacent to an existing tile to expand Walled Cities, Monasteries, and Crossroads.</li>
+                        <li><strong>Meeples:</strong> Keep "Meeple" checked to station one of your 7 followers on your newly placed tile for +2 extra points.</li>
+                    </ul>
+                `,
+                twixt: `
+                    <h4 class="font-bold text-purple-300 text-sm">Twixt 3D — Rules & Specifications</h4>
+                    ${specsCard('1 Pegboard Arena with 4 Goal Borders', '12 × 12 Grid (140 Peg Holes; 4 Corners Excluded)', 'Unlimited Cyan & Red Pegs + Auto-Linking Knight-Move 3D Bridges', '2 Players (Human, Online, or Computer AI)')}
+                    <p><strong>Objective:</strong> Build an unbroken chain of pegs and knight-move bridges connecting your two opposite goal borders.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Goal Borders:</strong> Player 1 (Cyan) connects North ↔ South; Player 2 (Red) connects West ↔ East.</li>
+                        <li><strong>Auto-Bridges:</strong> Planting two friendly pegs a chess knight's move apart (2 spaces by 1 space) automatically raises a 3D bridge between them.</li>
+                    </ul>
+                `,
+                startrek: `
+                    <h4 class="font-bold text-cyan-300 text-sm">Star Trek Tri-Dimensional Chess — Rules & Specifications</h4>
+                    ${specsCard('7 Multi-Level Boards', '3 Stepped 4 × 4 Main Boards + 4 Suspended 2 × 2 Attack Boards (64 Squares Total)', '24 Pieces (12 per Side: 1 King, 1 Queen, 2 Rooks, 2 Bishops, 2 Knights, 4 Pawns)', '2 Players (Human, Online, or Computer AI)')}
+                    <p><strong>Objective:</strong> Capture the opponent's King across 3 stepped 4×4 main boards and 4 suspended 2×2 attack boards.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>3D Movement:</strong> Tap any friendly Starfleet (White) or Opponent (Red) piece to select it, then tap a destination square on the same level or an overlapping upper/lower level.</li>
+                        <li><strong>Victory:</strong> Capturing the opposing King wins the match immediately.</li>
+                    </ul>
+                `,
+                mensch: `
+                    <h4 class="font-bold text-amber-300 text-sm">Mensch ärgere Dich nicht 3D — Rules & Specifications (2–4 Players)</h4>
+                    ${specsCard('1 Circular Circuit Board + Central Home Sanctuary', '40 Outer Circuit Spaces + Up to 4 Starting Yards', 'Up to 16 Conical Pawns (4 per Player in Cyan, Red, Gold, Emerald) + 1 Six-Sided Die', '2–4 Players (Any mix of Human, Online & Computer AI)')}
+                    <p><strong>Objective:</strong> Be the first player to race all 4 of your pawns around the 40-tile circuit into the central golden Home Sanctuary.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Entering Play:</strong> Roll a <strong>6</strong> to deploy a pawn from your starting yard onto the track and earn a bonus roll.</li>
+                        <li><strong>Captures:</strong> Landing on an opponent's pawn sends it straight back to their starting yard!</li>
+                    </ul>
+                `,
+                skribbl: `
+                    <h4 class="font-bold text-cyan-300 text-sm">Skribbl 3D — Rules & Specifications (2–4 Players)</h4>
+                    ${specsCard('1 Interactive Neon Sketchpad Canvas', '520 × 210 px Multi-Color Drawing Board', 'Full RGB Color Picker, Touch/Mouse Brush & Secret Word Dictionary', '2–4 Players (Human or Online)')}
+                    <p><strong>Objective:</strong> Illustrate the secret word on the neon sketchpad while players type guesses in real time.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Drawing:</strong> Pick any color from the swatch picker and draw clues using mouse or touch.</li>
+                        <li><strong>Guessing:</strong> Type your answer into the guess box and press Guess to score points and rotate turns.</li>
+                    </ul>
+                `,
+                hangman: `
+                    <h4 class="font-bold text-rose-300 text-sm">Hangman 3D — Rules & Specifications (1–4 Players)</h4>
+                    ${specsCard('1 3D Wooden Gallows Stage', '3.2 × 4.4 Unit 3D Scaffold Platform', '6-Part 3D Figure (Head, Torso, Left/Right Arms, Left/Right Legs) + 26-Letter Keyboard', '1–4 Players (Any mix of Human & Computer AI)')}
+                    <p><strong>Objective:</strong> Deduce the hidden word letter-by-letter before all 6 parts of the 3D figure appear on the gallows.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Letter Selection:</strong> Tap letters on the A–Z keyboard. Correct letters reveal their positions; wrong letters add a 3D piece to the scaffold (max 6 mistakes).</li>
+                    </ul>
+                `,
+                yahtzee: `
+                    <h4 class="font-bold text-amber-300 text-sm">Yahtzee 3D — Rules & Specifications (2–4 Players)</h4>
+                    ${specsCard('1 3D Dice Arena + Multi-Player Scorecards', '5-Die Rolling Tray & 8-Category Scorecard per Player', '5 Interactive 3D Dice (Up to 3 Rolls per Turn)', '2–4 Players (Any mix of Human, Online & Computer AI)')}
+                    <p><strong>Objective:</strong> Roll 5 dice up to 3 times per turn to achieve the highest total score across 8 scoring categories.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Holding Dice:</strong> Click any die between rolls to lock (HOLD) its value while re-rolling the remaining dice.</li>
+                        <li><strong>Scoring:</strong> Choose an open category on the scorecard (Ones through Sixes, 3 of a Kind, or 50-point Yahtzee!) to bank your points.</li>
+                    </ul>
+                `,
+                muhle: `
+                    <h4 class="font-bold text-amber-300 text-sm">Mühle 3D (Nine Men's Morris) — Rules & Specifications</h4>
+                    ${specsCard('1 Concentric Morris Board', '3 Concentric Squares / 24 Intersection Nodes', '18 Stones (9 Cyan for Player 1, 9 Amber for Player 2)', '2 Players (Human, Online, or Computer AI)')}
+                    <p><strong>Objective:</strong> Form "Mills" (3 of your stones in a straight line along the 3 concentric squares) to capture opponent stones until they have fewer than 3 left.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Phase 1 (Placing):</strong> Each player starts with 9 stones and takes turns placing them onto any of the 24 board intersections.</li>
+                        <li><strong>Phase 2 & 3 (Sliding & Flying):</strong> Once all 9 stones are placed, slide stones along lines to adjacent open points. When reduced to 3 stones, you may "fly" to any open point!</li>
+                        <li><strong>Forming a Mill:</strong> Completing 3 in a row lets you immediately click and remove one of your opponent's free stones.</li>
+                    </ul>
+                `,
+                fourgewinnt: `
+                    <h4 class="font-bold text-rose-300 text-sm">4gewinnt 3D (Connect 4) — Rules & Specifications</h4>
+                    ${specsCard('1 Standing Vertical Gravity Rack', '7 Columns × 6 Rows (42 Slots Total)', '42 Discs (21 Cyan for Player 1, 21 Red for Player 2)', '2 Players (Human, Online, or Computer AI)')}
+                    <p><strong>Objective:</strong> Be the first player to align 4 of your colored discs horizontally, vertically, or diagonally inside the standing 7×6 3D gravity rack.</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Gravity Drop:</strong> Click any of the 7 vertical columns (or top drop funnels); your disc drops to the lowest unoccupied slot in that column.</li>
+                        <li><strong>Victory Condition:</strong> The first player to connect 4 discs in an unbroken line wins the match!</li>
+                    </ul>
+                `
+            };
+
+            const box = document.getElementById('instruction-content-box');
+            if (box) box.innerHTML = rulesHTML[gameKey] || rulesHTML.quarto;
         }
 
         function loadChatHistory() {
@@ -5124,6 +5261,9 @@ function doPost(e) {
             currentUser = null;
             currentUserRole = 'player';
             closeMasterMenu();
+            closeInstructionsModal();
+            const topRulesBtn = document.getElementById('top-rules-btn');
+            if (topRulesBtn) topRulesBtn.classList.add('hidden');
             document.getElementById('game-lobby-modal').classList.add('hidden');
             document.getElementById('auth-screen').style.display = 'flex';
         }

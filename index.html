@@ -1526,6 +1526,139 @@ function doPost(e) {
 
         let skribblState = { drawing: false, currentWord: '', words: WORD_DATABASE.en.medium };
         let hangmanState = { word: '', guessed: [], mistakes: 0, scaffoldMeshes: [], words: WORD_DATABASE.en.medium };
+        let yahtzeeState = { dice: [1, 2, 3, 4, 5], held: [false, false, false, false, false], rollsLeft: 3, scoreCards: [{}, {}, {}, {}], diceMeshes: [] };
+        let azulState = { colors: [], factories: [], selectedBatch: null, walls: [], pts: [0, 0, 0, 0], boardPositions: [] };
+        let swState = { age: 1, turn: 1, players: [], hand: [], wonderCoords: [] };
+        let hiveState = { selectedInsect: 'Queen', placed: [], p1Hand: [], p2Hand: [] };
+        let carcState = { grid: {}, currentTile: null, rotation: 0, meeples: [7, 7, 7, 7], pts: [0, 0, 0, 0] };
+        let twixtBoardSize = 12;
+        let twixtState = { size: 12, pegs: [], links: [] };
+        let quoridorState = { mode: 'move', pawns: [], walls: [], wallStock: [10, 10, 10, 10] };
+        let pylosState = { levels: [], reserves: [15, 15], reclaimLeft: 0 };
+        let quixoState = { grid: [], selectedCube: null };
+        let qawaleState = { stacks: [], phase: 'place', hand: [], lastPos: null };
+        let squadroState = { shuttles: [], returned: [0, 0] };
+        let kataminoState = { grid: [], selectedId: 'F', rotation: 0, used: [] };
+        let muhleState = { phase: 'place', p1Unplaced: 9, p2Unplaced: 9, nodes: [], selectedNode: null, mustRemove: false };
+        let connect4State = { cols: 7, rows: 6, grid: [] };
+
+        const MULTIPLAYER_CAPABLE_GAMES = ['azul', 'sevenwonders', 'carcassonne', 'mensch', 'yahtzee', 'skribbl', 'hangman', 'quoridor', 'quixo'];
+        const TEAM_HEX_COLORS = [0x22d3ee, 0xf43f5e, 0xfbbf24, 0x10b981];
+
+        const FLAG_BADGES = {
+            active: { label: '🟢 Active', cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
+            vip: { label: '⭐ VIP', cls: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+            probation: { label: '🟠 Probation', cls: 'bg-orange-500/20 text-orange-300 border-orange-500/40' },
+            suspended: { label: '🔴 Suspended', cls: 'bg-rose-500/20 text-rose-300 border-rose-500/40' }
+        };
+
+        window.onload = function() {
+            if (typeof THREE === 'undefined') {
+                console.error("Three.js not loaded.");
+                return;
+            }
+            ensureMasterAccountExists();
+            init3D();
+            initLanguagePreference();
+            initSoundPreference();
+            initRealtimeBroadcastSync();
+            initDeviceAndDisplayDetection();
+            setupSkribblCanvasEvents();
+            loadChatHistory();
+            initWebRTCSignalingListener();
+            checkExistingSession();
+            startInviteNotificationListener();
+            renderSavedGamesAndOnlineUI();
+            renderHitListsUI();
+        };
+
+        // --- TONE.JS PROCEDURAL 3D SOUND EFFECTS, GPU CACHE & BROADCAST SYNC ---
+        function initSoundPreference() {
+            const saved = localStorage.getItem('intelligames_sound');
+            soundEnabled = saved !== 'off';
+            updateSoundHudIcon();
+        }
+
+        function toggleSoundEffects() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('intelligames_sound', soundEnabled ? 'on' : 'off');
+            updateSoundHudIcon();
+            if (soundEnabled) playGameSound('place');
+        }
+
+        function updateSoundHudIcon() {
+            const icon = document.getElementById('sound-hud-icon');
+            if (icon) {
+                icon.className = soundEnabled
+                    ? 'fa-solid fa-volume-high text-xs text-emerald-300'
+                    : 'fa-solid fa-volume-xmark text-xs text-gray-500';
+            }
+        }
+
+        function playGameSound(type = 'place') {
+            if (!soundEnabled || typeof Tone === 'undefined') return;
+            try {
+                if (Tone.context && Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                if (!toneSynth) {
+                    toneSynth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: 'triangle' },
+                        envelope: { attack: 0.01, decay: 0.14, sustain: 0.05, release: 0.25 }
+                    }).toDestination();
+                    toneSynth.volume.value = -10;
+                }
+                const now = Tone.now();
+                if (type === 'select') toneSynth.triggerAttackRelease('E5', '32n', now);
+                else if (type === 'place') toneSynth.triggerAttackRelease('C4', '16n', now);
+                else if (type === 'capture') toneSynth.triggerAttackRelease(['G4', 'C4'], '16n', now);
+                else if (type === 'undo') toneSynth.triggerAttackRelease(['E4', 'B3'], '16n', now);
+                else if (type === 'win') {
+                    toneSynth.triggerAttackRelease('C5', '16n', now);
+                    toneSynth.triggerAttackRelease('E5', '16n', now + 0.11);
+                    toneSynth.triggerAttackRelease('G5', '16n', now + 0.22);
+                    toneSynth.triggerAttackRelease('C6', '8n', now + 0.34);
+                }
+            } catch (e) {}
+        }
+
+        function getSharedGeometry(key, factoryFn) {
+            if (!sharedGeoCache[key]) sharedGeoCache[key] = factoryFn();
+            return sharedGeoCache[key];
+        }
+
+        function getSharedMaterial(key, factoryFn) {
+            if (!sharedMatCache[key]) sharedMatCache[key] = factoryFn();
+            return sharedMatCache[key];
+        }
+
+        function initRealtimeBroadcastSync() {
+            if (typeof BroadcastChannel === 'undefined') return;
+            try {
+                realtimeChannel = new BroadcastChannel('intelligames_3d_live_channel');
+                realtimeChannel.onmessage = (ev) => {
+                    const msg = ev.data;
+                    if (!msg || msg.sender === currentUser) return;
+                    if (msg.type === 'live_move' && msg.snapshot && msg.snapshot.game === activeGame && !gameOver) {
+                        restoreSnapshotInPlace(msg.snapshot);
+                        playGameSound('place');
+                    } else if (msg.type === 'chat_update') {
+                        loadChatHistory();
+                    } else if (msg.type === 'invite_update') {
+                        checkIncomingInvites();
+                        renderSavedGamesAndOnlineUI();
+                    }
+                };
+            } catch (e) {}
+        }
+
+        function broadcastLiveUpdate(type, payload = {}) {
+            if (!realtimeChannel) return;
+            try {
+                realtimeChannel.postMessage({ sender: currentUser || 'Peer', type, ...payload });
+            } catch (e) {}
+        }
+
         // --- ENGLISH / DEUTSCH (EN / DE) BILINGUAL ENGINE ---
         const I18N_DICT = {
             en: {

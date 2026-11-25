@@ -151,6 +151,9 @@
                                 <button type="button" onclick="setAppLanguage('en')" class="lang-btn-en px-2 py-0.5 rounded-lg font-extrabold bg-cyan-500 text-gray-950 transition">EN</button>
                                 <button type="button" onclick="setAppLanguage('de')" class="lang-btn-de px-2 py-0.5 rounded-lg font-semibold text-gray-400 hover:text-white transition">DE</button>
                             </div>
+                            <button type="button" onclick="openAccountModal()" class="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-semibold rounded-xl text-xs border border-purple-500/40 transition">
+                                <i class="fa-solid fa-user-circle mr-1"></i> <span data-i18n="myAccount">My Account</span>
+                            </button>
                             <button type="button" onclick="toggleChatWindow()" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold rounded-xl text-xs border border-cyan-500/40 transition">
                                 <i class="fa-solid fa-comments mr-1"></i> <span data-i18n="appChat">App Chat</span>
                             </button>
@@ -393,6 +396,10 @@
                     <i class="fa-solid fa-user-shield text-xs"></i>
                     <span class="text-xs font-bold hidden lg:inline" data-i18n="masterMode">Master Mode</span>
                 </button>
+                <button type="button" id="top-account-btn" onclick="openAccountModal()" class="hidden interactive glass-panel px-3 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-purple-500/50 text-purple-300 transition" title="Manage Your Account, Scores, Favorites & Recent Players">
+                    <i class="fa-solid fa-user-circle text-xs"></i>
+                    <span class="text-xs font-semibold hidden sm:inline" data-i18n="myAccount">Account</span>
+                </button>
                 <button type="button" id="top-logout-btn" onclick="logoutUser()" class="hidden interactive glass-panel px-3 py-2.5 rounded-2xl flex items-center space-x-1.5 shadow-xl hover:border-rose-500/50 text-rose-300 transition" title="Log Out of Your Account">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i>
                     <span class="text-xs font-semibold hidden sm:inline" data-i18n="logout">Log Out</span>
@@ -597,25 +604,45 @@
             <!-- Skribbl HUD -->
             <div id="hud-skribbl" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-cyan-500/40 w-full max-w-md space-y-2">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="text-xs font-bold text-cyan-300">Word: <span id="skribbl-word-display" class="text-white tracking-widest uppercase">_ _ _ _ _</span></div>
-                    <div class="flex items-center space-x-1.5">
+                    <div class="text-xs font-bold text-cyan-300"><span data-i18n="wordLabel">Word</span>: <span id="skribbl-word-display" class="text-white tracking-widest uppercase">_ _ _ _ _</span></div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <select id="skribbl-word-lang" onchange="nextSkribblRound()" class="px-2 py-1 bg-gray-900 border border-gray-700 rounded-lg text-[10px] font-bold text-cyan-300">
+                            <option value="en">EN</option>
+                            <option value="de">DE</option>
+                        </select>
+                        <select id="skribbl-word-diff" onchange="nextSkribblRound()" class="px-2 py-1 bg-gray-900 border border-gray-700 rounded-lg text-[10px] font-bold text-purple-300">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
                         <input type="color" id="skribbl-color" value="#22d3ee" class="w-7 h-7 rounded bg-transparent border-0 cursor-pointer">
-                        <button onclick="clearSkribblCanvas()" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-xs">Clear</button>
-                        <button onclick="nextSkribblRound()" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-xs">New Word</button>
+                        <button onclick="clearSkribblCanvas()" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-[11px]" data-i18n="clearBtn">Clear</button>
+                        <button onclick="nextSkribblRound()" class="px-2 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-[11px]" data-i18n="newWordBtn">New Word</button>
                     </div>
                 </div>
                 <canvas id="skribbl-canvas" width="520" height="210" class="w-full h-40 bg-gray-950 rounded-xl border border-gray-800 cursor-crosshair touch-none"></canvas>
                 <div class="flex space-x-2">
                     <input type="text" id="skribbl-guess-input" onkeypress="if(event.key==='Enter') submitSkribblGuess()" placeholder="Type your guess here..." class="flex-1 px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
-                    <button onclick="submitSkribblGuess()" class="px-4 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs">Guess</button>
+                    <button onclick="submitSkribblGuess()" class="px-4 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs" data-i18n="guessBtn">Guess</button>
                 </div>
             </div>
 
             <!-- Hangman 3D HUD -->
             <div id="hud-hangman" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-rose-500/40 w-full max-w-sm space-y-2 text-center">
-                <div class="flex items-center justify-between text-[11px]">
-                    <span class="text-rose-300 font-bold">Mistakes: <span id="hangman-mistakes">0</span> / 6</span>
-                    <button onclick="initHangmanGame()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded font-semibold">New Word</button>
+                <div class="flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+                    <span class="text-rose-300 font-bold"><span data-i18n="mistakesLabel">Mistakes</span>: <span id="hangman-mistakes">0</span> / 6</span>
+                    <div class="flex items-center space-x-1">
+                        <select id="hangman-word-lang" onchange="initHangmanGame()" class="px-1.5 py-0.5 bg-gray-900 border border-gray-700 rounded text-[10px] font-bold text-cyan-300">
+                            <option value="en">EN</option>
+                            <option value="de">DE</option>
+                        </select>
+                        <select id="hangman-word-diff" onchange="initHangmanGame()" class="px-1.5 py-0.5 bg-gray-900 border border-gray-700 rounded text-[10px] font-bold text-purple-300">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                        <button onclick="initHangmanGame()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded font-semibold" data-i18n="newWordBtn">New Word</button>
+                    </div>
                 </div>
                 <div id="hangman-word-slots" class="text-lg font-extrabold tracking-[0.28em] text-white py-0.5">_ _ _ _ _</div>
                 <div id="hangman-keyboard" class="flex flex-wrap justify-center gap-1"></div>
@@ -713,6 +740,7 @@
                     </button>
                 </div>
 
+                <!-- Peer-to-Peer Room / Manual Signaling Exchange -->
                 <details class="bg-gray-900/90 p-2.5 rounded-xl border border-gray-800 text-[11px]">
                     <summary class="cursor-pointer font-semibold text-cyan-300">Peer Connection Code (2-Device Connect)</summary>
                     <div class="mt-2 space-y-2 text-[10px] text-gray-400">
@@ -766,6 +794,73 @@
                 <button onclick="sendChatMessage()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER ACCOUNT MANAGEMENT MODAL (SCORES, FAVORITES, RECENT PLAYERS, EDIT & DELETE ACCOUNT) -->
+    <div id="user-account-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-3xl shadow-2xl border border-purple-500/50 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div>
+                    <h3 class="text-base font-extrabold text-purple-300 flex items-center">
+                        <i class="fa-solid fa-user-circle mr-2"></i> <span data-i18n="accountMgmtTitle">Player Account Management</span>
+                    </h3>
+                    <p id="acct-header-subtitle" class="text-[11px] text-gray-400 mt-0.5">View your match scores, favorite players, recent opponents, or edit/delete your profile</p>
+                </div>
+                <button type="button" onclick="closeAccountModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Scores Summary & Per-Game Breakdown -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div class="bg-gray-950/80 p-3.5 rounded-2xl border border-amber-500/30 space-y-1.5">
+                    <div class="font-bold text-amber-300"><i class="fa-solid fa-trophy mr-1"></i> <span data-i18n="myScores">My Scores & Rank</span></div>
+                    <div id="acct-total-wins" class="text-xl font-extrabold text-white">0 Wins</div>
+                    <div id="acct-per-game-scores" class="max-h-28 overflow-y-auto space-y-1 text-[11px] text-gray-300 pt-1"></div>
+                </div>
+
+                <!-- Favorite Players -->
+                <div class="bg-gray-950/80 p-3.5 rounded-2xl border border-cyan-500/30 space-y-1.5">
+                    <div class="font-bold text-cyan-300"><i class="fa-solid fa-star mr-1"></i> <span data-i18n="favPlayers">Favorite Players</span></div>
+                    <div id="acct-fav-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+
+                <!-- Recent Players -->
+                <div class="bg-gray-950/80 p-3.5 rounded-2xl border border-emerald-500/30 space-y-1.5">
+                    <div class="font-bold text-emerald-300"><i class="fa-solid fa-clock-rotate-left mr-1"></i> <span data-i18n="recentPlayers">Recent Players</span></div>
+                    <div id="acct-recent-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Credentials & Danger Zone (Delete Account) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+                <div class="bg-gray-950/80 p-4 rounded-2xl border border-gray-800 space-y-2.5">
+                    <div class="font-bold text-cyan-300"><i class="fa-solid fa-user-pen mr-1"></i> <span data-i18n="editAccount">Edit Account Details</span></div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-1" data-i18n="usernameLabel">Username</label>
+                        <input type="text" id="acct-edit-username" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-1" data-i18n="newPinLabel">New Password / PIN</label>
+                        <input type="text" id="acct-edit-password" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <button type="button" onclick="saveOwnAccountEdits()" class="w-full py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-extrabold rounded-xl transition" data-i18n="saveAccountBtn">
+                        Save Profile Changes
+                    </button>
+                </div>
+
+                <div class="bg-rose-950/25 p-4 rounded-2xl border border-rose-500/30 flex flex-col justify-between space-y-3">
+                    <div class="space-y-1">
+                        <div class="font-bold text-rose-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i> <span data-i18n="deleteAccountTitle">Delete Account</span></div>
+                        <p class="text-[11px] text-gray-400 leading-relaxed" data-i18n="deleteAccountDesc">Permanently remove your player profile, saved favorites, and session access. Type DELETE below to confirm.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <input type="text" id="acct-delete-confirm-input" placeholder="Type DELETE to confirm" class="w-full px-3 py-2 bg-gray-950 border border-rose-500/40 rounded-xl text-xs text-rose-200 focus:outline-none">
+                        <button type="button" onclick="deleteOwnAccount()" class="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold rounded-xl transition" data-i18n="deleteAccountBtn">
+                            Permanently Delete My Account
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1366,60 +1461,78 @@ function doPost(e) {
 
         // Multi-player game state holders
         let menschState = { dice: null, rolled: false, trackCoords: [], pawns: [] };
-        let skribblState = { drawing: false, currentWord: '', words: ['SPACESHIP', 'PYRAMID', 'DRAGON', 'CASTLE', 'VOLCANO', 'TELESCOPE', 'OCTOPUS', 'LIGHTHOUSE'] };
-        let hangmanState = { word: '', guessed: [], mistakes: 0, scaffoldMeshes: [], words: ['QUARTO', 'STARSHIP', 'GALAXY', 'STRATEGY', 'DIMENSION', 'MONOLITH', 'ASTEROID', 'NEBULA'] };
-        let yahtzeeState = { dice: [1, 2, 3, 4, 5], held: [false, false, false, false, false], rollsLeft: 3, scoreCards: [{}, {}, {}, {}], diceMeshes: [] };
-        let azulState = { colors: [], factories: [], selectedBatch: null, walls: [], pts: [0, 0, 0, 0], boardPositions: [] };
-        let swState = { age: 1, turn: 1, players: [], hand: [], wonderCoords: [] };
-        let hiveState = { selectedInsect: 'Queen', placed: [], p1Hand: [], p2Hand: [] };
-        let carcState = { grid: {}, currentTile: null, rotation: 0, meeples: [7, 7, 7, 7], pts: [0, 0, 0, 0] };
-        let twixtBoardSize = 12;
-        let twixtState = { size: 12, pegs: [], links: [] };
-        let quoridorState = { mode: 'move', pawns: [], walls: [], wallStock: [10, 10, 10, 10] };
-        let pylosState = { levels: [], reserves: [15, 15], reclaimLeft: 0 };
-        let quixoState = { grid: [], selectedCube: null };
-        let qawaleState = { stacks: [], phase: 'place', hand: [], lastPos: null };
-        let squadroState = { shuttles: [], returned: [0, 0] };
-        let kataminoState = { grid: [], selectedId: 'F', rotation: 0, used: [] };
-        let muhleState = { phase: 'place', p1Unplaced: 9, p2Unplaced: 9, nodes: [], selectedNode: null, mustRemove: false };
-        let connect4State = { cols: 7, rows: 6, grid: [] };
+        let usedWordHistory = [];
 
-        const MULTIPLAYER_CAPABLE_GAMES = ['azul', 'sevenwonders', 'carcassonne', 'mensch', 'yahtzee', 'skribbl', 'hangman', 'quoridor', 'quixo'];
-        const TEAM_HEX_COLORS = [0x22d3ee, 0xf43f5e, 0xfbbf24, 0x10b981];
-
-        const FLAG_BADGES = {
-            active: { label: '🟢 Active', cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
-            vip: { label: '⭐ VIP', cls: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
-            probation: { label: '🟠 Probation', cls: 'bg-orange-500/20 text-orange-300 border-orange-500/40' },
-            suspended: { label: '🔴 Suspended', cls: 'bg-rose-500/20 text-rose-300 border-rose-500/40' }
-        };
-
-        window.onload = function() {
-            if (typeof THREE === 'undefined') {
-                console.error("Three.js not loaded.");
-                return;
+        const WORD_DATABASE = {
+            en: {
+                easy: [
+                    'STAR', 'MOON', 'TREE', 'HOUSE', 'BOAT', 'FISH', 'BIRD', 'BOOK', 'CAKE', 'CLOUD',
+                    'RIVER', 'BRIDGE', 'TRAIN', 'CLOCK', 'APPLE', 'TIGER', 'WHALE', 'ROBOT', 'SWORD', 'CROWN',
+                    'HEART', 'FLAME', 'OCEAN', 'PLANE', 'GUITAR', 'CASTLE', 'FOREST', 'ISLAND', 'ROCKET', 'PLANET',
+                    'DRAGON', 'CASTLE', 'BRIDGE', 'FLOWER', 'HAMMER', 'LADDER', 'MIRROR', 'PENCIL', 'WINDOW', 'ANCHOR'
+                ],
+                medium: [
+                    'SPACESHIP', 'PYRAMID', 'VOLCANO', 'TELESCOPE', 'OCTOPUS', 'LIGHTHOUSE', 'COMPASS', 'FORTRESS',
+                    'LABYRINTH', 'PENDULUM', 'SUBMARINE', 'SATELLITE', 'AVALANCHE', 'GLACIER', 'CATHEDRAL', 'MONOLITH',
+                    'ASTEROID', 'CHAMELEON', 'DRAGONFLY', 'HORIZON', 'ILLUSION', 'MANDARIN', 'NAVIGATOR', 'OBELISK',
+                    'PANGOLIN', 'QUICKSAND', 'SCORPION', 'TORNADO', 'UMBRELLA', 'VORTEX', 'WATERFALL', 'XYLOPHONE',
+                    'ZEPPELIN', 'TREASURE', 'CARAVAN', 'DUNGEON', 'EMERALD', 'FALCON', 'GAUNTLET', 'HARPOON'
+                ],
+                hard: [
+                    'CONSTELLATION', 'ARCHIPELAGO', 'KALEIDOSCOPE', 'METAMORPHOSIS', 'PHOTOSYNTHESIS', 'EXTRAVAGANZA',
+                    'HIEROGLYPHICS', 'SYNCHRONIZATION', 'THERMODYNAMICS', 'BIOLUMINESCENCE', 'CHRYSANTHEMUM',
+                    'EQUILIBRIUM', 'FLUORESCENCE', 'HYPOTHETICAL', 'INFRASTRUCTURE', 'JUXTAPOSITION', 'LABYRINTHINE',
+                    'MAGNIFICENCE', 'OBSERVATORY', 'PERPENDICULAR', 'QUARANTINE', 'RECONNAISSANCE', 'SILHOUETTE',
+                    'TRANSPARENCY', 'UNPRECEDENTED', 'VENTRILOQUIST', 'WILDERNESS', 'CRYPTOGRAPHY', 'DIMENSION', 'STRATEGY'
+                ]
+            },
+            de: {
+                easy: [
+                    'STERN', 'MOND', 'BAUM', 'HAUS', 'BOOT', 'FISCH', 'VOGEL', 'BUCH', 'KUCHEN', 'WOLKE',
+                    'FLUSS', 'BRÜCKE', 'ZUG', 'UHR', 'APFEL', 'TIGER', 'WAL', 'ROBOTER', 'SCHWERT', 'KRONE',
+                    'HERZ', 'FLAMME', 'OZEAN', 'FLUGZEUG', 'GITARRE', 'SCHLOSS', 'WALD', 'INSEL', 'RAKETE', 'PLANET',
+                    'DRACHE', 'BLUME', 'HAMMER', 'LEITER', 'SPIEGEL', 'BLEISTIFT', 'FENSTER', 'ANKER', 'BERG', 'SONNE'
+                ],
+                medium: [
+                    'RAUMSCHIFF', 'PYRAMIDE', 'VULKAN', 'TELESKOP', 'OKTOPUS', 'LEUCHTTURM', 'KOMPASS', 'FESTUNG',
+                    'LABYRINTH', 'PENDEL', 'UNTERSEEBOOT', 'SATELLIT', 'LAWINE', 'GLETSCHER', 'KATHEDRALE', 'MONOLITH',
+                    'ASTEROID', 'CHAMÄLEON', 'LIBELLE', 'HORIZONT', 'ILLUSION', 'NAVIGATOR', 'OBELISK', 'SCHATZTRUHE',
+                    'TREIBSAND', 'SKORPION', 'WIRBELSTURM', 'REGENSCHIRM', 'WASSERFALL', 'XYLOPHON', 'ZEPPELIN', 'KARAWANE',
+                    'SMARAGD', 'FALKE', 'RITTERBURG', 'ZAUBERER', 'FERNGLAS', 'SCHILDKRÖTE', 'EISBERG', 'SONNENUHR'
+                ],
+                hard: [
+                    'STERNBILD', 'ARCHIPEL', 'KALEIDOSKOP', 'METAMORPHOSE', 'FOTOSYNTHESE', 'HIEROGLYPHEN',
+                    'SYNCHRONISATION', 'THERMODYNAMIK', 'BIOLUMINESZENZ', 'GLEICHGEWICHT', 'FLUORESZENZ',
+                    'INFRASTRUKTUR', 'OBSERVATORIUM', 'SCHATTENRISS', 'TRANSPARENZ', 'KRYPTOGRAPHIE', 'DIMENSION',
+                    'STRATEGIE', 'SCHMETTERLING', 'ABENTEUER', 'WISSENSCHAFT', 'WELTRAUMSTATION', 'GEHEIMNISVOLL',
+                    'ARCHITEKTUR', 'ELEKTRIZITÄT', 'ENTDECKUNG', 'FERNSEHTURM', 'GESCHWINDIGKEIT', 'HOCHGEBIRGE', 'NATURWUNDER'
+                ]
             }
-            ensureMasterAccountExists();
-            init3D();
-            initLanguagePreference();
-            initSoundPreference();
-            initRealtimeBroadcastSync();
-            initDeviceAndDisplayDetection();
-            setupSkribblCanvasEvents();
-            loadChatHistory();
-            initWebRTCSignalingListener();
-            checkExistingSession();
-            startInviteNotificationListener();
-            renderSavedGamesAndOnlineUI();
-            renderHitListsUI();
         };
 
+        function getRandomWordFromDatabase(langCode, diffLevel) {
+            const lang = WORD_DATABASE[langCode] ? langCode : 'en';
+            const diff = WORD_DATABASE[lang][diffLevel] ? diffLevel : 'medium';
+            const pool = WORD_DATABASE[lang][diff];
+            let candidates = pool.filter(w => !usedWordHistory.includes(`${lang}:${w}`));
+            if (candidates.length === 0) {
+                usedWordHistory = usedWordHistory.filter(k => !k.startsWith(`${lang}:`));
+                candidates = pool;
+            }
+            const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+            usedWordHistory.push(`${lang}:${chosen}`);
+            return chosen;
+        }
+
+        let skribblState = { drawing: false, currentWord: '', words: WORD_DATABASE.en.medium };
+        let hangmanState = { word: '', guessed: [], mistakes: 0, scaffoldMeshes: [], words: WORD_DATABASE.en.medium };
         // --- ENGLISH / DEUTSCH (EN / DE) BILINGUAL ENGINE ---
         const I18N_DICT = {
             en: {
                 login: "Log In",
                 register: "Register",
                 logout: "Log Out",
+                myAccount: "My Account",
                 chooseGameTitle: "Choose Your Game & Overall Hit List",
                 appChat: "App Chat",
                 sheetSync: "Sheet Sync",
@@ -1441,12 +1554,29 @@ function doPost(e) {
                 playerChat: "Player Chat",
                 moveHistory: "Move History",
                 sessionsInvites: "Sessions & Invites",
-                audioVideo: "Audio / Video"
+                audioVideo: "Audio / Video",
+                wordLabel: "Word",
+                clearBtn: "Clear",
+                newWordBtn: "New Word",
+                guessBtn: "Guess",
+                mistakesLabel: "Mistakes",
+                accountMgmtTitle: "Player Account Management",
+                myScores: "My Scores & Rank",
+                favPlayers: "Favorite Players",
+                recentPlayers: "Recent Players",
+                editAccount: "Edit Account Details",
+                usernameLabel: "Username",
+                newPinLabel: "New Password / PIN",
+                saveAccountBtn: "Save Profile Changes",
+                deleteAccountTitle: "Delete Account",
+                deleteAccountDesc: "Permanently remove your player profile, saved favorites, and session access. Type DELETE below to confirm.",
+                deleteAccountBtn: "Permanently Delete My Account"
             },
             de: {
                 login: "Anmelden",
                 register: "Registrieren",
                 logout: "Abmelden",
+                myAccount: "Mein Konto",
                 chooseGameTitle: "Spiel wählen & Gesamt-Bestenliste",
                 appChat: "App-Chat",
                 sheetSync: "Tabellen-Sync",
@@ -1468,7 +1598,23 @@ function doPost(e) {
                 playerChat: "Spieler-Chat",
                 moveHistory: "Zugverlauf",
                 sessionsInvites: "Sitzungen & Einladungen",
-                audioVideo: "Audio / Video"
+                audioVideo: "Audio / Video",
+                wordLabel: "Wort",
+                clearBtn: "Löschen",
+                newWordBtn: "Neues Wort",
+                guessBtn: "Raten",
+                mistakesLabel: "Fehler",
+                accountMgmtTitle: "Spielerkonto-Verwaltung",
+                myScores: "Meine Punkte & Rang",
+                favPlayers: "Favorisierte Spieler",
+                recentPlayers: "Letzte Mitspieler",
+                editAccount: "Kontodaten bearbeiten",
+                usernameLabel: "Benutzername",
+                newPinLabel: "Neues Passwort / PIN",
+                saveAccountBtn: "Änderungen speichern",
+                deleteAccountTitle: "Konto löschen",
+                deleteAccountDesc: "Entferne dein Spielerprofil, deine Favoriten und deinen Zugang dauerhaft. Gib DELETE zur Bestätigung ein.",
+                deleteAccountBtn: "Mein Konto dauerhaft löschen"
             }
         };
 
@@ -1480,6 +1626,11 @@ function doPost(e) {
         function setAppLanguage(lang, announce = true) {
             currentLang = lang === 'de' ? 'de' : 'en';
             localStorage.setItem('intelligames_lang', currentLang);
+
+            ['skribbl-word-lang', 'hangman-word-lang'].forEach(selId => {
+                const el = document.getElementById(selId);
+                if (el) el.value = currentLang;
+            });
 
             document.querySelectorAll('.lang-btn-en').forEach(btn => {
                 btn.className = currentLang === 'en'
@@ -1498,97 +1649,192 @@ function doPost(e) {
                 if (dict[key]) el.innerText = dict[key];
             });
 
+            const chatInp = document.getElementById('chat-input');
+            if (chatInp) chatInp.placeholder = currentLang === 'de' ? 'Nachricht eingeben...' : 'Type a message...';
+            const skribblInp = document.getElementById('skribbl-guess-input');
+            if (skribblInp) skribblInp.placeholder = currentLang === 'de' ? 'Ratewort hier eingeben...' : 'Type your guess here...';
+
+            if (activeGame === 'skribbl') nextSkribblRound();
+            else if (activeGame === 'hangman') initHangmanGame();
+
             if (announce) {
                 showToast(currentLang === 'de' ? 'Sprache auf Deutsch (DE) umgestellt.' : 'Language switched to English (EN).');
             }
         }
-
-        // --- TONE.JS PROCEDURAL 3D SOUND EFFECTS & SHARED GPU CACHE ---
-        function initSoundPreference() {
-            const saved = localStorage.getItem('intelligames_sound');
-            soundEnabled = saved !== 'off';
-            updateSoundHudIcon();
+        // --- PERSONAL USER ACCOUNT MANAGEMENT (SCORES, FAVORITES, RECENT PLAYERS, EDIT & DELETE) ---
+        function getRecentPlayers() {
+            try {
+                const raw = localStorage.getItem(`intelligames_recent_${currentUser}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
         }
 
-        function toggleSoundEffects() {
-            soundEnabled = !soundEnabled;
-            localStorage.setItem('intelligames_sound', soundEnabled ? 'on' : 'off');
-            updateSoundHudIcon();
-            if (soundEnabled) playGameSound('place');
+        function recordRecentOpponents(namesList, gameId) {
+            if (!currentUser || !Array.isArray(namesList)) return;
+            let rec = getRecentPlayers();
+            namesList.forEach(name => {
+                if (!name || name.toLowerCase() === currentUser.toLowerCase()) return;
+                rec = rec.filter(r => r.name.toLowerCase() !== name.toLowerCase());
+                rec.unshift({
+                    name,
+                    game: gameId || activeGame,
+                    lastPlayed: new Date().toLocaleDateString([], { month: 'short', day: '2-digit' })
+                });
+            });
+            localStorage.setItem(`intelligames_recent_${currentUser}`, JSON.stringify(rec.slice(0, 12)));
         }
 
-        function updateSoundHudIcon() {
-            const icon = document.getElementById('sound-hud-icon');
-            if (icon) {
-                icon.className = soundEnabled
-                    ? 'fa-solid fa-volume-high text-xs text-emerald-300'
-                    : 'fa-solid fa-volume-xmark text-xs text-gray-500';
+        function openAccountModal() {
+            if (!currentUser) return;
+            const users = getUsersRegistry();
+            const me = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase()) || { username: currentUser, password: '', role: currentUserRole, flag: 'active' };
+
+            const subEl = document.getElementById('acct-header-subtitle');
+            if (subEl) subEl.innerText = `${me.username} • Role: ${(me.role || 'player').toUpperCase()} • Status: ${(me.flag || 'active').toUpperCase()}`;
+
+            const uInp = document.getElementById('acct-edit-username');
+            const pInp = document.getElementById('acct-edit-password');
+            const delInp = document.getElementById('acct-delete-confirm-input');
+            if (uInp) uInp.value = me.username;
+            if (pInp) pInp.value = me.password;
+            if (delInp) delInp.value = '';
+
+            // 1. Personal Scores & Per-Game Breakdown
+            const allWins = getHitListRegistry().filter(r => r.player && r.player.toLowerCase() === currentUser.toLowerCase());
+            const totalWinsEl = document.getElementById('acct-total-wins');
+            const perGameEl = document.getElementById('acct-per-game-scores');
+            if (totalWinsEl) totalWinsEl.innerText = currentLang === 'de' ? `${allWins.length} Siege gesamt` : `${allWins.length} Total Wins`;
+            if (perGameEl) {
+                perGameEl.innerHTML = '';
+                if (allWins.length === 0) {
+                    perGameEl.innerHTML = `<div class="text-gray-500 italic">${currentLang === 'de' ? 'Noch keine Siege gespeichert.' : 'No match victories recorded yet.'}</div>`;
+                } else {
+                    const byGame = {};
+                    allWins.forEach(w => { byGame[w.game] = (byGame[w.game] || 0) + 1; });
+                    Object.keys(byGame).sort((a, b) => byGame[b] - byGame[a]).forEach(gId => {
+                        const gObj = GAME_CATALOG.find(g => g.id === gId);
+                        const row = document.createElement('div');
+                        row.className = "flex justify-between bg-gray-900/90 px-2.5 py-1 rounded-lg border border-gray-800";
+                        row.innerHTML = `<span class="text-gray-200 truncate">${gObj ? gObj.name : gId.toUpperCase()}</span><strong class="text-amber-300">${byGame[gId]}W</strong>`;
+                        perGameEl.appendChild(row);
+                    });
+                }
             }
-        }
 
-        function playGameSound(type = 'place') {
-            if (!soundEnabled || typeof Tone === 'undefined') return;
-            try {
-                if (Tone.context && Tone.context.state !== 'running') {
-                    Tone.start();
+            // 2. Favorite Players
+            const favs = getFavoredPlayers();
+            const favBox = document.getElementById('acct-fav-players-list');
+            if (favBox) {
+                favBox.innerHTML = '';
+                if (favs.length === 0) {
+                    favBox.innerHTML = `<div class="text-gray-500 italic text-[11px]">${currentLang === 'de' ? 'Keine Favoriten markiert.' : 'No favorite players starred yet.'}</div>`;
+                } else {
+                    favs.forEach(fName => {
+                        const safe = fName.replace(/'/g, "\\'");
+                        const row = document.createElement('div');
+                        row.className = "bg-gray-900/90 px-2.5 py-1.5 rounded-lg border border-gray-800 flex items-center justify-between gap-1.5";
+                        row.innerHTML = `
+                            <span class="font-bold text-white truncate">★ ${fName}</span>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button type="button" onclick="inviteOnlinePlayer('${safe}')" class="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[10px] font-bold">Invite</button>
+                                <button type="button" onclick="toggleFavoredPlayer('${safe}'); openAccountModal();" class="px-1.5 py-0.5 bg-gray-800 text-rose-400 rounded text-[10px]" title="Remove Favorite"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        `;
+                        favBox.appendChild(row);
+                    });
                 }
-                if (!toneSynth) {
-                    toneSynth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: { type: 'triangle' },
-                        envelope: { attack: 0.01, decay: 0.14, sustain: 0.05, release: 0.25 }
-                    }).toDestination();
-                    toneSynth.volume.value = -10;
+            }
+
+            // 3. Recent Players
+            const recents = getRecentPlayers();
+            const recBox = document.getElementById('acct-recent-players-list');
+            if (recBox) {
+                recBox.innerHTML = '';
+                if (recents.length === 0) {
+                    recBox.innerHTML = `<div class="text-gray-500 italic text-[11px]">${currentLang === 'de' ? 'Noch keine letzten Mitspieler.' : 'No recent opponents yet.'}</div>`;
+                } else {
+                    recents.forEach(item => {
+                        const isFav = favs.includes(item.name);
+                        const safe = item.name.replace(/'/g, "\\'");
+                        const row = document.createElement('div');
+                        row.className = "bg-gray-900/90 px-2.5 py-1.5 rounded-lg border border-gray-800 flex items-center justify-between gap-1.5";
+                        row.innerHTML = `
+                            <div class="min-w-0">
+                                <div class="font-semibold text-white truncate">${item.name}</div>
+                                <div class="text-[9px] text-gray-400">${(item.game || '').toUpperCase()} • ${item.lastPlayed || ''}</div>
+                            </div>
+                            <button type="button" onclick="toggleFavoredPlayer('${safe}'); openAccountModal();" class="px-2 py-0.5 rounded text-[10px] ${isFav ? 'text-amber-400' : 'text-gray-400 hover:text-amber-300'}" title="Toggle Favorite">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                        `;
+                        recBox.appendChild(row);
+                    });
                 }
-                const now = Tone.now();
-                if (type === 'select') toneSynth.triggerAttackRelease('E5', '32n', now);
-                else if (type === 'place') toneSynth.triggerAttackRelease('C4', '16n', now);
-                else if (type === 'capture') toneSynth.triggerAttackRelease(['G4', 'C4'], '16n', now);
-                else if (type === 'undo') toneSynth.triggerAttackRelease(['E4', 'B3'], '16n', now);
-                else if (type === 'win') {
-                    toneSynth.triggerAttackRelease('C5', '16n', now);
-                    toneSynth.triggerAttackRelease('E5', '16n', now + 0.11);
-                    toneSynth.triggerAttackRelease('G5', '16n', now + 0.22);
-                    toneSynth.triggerAttackRelease('C6', '8n', now + 0.34);
-                }
-            } catch (e) {}
+            }
+
+            document.getElementById('user-account-modal').classList.remove('hidden');
         }
 
-        function getSharedGeometry(key, factoryFn) {
-            if (!sharedGeoCache[key]) sharedGeoCache[key] = factoryFn();
-            return sharedGeoCache[key];
+        function closeAccountModal() {
+            document.getElementById('user-account-modal').classList.add('hidden');
         }
 
-        function getSharedMaterial(key, factoryFn) {
-            if (!sharedMatCache[key]) sharedMatCache[key] = factoryFn();
-            return sharedMatCache[key];
+        function saveOwnAccountEdits() {
+            if (!currentUser) return;
+            const newName = (document.getElementById('acct-edit-username').value || '').trim();
+            const newPass = (document.getElementById('acct-edit-password').value || '').trim();
+            if (!newName || !newPass) {
+                showToast(currentLang === 'de' ? 'Bitte Benutzername und Passwort ausfüllen.' : 'Please enter both Username and Password/PIN.');
+                return;
+            }
+            const users = getUsersRegistry();
+            const idx = users.findIndex(u => u.username.toLowerCase() === currentUser.toLowerCase());
+            if (idx === -1) return;
+
+            if (newName.toLowerCase() !== currentUser.toLowerCase() && users.some(u => u.username.toLowerCase() === newName.toLowerCase())) {
+                showToast(currentLang === 'de' ? 'Dieser Benutzername ist bereits vergeben.' : 'That username is already taken.');
+                return;
+            }
+
+            const oldName = currentUser;
+            users[idx].username = newName;
+            users[idx].password = newPass;
+            saveUsersRegistry(users);
+
+            if (oldName !== newName) {
+                const oldFavs = localStorage.getItem(`intelligames_favs_${oldName}`);
+                if (oldFavs) { localStorage.setItem(`intelligames_favs_${newName}`, oldFavs); localStorage.removeItem(`intelligames_favs_${oldName}`); }
+                const oldRec = localStorage.getItem(`intelligames_recent_${oldName}`);
+                if (oldRec) { localStorage.setItem(`intelligames_recent_${newName}`, oldRec); localStorage.removeItem(`intelligames_recent_${oldName}`); }
+            }
+
+            currentUser = newName;
+            localStorage.setItem('intelligames_active_session', JSON.stringify({ username: newName, role: currentUserRole }));
+            const badge = document.getElementById('user-display-badge');
+            if (badge) badge.innerText = `• ${newName}`;
+            const authUserLabel = document.getElementById('auth-active-user-label');
+            if (authUserLabel) authUserLabel.innerText = newName;
+
+            renderSavedGamesAndOnlineUI();
+            openAccountModal();
+            showToast(currentLang === 'de' ? 'Kontodaten erfolgreich aktualisiert!' : 'Account profile updated successfully!');
         }
 
-        // --- REAL-TIME BROADCASTCHANNEL MULTI-TAB / SESSION SYNC ---
-        function initRealtimeBroadcastSync() {
-            if (typeof BroadcastChannel === 'undefined') return;
-            try {
-                realtimeChannel = new BroadcastChannel('intelligames_3d_live_channel');
-                realtimeChannel.onmessage = (ev) => {
-                    const msg = ev.data;
-                    if (!msg || msg.sender === currentUser) return;
-                    if (msg.type === 'live_move' && msg.snapshot && msg.snapshot.game === activeGame && !gameOver) {
-                        restoreSnapshotInPlace(msg.snapshot);
-                        playGameSound('place');
-                    } else if (msg.type === 'chat_update') {
-                        loadChatHistory();
-                    } else if (msg.type === 'invite_update') {
-                        checkIncomingInvites();
-                        renderSavedGamesAndOnlineUI();
-                    }
-                };
-            } catch (e) {}
-        }
-
-        function broadcastLiveUpdate(type, payload = {}) {
-            if (!realtimeChannel) return;
-            try {
-                realtimeChannel.postMessage({ sender: currentUser || 'Peer', type, ...payload });
-            } catch (e) {}
+        function deleteOwnAccount() {
+            if (!currentUser) return;
+            const confirmWord = (document.getElementById('acct-delete-confirm-input').value || '').trim().toUpperCase();
+            if (confirmWord !== 'DELETE') {
+                showToast(currentLang === 'de' ? 'Bitte gib DELETE zur Bestätigung ein.' : 'Please type DELETE in the confirmation box first.');
+                return;
+            }
+            const targetName = currentUser;
+            let users = getUsersRegistry().filter(u => u.username.toLowerCase() !== targetName.toLowerCase());
+            saveUsersRegistry(users);
+            localStorage.removeItem(`intelligames_favs_${targetName}`);
+            localStorage.removeItem(`intelligames_recent_${targetName}`);
+            closeAccountModal();
+            logoutUser();
+            showToast(currentLang === 'de' ? `Konto "${targetName}" wurde dauerhaft gelöscht.` : `Account "${targetName}" has been permanently deleted.`);
         }
 
         // --- MASTER MODE: ADD, EDIT, REMOVE & REFLAG PLAYERS ---
@@ -3380,6 +3626,7 @@ function doPost(e) {
             document.getElementById('game-lobby-modal').classList.add('hidden');
             document.getElementById('game-setup-modal').classList.add('hidden');
             initGameArena();
+            recordRecentOpponents(playerNames.slice(0, numPlayers), activeGame);
             addChatSystemMessage(isTrainingMode
                 ? `🎓 Started ${activeGame.toUpperCase()} in Training Mode with Interactive Coach!`
                 : `Started ${activeGame.toUpperCase()} (${numPlayers}P) — ${activeRoster}.`);
@@ -5185,13 +5432,23 @@ function doPost(e) {
             if (destSq) handleClassicChessSquareClick(pick.move.r, pick.move.c, destSq);
         }
 
-        // --- HANGMAN 3D ---
+        // --- HANGMAN 3D (ENGLISH & GERMAN WORD DATABASE + EASY/MEDIUM/HARD DIFFICULTY) ---
         function initHangmanGame() {
-            const word = hangmanState.words[Math.floor(Math.random() * hangmanState.words.length)];
+            const langSel = document.getElementById('hangman-word-lang');
+            const diffSel = document.getElementById('hangman-word-diff');
+            const wordLang = langSel ? langSel.value : currentLang;
+            const wordDiff = diffSel ? diffSel.value : aiDifficulty;
+
+            const word = getRandomWordFromDatabase(wordLang, wordDiff);
             hangmanState.word = word;
             hangmanState.guessed = [];
             hangmanState.mistakes = 0;
             hangmanState.scaffoldMeshes = [];
+
+            boardSquareMeshes.forEach(m => scene.remove(m));
+            pieceMeshes.forEach(m => scene.remove(m));
+            boardSquareMeshes = [];
+            pieceMeshes = [];
 
             const woodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.5 });
             const base = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.25, 1.8), woodMat);
@@ -5205,7 +5462,7 @@ function doPost(e) {
 
             [base, post, beam, rope].forEach(m => { scene.add(m); boardSquareMeshes.push(m); });
             renderHangmanUI();
-            document.getElementById('turn-status').innerText = `Hangman 3D — ${getPlayerLabel(currentPlayer)}: Deduce the secret word!`;
+            document.getElementById('turn-status').innerText = `Hangman 3D [${wordLang.toUpperCase()} • ${wordDiff.toUpperCase()}] — ${getPlayerLabel(currentPlayer)}: Deduce the secret word!`;
         }
 
         function renderHangmanUI() {
@@ -5213,9 +5470,14 @@ function doPost(e) {
             const slots = hangmanState.word.split('').map(ch => hangmanState.guessed.includes(ch) ? ch : '_').join(' ');
             document.getElementById('hangman-word-slots').innerText = slots;
 
+            const wordLang = document.getElementById('hangman-word-lang')?.value || currentLang;
+            const alphabet = wordLang === 'de'
+                ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜß'.split('')
+                : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
             const kb = document.getElementById('hangman-keyboard');
             kb.innerHTML = '';
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+            alphabet.forEach(letter => {
                 const used = hangmanState.guessed.includes(letter);
                 const btn = document.createElement('button');
                 btn.disabled = used;
@@ -5661,11 +5923,15 @@ function doPost(e) {
 
         function nextSkribblRound() {
             clearSkribblCanvas();
-            const pool = skribblState.words;
-            skribblState.currentWord = pool[Math.floor(Math.random() * pool.length)];
+            const langSel = document.getElementById('skribbl-word-lang');
+            const diffSel = document.getElementById('skribbl-word-diff');
+            const wordLang = langSel ? langSel.value : currentLang;
+            const wordDiff = diffSel ? diffSel.value : aiDifficulty;
+
+            skribblState.currentWord = getRandomWordFromDatabase(wordLang, wordDiff);
             const masked = skribblState.currentWord.split('').map((ch, idx) => idx === 0 ? ch : '_').join(' ');
             document.getElementById('skribbl-word-display').innerText = masked;
-            document.getElementById('turn-status').innerText = `Skribbl 3D — ${getPlayerLabel(currentPlayer)} Drawing! (Hint starts with ${skribblState.currentWord[0]})`;
+            document.getElementById('turn-status').innerText = `Skribbl 3D [${wordLang.toUpperCase()} • ${wordDiff.toUpperCase()}] — ${getPlayerLabel(currentPlayer)} Drawing! (Starts with ${skribblState.currentWord[0]})`;
         }
 
         function submitSkribblGuess() {
@@ -8785,6 +9051,8 @@ function doPost(e) {
             document.getElementById('auth-screen').style.display = 'none';
             const badge = document.getElementById('user-display-badge');
             if (badge) badge.innerText = `• ${username}`;
+            const topAcctBtn = document.getElementById('top-account-btn');
+            if (topAcctBtn) topAcctBtn.classList.remove('hidden');
             const topLogoutBtn = document.getElementById('top-logout-btn');
             if (topLogoutBtn) topLogoutBtn.classList.remove('hidden');
             const authLogoutField = document.getElementById('auth-logout-field');
@@ -8829,8 +9097,11 @@ function doPost(e) {
             if (topUndoBtn) topUndoBtn.classList.add('hidden');
             const topMasterBtn = document.getElementById('top-master-mode-btn');
             if (topMasterBtn) topMasterBtn.classList.add('hidden');
+            const topAcctBtn = document.getElementById('top-account-btn');
+            if (topAcctBtn) topAcctBtn.classList.add('hidden');
             const topLogoutBtn = document.getElementById('top-logout-btn');
             if (topLogoutBtn) topLogoutBtn.classList.add('hidden');
+            closeAccountModal();
             const authLogoutField = document.getElementById('auth-logout-field');
             if (authLogoutField) authLogoutField.classList.add('hidden');
             const badge = document.getElementById('user-display-badge');

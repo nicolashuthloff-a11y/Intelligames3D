@@ -168,7 +168,7 @@
                             </button>
                         </div>
                     </div>
-                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Click any game tile to enter its Game Menu (playmode, difficulty, training coach, instructions & game scoreboard)</p>
+                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Click any game tile to enter its Game Menu (playmode, difficulty, training coach, visual rules & game scoreboard)</p>
                 </div>
 
                 <!-- Visual Game Tiles Gallery (All 20 Games — Click to Enter Game Menu) -->
@@ -457,24 +457,6 @@
 
         <!-- EXTRA GAMES INTERACTIVE HUD PANELS (TOP-LEFT DOCKED SO 3D BOARDS REMAIN UNOBSTRUCTED) -->
         <div id="minigame-hud-container" class="w-full px-3 sm:px-4 flex flex-col gap-2 justify-start items-start pointer-events-none">
-            <!-- LIVE TRAINING COACH BANNER (ACTIVE IN TRAINING MODE FOR ALL 20 GAMES) -->
-            <div id="hud-training-coach" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-emerald-400/60 bg-emerald-950/85 w-full max-w-md space-y-1.5 text-xs">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="font-extrabold text-emerald-300 flex items-center">
-                        <i class="fa-solid fa-graduation-cap mr-1.5"></i> Interactive Training Coach
-                    </span>
-                    <div class="flex items-center space-x-1.5">
-                        <button type="button" onclick="suggestMoveOrAnswer()" class="px-2.5 py-0.5 bg-emerald-400 hover:bg-emerald-300 text-gray-950 font-extrabold rounded text-[10px] transition">
-                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Next Tip
-                        </button>
-                        <button type="button" onclick="undoLastMove()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-purple-300 font-bold rounded text-[10px] transition">
-                            Undo
-                        </button>
-                    </div>
-                </div>
-                <p id="training-coach-advice" class="text-[11px] text-emerald-100 leading-snug">Training Mode active: Practice freely with live tactical guidance, unlimited Undo, and a Sparring AI Coach!</p>
-            </div>
-
             <!-- Azul 3D HUD -->
             <div id="hud-azul" class="hidden interactive glass-panel p-3 rounded-2xl shadow-xl border border-cyan-500/40 w-full max-w-sm space-y-2">
                 <div class="flex items-center justify-between gap-2">
@@ -666,6 +648,29 @@
             </div>
         </div>
 
+        <!-- NON-BLOCKING COMPACT TRAINING COACH DOCK (BOTTOM-RIGHT, NEVER COVERS 3D BOARDS OR GAME HUDS) -->
+        <div id="hud-training-coach" class="hidden fixed bottom-16 right-4 z-30 interactive glass-panel p-2.5 rounded-2xl shadow-xl border border-emerald-400/60 bg-emerald-950/90 w-72 sm:w-80 max-w-[calc(100vw-2rem)] space-y-1 text-xs">
+            <div class="flex items-center justify-between gap-1.5">
+                <span class="font-extrabold text-emerald-300 flex items-center text-[11px]">
+                    <i class="fa-solid fa-graduation-cap mr-1.5"></i> Training Coach
+                </span>
+                <div class="flex items-center space-x-1">
+                    <button type="button" onclick="suggestMoveOrAnswer()" class="px-2 py-0.5 bg-emerald-400 hover:bg-emerald-300 text-gray-950 font-extrabold rounded text-[10px] transition">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i> Tip
+                    </button>
+                    <button type="button" onclick="undoLastMove()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-purple-300 font-bold rounded text-[10px] transition">
+                        Undo
+                    </button>
+                    <button type="button" onclick="toggleHudPanelCollapse('training-coach-body', this)" class="px-1.5 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[10px] font-semibold">
+                        Hide
+                    </button>
+                </div>
+            </div>
+            <div id="training-coach-body">
+                <p id="training-coach-advice" class="text-[11px] text-emerald-100 leading-snug">Practice freely with live tips and unlimited Undo!</p>
+            </div>
+        </div>
+
         <!-- FLOATING ACTION CHAT & CONTROLS -->
         <div class="w-full p-4 flex flex-wrap gap-2 justify-between items-end pointer-events-none">
             <div class="flex flex-wrap gap-2 pointer-events-auto">
@@ -740,7 +745,6 @@
                     </button>
                 </div>
 
-                <!-- Peer-to-Peer Room / Manual Signaling Exchange -->
                 <details class="bg-gray-900/90 p-2.5 rounded-xl border border-gray-800 text-[11px]">
                     <summary class="cursor-pointer font-semibold text-cyan-300">Peer Connection Code (2-Device Connect)</summary>
                     <div class="mt-2 space-y-2 text-[10px] text-gray-400">
@@ -811,7 +815,6 @@
                 <button type="button" onclick="closeAccountModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- Scores Summary & Per-Game Breakdown -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                 <div class="bg-gray-950/80 p-3.5 rounded-2xl border border-amber-500/30 space-y-1.5">
                     <div class="font-bold text-amber-300"><i class="fa-solid fa-trophy mr-1"></i> <span data-i18n="myScores">My Scores & Rank</span></div>
@@ -819,20 +822,17 @@
                     <div id="acct-per-game-scores" class="max-h-28 overflow-y-auto space-y-1 text-[11px] text-gray-300 pt-1"></div>
                 </div>
 
-                <!-- Favorite Players -->
                 <div class="bg-gray-950/80 p-3.5 rounded-2xl border border-cyan-500/30 space-y-1.5">
                     <div class="font-bold text-cyan-300"><i class="fa-solid fa-star mr-1"></i> <span data-i18n="favPlayers">Favorite Players</span></div>
                     <div id="acct-fav-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
                 </div>
 
-                <!-- Recent Players -->
                 <div class="bg-gray-950/80 p-3.5 rounded-2xl border border-emerald-500/30 space-y-1.5">
                     <div class="font-bold text-emerald-300"><i class="fa-solid fa-clock-rotate-left mr-1"></i> <span data-i18n="recentPlayers">Recent Players</span></div>
                     <div id="acct-recent-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
                 </div>
             </div>
 
-            <!-- Edit Profile Credentials & Danger Zone (Delete Account) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
                 <div class="bg-gray-950/80 p-4 rounded-2xl border border-gray-800 space-y-2.5">
                     <div class="font-bold text-cyan-300"><i class="fa-solid fa-user-pen mr-1"></i> <span data-i18n="editAccount">Edit Account Details</span></div>
@@ -1358,12 +1358,12 @@ function doPost(e) {
         </div>
     </div>
 
-    <!-- ACTIVE GAME RULES & OPTIMIZED INSTRUCTIONS MODAL -->
+    <!-- ACTIVE GAME RULES & BEGINNER-FRIENDLY VISUAL INSTRUCTIONS MODAL -->
     <div id="instructions-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
         <div class="glass-panel p-6 rounded-2xl w-full max-w-2xl shadow-2xl border border-cyan-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-gray-800 pb-3">
                 <h3 id="instruction-modal-title" class="text-base font-bold text-white flex items-center">
-                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Game Rules & Specifications
+                    <i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> Game Rules & Visual Guide
                 </h3>
                 <button onclick="closeInstructionsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -1469,7 +1469,7 @@ function doPost(e) {
                     'STAR', 'MOON', 'TREE', 'HOUSE', 'BOAT', 'FISH', 'BIRD', 'BOOK', 'CAKE', 'CLOUD',
                     'RIVER', 'BRIDGE', 'TRAIN', 'CLOCK', 'APPLE', 'TIGER', 'WHALE', 'ROBOT', 'SWORD', 'CROWN',
                     'HEART', 'FLAME', 'OCEAN', 'PLANE', 'GUITAR', 'CASTLE', 'FOREST', 'ISLAND', 'ROCKET', 'PLANET',
-                    'DRAGON', 'CASTLE', 'BRIDGE', 'FLOWER', 'HAMMER', 'LADDER', 'MIRROR', 'PENCIL', 'WINDOW', 'ANCHOR'
+                    'DRAGON', 'FLOWER', 'HAMMER', 'LADDER', 'MIRROR', 'PENCIL', 'WINDOW', 'ANCHOR', 'MOUNTAIN', 'SUNSHINE'
                 ],
                 medium: [
                     'SPACESHIP', 'PYRAMID', 'VOLCANO', 'TELESCOPE', 'OCTOPUS', 'LIGHTHOUSE', 'COMPASS', 'FORTRESS',
@@ -1794,6 +1794,7 @@ function doPost(e) {
                 showToast(currentLang === 'de' ? 'Sprache auf Deutsch (DE) umgestellt.' : 'Language switched to English (EN).');
             }
         }
+
         // --- PERSONAL USER ACCOUNT MANAGEMENT (SCORES, FAVORITES, RECENT PLAYERS, EDIT & DELETE) ---
         function getRecentPlayers() {
             try {
@@ -1832,7 +1833,6 @@ function doPost(e) {
             if (pInp) pInp.value = me.password;
             if (delInp) delInp.value = '';
 
-            // 1. Personal Scores & Per-Game Breakdown
             const allWins = getHitListRegistry().filter(r => r.player && r.player.toLowerCase() === currentUser.toLowerCase());
             const totalWinsEl = document.getElementById('acct-total-wins');
             const perGameEl = document.getElementById('acct-per-game-scores');
@@ -1854,7 +1854,6 @@ function doPost(e) {
                 }
             }
 
-            // 2. Favorite Players
             const favs = getFavoredPlayers();
             const favBox = document.getElementById('acct-fav-players-list');
             if (favBox) {
@@ -1878,7 +1877,6 @@ function doPost(e) {
                 }
             }
 
-            // 3. Recent Players
             const recents = getRecentPlayers();
             const recBox = document.getElementById('acct-recent-players-list');
             if (recBox) {
@@ -3596,7 +3594,7 @@ function doPost(e) {
                 iconBox.innerHTML = gameObj.svg;
             }
             if (titleEl) titleEl.innerText = `${gameObj.name} — Game Menu`;
-            if (subEl) subEl.innerText = `${gameObj.tag} • Choose playmode, difficulty, training coach, instructions & view game scoreboard`;
+            if (subEl) subEl.innerText = `${gameObj.tag} • Choose playmode, difficulty, training coach, visual rules & view game scoreboard`;
 
             const p1Inp = document.getElementById('lobby-p1-name');
             const p2Inp = document.getElementById('lobby-p2-name');
@@ -3625,7 +3623,7 @@ function doPost(e) {
             const gameObj = GAME_CATALOG.find(g => g.id === targetId);
             const modalTitleEl = document.getElementById('instruction-modal-title');
             if (modalTitleEl) {
-                modalTitleEl.innerHTML = `<i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> ${gameObj ? gameObj.name : targetId.toUpperCase()} — Instructions & Rules`;
+                modalTitleEl.innerHTML = `<i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> ${gameObj ? gameObj.name : targetId.toUpperCase()} — Visual Rules & Beginner Guide`;
             }
             selectInstructionTab(targetId);
             document.getElementById('instructions-modal').classList.remove('hidden');
@@ -3781,7 +3779,7 @@ function doPost(e) {
             document.getElementById('game-lobby-modal').classList.add('hidden');
             document.getElementById('game-setup-modal').classList.add('hidden');
             initGameArena();
-            addChatSystemMessage(`🎓 Training Mode launched for ${activeGame.toUpperCase()} — follow the Coach tips and practice freely!`);
+            addChatSystemMessage(`🎓 Training Mode launched for ${activeGame.toUpperCase()} — follow the Coach tips in the bottom-right corner!`);
         }
 
         function startTrainingFromInstructionsModal() {
@@ -6638,7 +6636,7 @@ function doPost(e) {
             const gameTitle = document.getElementById('current-game-title')?.innerText || activeGame.toUpperCase();
             const modalTitleEl = document.getElementById('instruction-modal-title');
             if (modalTitleEl) {
-                modalTitleEl.innerHTML = `<i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> ${gameTitle} — Rules & Specifications`;
+                modalTitleEl.innerHTML = `<i class="fa-solid fa-book-open text-cyan-400 mr-2"></i> ${gameTitle} — Visual Rules & Beginner Guide`;
             }
             selectInstructionTab(activeGame);
             document.getElementById('instructions-modal').classList.remove('hidden');
@@ -6648,7 +6646,7 @@ function doPost(e) {
             document.getElementById('instructions-modal').classList.add('hidden');
         }
 
-        // --- ACTIVE GAME INSTRUCTIONS RENDERER (OPTIMIZED PER-GAME VISUAL GUIDES) ---
+        // --- ACTIVE GAME INSTRUCTIONS RENDERER (EXPLAINED FOR BEGINNERS + VISUAL SVG DIAGRAMS) ---
         function selectInstructionTab(gameKey) {
             lastInspectedRuleGame = gameKey || activeGame || 'quarto';
             const gameObj = GAME_CATALOG.find(g => g.id === lastInspectedRuleGame) || GAME_CATALOG[0];
@@ -6663,34 +6661,51 @@ function doPost(e) {
                         <div class="min-w-0">
                             <div class="text-sm font-extrabold text-white">${gameObj.name}</div>
                             <div class="text-[11px] text-cyan-300 font-semibold">${cfg.tagline}</div>
-                            <div class="text-[10px] text-emerald-300 mt-0.5"><i class="fa-solid fa-bullseye mr-1"></i> <strong>Win Goal:</strong> ${cfg.goal}</div>
+                            <div class="text-[10px] text-emerald-300 mt-0.5"><i class="fa-solid fa-bullseye mr-1"></i> <strong>How to Win:</strong> ${cfg.goal}</div>
+                        </div>
+                    </div>
+
+                    <!-- Beginner Plain-English Overview ("In Simple Words") -->
+                    <div class="bg-amber-950/30 p-3.5 rounded-2xl border border-amber-400/35 space-y-1">
+                        <div class="text-[11px] font-extrabold text-amber-300 uppercase tracking-wider"><i class="fa-solid fa-face-smile mr-1"></i> The Game in 10 Seconds (Beginner Summary)</div>
+                        <p class="text-[11px] text-amber-100 leading-relaxed">${cfg.dummiesSummary}</p>
+                    </div>
+
+                    <!-- Visual Diagram Explaining the Board & Winning Pattern -->
+                    <div class="bg-gray-950/90 p-3.5 rounded-2xl border border-purple-500/35 space-y-2">
+                        <div class="text-[11px] font-extrabold text-purple-300 uppercase tracking-wider"><i class="fa-solid fa-diagram-project mr-1"></i> Visual Rule Diagram</div>
+                        <div class="flex flex-col sm:flex-row items-center gap-3">
+                            <div class="w-full sm:w-48 h-28 bg-gray-900 rounded-xl border border-gray-800 flex items-center justify-center p-2 shrink-0">
+                                ${cfg.diagramSvg}
+                            </div>
+                            <p class="text-[11px] text-gray-300 leading-relaxed">${cfg.diagramCaption}</p>
                         </div>
                     </div>
 
                     <!-- Technical Specifications Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-950/75 p-3 rounded-xl border border-gray-800 text-[11px]">
                         <div><span class="text-cyan-400 font-bold">Board & Arena:</span> <span class="text-white">${cfg.boards}</span></div>
-                        <div><span class="text-cyan-400 font-bold">Grid Dimensions:</span> <span class="text-white">${cfg.size}</span></div>
+                        <div><span class="text-cyan-400 font-bold">Grid Size:</span> <span class="text-white">${cfg.size}</span></div>
                         <div><span class="text-purple-400 font-bold">Pieces & Kit:</span> <span class="text-white">${cfg.pieces}</span></div>
                         <div><span class="text-emerald-400 font-bold">Players & Modes:</span> <span class="text-white">${cfg.players}</span></div>
                     </div>
 
                     <!-- Step-by-Step How to Play -->
                     <div class="bg-gray-900/85 p-3.5 rounded-xl border border-gray-800 space-y-1.5">
-                        <div class="text-[11px] font-extrabold text-amber-300 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Step-by-Step Gameplay</div>
+                        <div class="text-[11px] font-extrabold text-cyan-300 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Exact Turn-by-Turn Steps</div>
                         <ol class="list-decimal pl-5 space-y-1 text-[11px] text-gray-200">
                             ${cfg.steps.map(s => `<li>${s}</li>`).join('')}
                         </ol>
                     </div>
 
-                    <!-- Controls & Pro Strategy Tip -->
+                    <!-- Controls & Beginner Mistake to Avoid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                         <div class="bg-cyan-950/35 p-3 rounded-xl border border-cyan-500/30">
-                            <div class="font-bold text-cyan-300 mb-0.5"><i class="fa-solid fa-hand-pointer mr-1"></i> Controls</div>
+                            <div class="font-bold text-cyan-300 mb-0.5"><i class="fa-solid fa-hand-pointer mr-1"></i> Where to Click</div>
                             <div class="text-gray-300">${cfg.controls}</div>
                         </div>
                         <div class="bg-emerald-950/35 p-3 rounded-xl border border-emerald-500/30">
-                            <div class="font-bold text-emerald-300 mb-0.5"><i class="fa-solid fa-lightbulb mr-1"></i> Pro Strategy Tip</div>
+                            <div class="font-bold text-emerald-300 mb-0.5"><i class="fa-solid fa-lightbulb mr-1"></i> Golden Rule for Beginners</div>
                             <div class="text-gray-300">${cfg.proTip}</div>
                         </div>
                     </div>
@@ -6699,288 +6714,349 @@ function doPost(e) {
 
             const guides = {
                 quarto: {
-                    tagline: 'Gigamic 4-Attribute Deduction & Shared Piece Selection',
-                    goal: 'Align 4 pieces (row, column, or diagonal) sharing at least 1 trait: Tall/Short, Dark/Light, Square/Round, or Solid/Hollow.',
+                    tagline: '4-in-a-Row with a Twist: Your Opponent Picks Your Piece!',
+                    goal: 'Line up 4 pieces (across, down, or diagonally) that all share at least ONE matching feature.',
+                    dummiesSummary: 'Think of Tic-Tac-Toe on a 4×4 board—except you NEVER pick the piece you put on the board! Instead, your opponent hands you a piece, you place it anywhere you want, and then YOU pick which piece your opponent has to place next.',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="10" y="10" width="160" height="75" rx="8" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/><rect x="22" y="25" width="22" height="45" rx="3" fill="#fef3c7"/><rect x="56" y="25" width="22" height="45" rx="11" fill="#92400e"/><rect x="90" y="25" width="22" height="45" rx="3" fill="#92400e"/><rect x="124" y="25" width="22" height="45" rx="11" fill="#fef3c7"/><line x1="18" y1="22" x2="152" y2="22" stroke="#22d3ee" stroke-width="2.5" stroke-dasharray="4 3"/><text x="85" y="18" fill="#22d3ee" font-size="9" text-anchor="middle" font-weight="bold">ALL 4 ARE TALL = QUARTO WIN!</text></svg>`,
+                    diagramCaption: 'Even though these 4 pieces have different colors and shapes, they are ALL TALL—so lining up 4 tall pieces (or 4 short, 4 dark, 4 light, 4 square, 4 round, 4 solid, or 4 hollow) wins immediately!',
                     boards: '1 Main 3D Board + Perimeter Ring',
                     size: '4 × 4 Grid (16 Squares)',
                     pieces: '16 Unique Sculpted Wooden Pieces',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Select for Opponent:</strong> Click an unplaced piece around the perimeter ring to hand it to your opponent.',
-                        '<strong>Place & Hand Over:</strong> When handed a floating piece, click any open square on the 4×4 board to place it, then choose the next piece for your opponent.',
-                        '<strong>Claim Quarto:</strong> Completing 4-in-a-line with any shared attribute wins immediately!'
+                        '<strong>Step 1 (Pick for Opponent):</strong> Click one of the pieces standing around the outside ring of the board. It floats in the air for your opponent.',
+                        '<strong>Step 2 (Place on Board):</strong> When it is your turn to place, click any empty square inside the 4×4 grid to drop the floating piece there.',
+                        '<strong>Step 3 (Hand Over Next Piece):</strong> Right after placing your piece, click a new piece from the outer ring for your opponent—unless your placement just made 4-in-a-line!'
                     ],
-                    controls: 'Click/tap perimeter pieces to select, board squares to place; drag to orbit 3D camera.',
-                    proTip: 'Before handing a piece to your opponent, scan every row/column with 3 pieces so you never give away a winning 4th trait!'
+                    controls: 'Click an outer-ring piece to select it, then click an empty square on the 4×4 board.',
+                    proTip: 'Before handing a piece to your opponent, look for any row with 3 pieces already in it—do not hand them the 4th matching piece!'
                 },
                 quoridor: {
-                    tagline: 'Gigamic Labyrinth Racing & Strategic Fence Blocking',
-                    goal: 'Be the first pawn to reach any square along the opposite border of the 9×9 wooden grid.',
+                    tagline: 'Race Across the Maze While Dropping Wooden Fences',
+                    goal: 'Be the first player to walk your pawn all the way to the opposite edge of the 9×9 board.',
+                    dummiesSummary: 'You start on one side of a 9×9 grid and want to reach the other side. On each turn you have a simple choice: either move your pawn 1 step forward/sideways, OR drop a wooden wall in front of your opponent to force them to walk the long way around!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="20" y="8" width="140" height="78" rx="6" fill="#451a03" stroke="#fbbf24" stroke-width="1.5"/><circle cx="90" cy="70" r="8" fill="#22d3ee"/><path d="M90 60 V48 H122 V20" fill="none" stroke="#22d3ee" stroke-width="2.5"/><rect x="65" y="42" width="48" height="6" rx="2" fill="#fde68a"/><text x="90" y="18" fill="#fbbf24" font-size="8" text-anchor="middle" font-weight="bold">GOAL EDGE (DETOUR AROUND FENCE)</text></svg>`,
+                    diagramCaption: 'The Cyan pawn wanted to walk straight up, but a yellow horizontal fence blocks the path—so the pawn steps sideways around the fence toward the top Goal Edge.',
                     boards: '1 Wooden 9×9 Labyrinth Board',
                     size: '9 × 9 Squares (81 Cells)',
-                    pieces: '2–4 Pawns + 20 Wooden Fences (10 per player in 2P, 5 in 3–4P)',
+                    pieces: '2–4 Pawns + 20 Wooden Fences (10 per player in 2P)',
                     players: '2–4 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Move Pawn:</strong> Keep "Move Pawn" active and click an orthogonally adjacent open cell (or jump over an adjacent pawn).',
-                        '<strong>Place Wooden Fences:</strong> Switch to "Wall Horiz" or "Wall Vert" in the HUD and click a cell groove to drop a 2-space fence.',
-                        '<strong>Fair-Play Path Rule:</strong> Fences cannot completely seal off any player from reaching their goal edge.'
+                        '<strong>Option A — Move Your Pawn:</strong> Keep "Move Pawn" selected in the top-left box and click a neighboring square (up, down, left, or right).',
+                        '<strong>Option B — Place a Fence:</strong> Click "Wall Horiz" (horizontal) or "Wall Vert" (vertical) in the top-left box, then click a board square to drop a 2-space wall.',
+                        '<strong>No Total Traps Allowed:</strong> You cannot box someone in completely—there must always be at least one open route to their goal.'
                     ],
-                    controls: 'Toggle Move Pawn / Wall Horiz / Wall Vert in top-left HUD, then click target cell.',
-                    proTip: 'Save at least 3 fences for the endgame—a single horizontal wall near the opponent’s goal line can add 6+ detour steps.'
+                    controls: 'Use the 3 buttons in the top-left HUD (Move Pawn / Wall Horiz / Wall Vert), then click a square.',
+                    proTip: 'Do not spend all your walls in the first 5 turns—keep 3 or 4 walls to slow down your opponent right before they reach your side!'
                 },
                 pylos: {
-                    tagline: 'Gigamic 3D Sphere Pyramid & Reserve Conservation',
-                    goal: 'Conserve your wooden spheres so you place the crowning 30th sphere at the top apex of the 4-tier pyramid.',
+                    tagline: 'Build a 3D Sphere Pyramid & Save Your Marbles',
+                    goal: 'Place the very last wooden sphere on the single top spot (Level 4) of the 3D pyramid.',
+                    dummiesSummary: 'Both players start with 15 wooden spheres and build a 4-layer pyramid together. Whenever 4 spheres form a 2×2 square underneath, a new upper spot opens up! Placing on upper spots or making 4 of your own color in a square lets you save spheres so you outlast your opponent.',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><circle cx="62" cy="72" r="12" fill="#fef3c7" stroke="#78350f" stroke-width="2"/><circle cx="90" cy="72" r="12" fill="#451a03" stroke="#fef3c7" stroke-width="1.5"/><circle cx="118" cy="72" r="12" fill="#fef3c7" stroke="#78350f" stroke-width="2"/><circle cx="76" cy="51" r="12" fill="#451a03" stroke="#fef3c7" stroke-width="1.5"/><circle cx="104" cy="51" r="12" fill="#fef3c7" stroke="#78350f" stroke-width="2"/><circle cx="90" cy="30" r="12" fill="#fbbf24" stroke="#78350f" stroke-width="2"/><text x="90" y="13" fill="#fbbf24" font-size="8.5" text-anchor="middle" font-weight="bold">CROWN THE APEX (LEVEL 4) TO WIN</text></svg>`,
+                    diagramCaption: 'Any 4 spheres forming a 2×2 square support a higher sphere on top. Making a 2×2 square of your own color lets you take 1 or 2 free spheres back into your hand!',
                     boards: '1 4-Tier 3D Pyramid Tray',
                     size: '4×4 Base → 3×3 → 2×2 → 1 Apex (30 Spheres)',
                     pieces: '15 Ivory Spheres vs 15 Ebony Spheres',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Place or Elevate:</strong> Click any open base socket or elevated cyan 2×2 platform (supported by 4 spheres below).',
-                        '<strong>Form a 2×2 Square:</strong> Completing a 2×2 square of your color lets you reclaim 1 or 2 unblocked spheres back into your reserve.',
-                        '<strong>Crown the Apex:</strong> Placing the final sphere on Level 4 wins the match.'
+                        '<strong>Place a Sphere:</strong> Click any empty dark socket on the base OR any glowing cyan elevated circle sitting on top of 4 spheres.',
+                        '<strong>2×2 Square Bonus:</strong> If you make a 2×2 square of 4 spheres of your color, click 1 or 2 of your unblocked spheres on the board to take them back!',
+                        '<strong>Win at the Top:</strong> Whoever has spheres left to place the 30th sphere at the peak wins.'
                     ],
-                    controls: 'Click base sockets or elevated cyan platforms to stack; click free spheres to reclaim.',
-                    proTip: 'Always prioritize building onto Level 2 or Level 3 platforms—every elevated placement saves 1 sphere from your reserve!'
+                    controls: 'Click base sockets or glowing cyan upper platforms to place; click free spheres to reclaim.',
+                    proTip: 'Always stack onto higher levels when available—it uses spheres already on the board so your reserve lasts longer!'
                 },
                 quixo: {
-                    tagline: 'Gigamic 5×5 Perimeter Cube Pulling & Row Sliding',
-                    goal: 'Align 5 cubes showing your color/symbol horizontally, vertically, or diagonally.',
+                    tagline: 'Pull an Edge Cube & Push the Whole Row Like a Sliding Puzzle',
+                    goal: 'Get 5 cubes of your color in a straight line (across, down, or diagonally).',
+                    dummiesSummary: 'Imagine a 5×5 tray of loose blocks. You can only pick up a block from the outside edge (either an empty ivory block or one already in your color). When you click the opposite end of that row or column, all blocks slide over by 1 space and your block slides in!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="30" y="25" width="22" height="22" rx="4" fill="#22d3ee" stroke="#fff" stroke-width="1.5"/><rect x="55" y="25" width="22" height="22" rx="4" fill="#fef3c7"/><rect x="80" y="25" width="22" height="22" rx="4" fill="#f43f5e"/><rect x="105" y="25" width="22" height="22" rx="4" fill="#fef3c7"/><rect x="130" y="25" width="22" height="22" rx="4" fill="#fbbf24" stroke="#fff" stroke-width="1.5"/><path d="M41 58 H141" stroke="#fbbf24" stroke-width="2.5"/><text x="90" y="75" fill="#fbbf24" font-size="8.5" text-anchor="middle" font-weight="bold">PICK OUTER CUBE → CLICK GOLD END TO SLIDE ROW</text></svg>`,
+                    diagramCaption: 'Step 1: Click an outer-edge cube (highlighted Cyan). Step 2: Click a gold destination cube at the opposite end of that row or column to slide every cube along the arrow.',
                     boards: '1 5×5 Sliding Cube Tray',
                     size: '5 × 5 Grid (25 Cubes)',
-                    pieces: '25 Engraved Cubes (Neutral Blank, Cyan & Red)',
+                    pieces: '25 Cubes (Ivory Neutral, Cyan P1, Red P2)',
                     players: '2–4 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Pick an Outer Cube:</strong> Click any cube on the outer border that is neutral (ivory) or already your color.',
-                        '<strong>Slide the Row/Column:</strong> Click one of the highlighted gold edge cubes to push the entire line back in.'
+                        '<strong>Step 1 (Pick Outer Cube):</strong> Click any ivory (blank) cube or cube of your own color along the outer border.',
+                        '<strong>Step 2 (Slide Line):</strong> Gold cubes appear at the ends of that row/column—click one to push the whole row into place!'
                     ],
-                    controls: 'First click an outer-rim cube, then click a highlighted gold destination cube.',
-                    proTip: 'Pull neutral cubes from rows where your opponent has 3-in-a-row to break their alignment while advancing yours!'
+                    controls: 'Click an outer-rim cube first, then click one of the gold highlighted edge cubes.',
+                    proTip: 'Never pick cubes from the center—only the 16 cubes on the outside border can be pulled!'
                 },
                 qawale: {
-                    tagline: 'Gigamic Stacked Pebble Mancala Sowing',
-                    goal: 'Align 4 pebbles of your color visible on top of stacks (row, column, or diagonal).',
+                    tagline: 'Drop a Pebble on a Stack & Scatter Them One-by-One',
+                    goal: 'Line up 4 pebbles of your color visible on the TOP of stacks (across, down, or diagonally).',
+                    dummiesSummary: 'Every turn has two easy steps: first, drop 1 of your colored pebbles on top of ANY stack on the 4×4 board. Second, pick up that whole stack and walk step-by-step to neighboring squares, dropping 1 pebble on each square until your hand is empty!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><ellipse cx="42" cy="66" rx="16" ry="6" fill="#64748b"/><ellipse cx="42" cy="58" rx="16" ry="6" fill="#f97316"/><ellipse cx="42" cy="50" rx="16" ry="6" fill="#22d3ee"/><path d="M62 52 Q90 30 112 52" fill="none" stroke="#22d3ee" stroke-width="2.5"/><ellipse cx="90" cy="66" rx="16" ry="6" fill="#f97316"/><ellipse cx="136" cy="66" rx="16" ry="6" fill="#22d3ee"/><text x="90" y="20" fill="#22d3ee" font-size="8.5" text-anchor="middle" font-weight="bold">DROP ON STACK → SOW 1 PEBBLE PER STEP</text></svg>`,
+                    diagramCaption: 'The bottom pebble in the stack drops on the first neighboring square you click, and the top pebble (the one you just added!) drops on the very last square.',
                     boards: '1 4×4 Pebble Grid',
                     size: '4 × 4 Squares (16 Stack Spaces)',
                     pieces: '16 Cyan & 16 Orange Pebbles + 8 Neutral Corner Pebbles',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Top a Stack:</strong> Click any square on the 4×4 grid to place 1 pebble from your hand onto that stack.',
-                        '<strong>Sow Step-by-Step:</strong> Pick up the entire stack and click orthogonally adjacent squares one-by-one to drop 1 pebble per step.'
+                        '<strong>Step 1 (Add to Stack):</strong> Click any square on the 4×4 grid to place your pebble on top of that stack.',
+                        '<strong>Step 2 (Sow Adjacent Squares):</strong> Click glowing teal neighboring squares one by one to drop 1 pebble per step.'
                     ],
-                    controls: 'Click a stack to begin, then click glowing teal adjacent squares to sow each pebble.',
-                    proTip: 'Remember that the pebble you place on top of a stack will be the VERY LAST pebble dropped at the end of your sowing path!'
+                    controls: 'Click a stack first, then click neighboring teal squares until your hand is empty.',
+                    proTip: 'Count the pebbles in the stack before clicking! If a stack has 2 pebbles, adding yours makes 3 steps—so your color lands 3 squares away.'
                 },
                 squadro: {
-                    tagline: 'Gigamic 5-Lane Cross-Track Shuttle Race & Jumping',
-                    goal: 'Be the first player to race 4 of your 5 shuttles across the board and back to their starting edge.',
+                    tagline: '5-Lane Shuttle Race Where Jumping Sends Rivals Home',
+                    goal: 'Be the first player to race 4 of your 5 shuttles across the board and all the way back.',
+                    dummiesSummary: 'You have 5 wooden shuttles that race across the board and turn around to come back. Each lane has a fixed speed (1, 2, or 3 steps). If your shuttle jumps over an opponent’s shuttle, you leap right past them AND send their shuttle all the way back to its start!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><line x1="20" y1="48" x2="160" y2="48" stroke="#64748b" stroke-width="2"/><polygon points="24,48 44,40 44,56" fill="#fbbf24"/><circle cx="85" cy="48" r="9" fill="#f43f5e"/><path d="M46 42 Q85 15 115 44" fill="none" stroke="#fbbf24" stroke-width="2.5"/><text x="90" y="80" fill="#fbbf24" font-size="8.5" text-anchor="middle" font-weight="bold">JUMP OVER RIVAL → LAND BEYOND & RESET RIVAL!</text></svg>`,
+                    diagramCaption: 'When a Gold shuttle jumps over a Red shuttle, Gold lands on the space immediately after Red, and Red is sent back to its starting edge.',
                     boards: '1 5-Lane Cross-Track Board',
                     size: '5 Horizontal Lanes × 5 Vertical Lanes',
-                    pieces: '10 Wooden Shuttles (5 Gold vs 5 Crimson with 1–3 Speed Pips)',
+                    pieces: '10 Shuttles (5 Gold vs 5 Crimson with 1–3 Speed Pips)',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Advance a Shuttle:</strong> Click any of your 5 shuttles to move it by its lane’s fixed speed (1, 2, or 3 pips).',
-                        '<strong>Jump & Reset:</strong> Jumping over opponent shuttles sends them back to their edge and places you on the very next open space!'
+                        '<strong>Click a Shuttle:</strong> Tap any of your 5 shuttles to move it forward by its lane’s speed (1, 2, or 3 spaces).',
+                        '<strong>Turn Around & Return:</strong> Reaching the far edge flips your shuttle around so it races back home.'
                     ],
-                    controls: 'Click/tap any of your active shuttles to advance it along its lane.',
-                    proTip: 'Slow 1-pip shuttles jump to 3 pips on the return trip—use fast shuttles to leapfrog enemy blockers!'
+                    controls: 'Simply click any of your active shuttles on the 3D board to move it.',
+                    proTip: 'A shuttle with 1 step on the way out becomes a super-fast 3-step shuttle on the way back!'
                 },
                 katamino: {
-                    tagline: 'Gigamic 3D Pentomino Spatial Packing Puzzle',
-                    goal: 'Fit 5-square 3D pentomino blocks inside the 8×5 wooden Penta frame without overlaps.',
+                    tagline: 'Fit 5-Square Tetris-Style Wooden Blocks Into the Frame',
+                    goal: 'Pack 3D pentomino blocks cleanly inside the 8×5 wooden frame without overlapping.',
+                    dummiesSummary: 'Just like 3D Tetris! Pick one of the 8 shapes from the top-left tray, rotate it with the Rotate 90° button so it fits neatly, and click the grid square where you want to place it. In 2-player mode, whoever places the final legal block wins!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="35" y="15" width="110" height="65" rx="4" fill="#1e293b" stroke="#a855f7" stroke-width="2"/><rect x="42" y="22" width="16" height="16" fill="#22d3ee"/><rect x="42" y="39" width="16" height="16" fill="#22d3ee"/><rect x="42" y="56" width="16" height="16" fill="#22d3ee"/><rect x="59" y="56" width="16" height="16" fill="#22d3ee"/><rect x="76" y="56" width="16" height="16" fill="#22d3ee"/><text x="122" y="48" fill="#e2e8f0" font-size="8.5" text-anchor="middle" font-weight="bold">5 SQUARES</text><text x="122" y="59" fill="#a855f7" font-size="8" text-anchor="middle">PER BLOCK</text></svg>`,
+                    diagramCaption: 'Every Pentomino block is made of exactly 5 connected squares. Rotate blocks to interlock them without leaving single trapped holes.',
                     boards: '1 Wooden Penta Frame',
                     size: '8 × 5 Grid (40 Unit Squares)',
                     pieces: '8 Classic Pentomino Blocks (F, I, L, P, N, T, U, V)',
                     players: '1–2 Players (Solo Puzzle, 2P Duel, or Training Coach)',
                     steps: [
-                        '<strong>Choose & Rotate:</strong> Pick an unused Penta block in the HUD tray and click "Rotate 90°" to orient it.',
-                        '<strong>Anchor Placement:</strong> Click the top-left anchor square inside the 8×5 grid to lock the block in place.'
+                        '<strong>Step 1 (Pick Block):</strong> Click an unused block button (e.g. Penta-F, Penta-L) in the top-left HUD.',
+                        '<strong>Step 2 (Rotate & Place):</strong> Click "Rotate 90°" if needed, then click the top-left square where you want the shape anchored.'
                     ],
-                    controls: 'Select block in HUD, click Rotate 90°, then click anchor square on the 3D frame.',
-                    proTip: 'Place awkward shapes like F, N, and T near the corners early so you do not leave isolated 1- or 2-square gaps.'
+                    controls: 'Click block button → Rotate 90° → Click target square on the 8×5 board.',
+                    proTip: 'Tuck corner-heavy shapes like V, L, and U against the outer wooden walls first!'
                 },
                 chess: {
-                    tagline: 'Classic 8×8 Tournament 3D Chess with Check & Promotion',
-                    goal: 'Deliver Checkmate or capture the opponent’s King across the 8×8 checkered 3D arena.',
+                    tagline: 'Classic 8×8 Chess with Highlighted Legal Moves',
+                    goal: 'Capture the opponent’s King (or trap it in Checkmate) on the 8×8 board.',
+                    dummiesSummary: 'Each player commands 16 pieces: 8 Pawns in front, plus Rooks (castles), Knights (horses), Bishops, a Queen, and a King in back. Don’t worry about memorizing every rule—when you click one of your pieces, the board lights up all legal squares in blue!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="45" y="12" width="90" height="70" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/><circle cx="90" cy="47" r="9" fill="#f8fafc"/><circle cx="90" cy="25" r="5" fill="#0284c7"/><circle cx="90" cy="69" r="5" fill="#0284c7"/><circle cx="68" cy="47" r="5" fill="#0284c7"/><circle cx="112" cy="47" r="5" fill="#0284c7"/><text x="90" y="91" fill="#38bdf8" font-size="8" text-anchor="middle" font-weight="bold">CLICK PIECE → BLUE SQUARES SHOW VALID MOVES</text></svg>`,
+                    diagramCaption: 'Clicking any piece automatically highlights every legal square it can move or capture onto in glowing blue.',
                     boards: '1 Classic Checkered 3D Board',
                     size: '8 × 8 Grid (64 Squares)',
-                    pieces: '32 Pieces (16 White vs 16 Red: King, Queen, 2 Rooks, 2 Bishops, 2 Knights, 8 Pawns)',
+                    pieces: '32 Pieces (16 White vs 16 Red)',
                     players: '2 Players (Human, Online, Grandmaster AI, or Training Coach)',
                     steps: [
-                        '<strong>Select Piece:</strong> Click any friendly piece to highlight all legal destination squares in blue.',
-                        '<strong>Capture & Promote:</strong> Move onto an enemy piece to capture it. Pawns reaching the opposite back rank promote to a Queen!'
+                        '<strong>Click Your Piece:</strong> Tap any friendly piece—all valid squares light up in blue.',
+                        '<strong>Move or Capture:</strong> Tap a glowing blue square to move there (or capture the enemy piece standing on it).'
                     ],
-                    controls: 'Click a friendly piece, then click any blue-highlighted destination square.',
-                    proTip: 'Control the central 4 squares (d4, e4, d5, e5) early with Knights and Pawns before launching Queen attacks.'
+                    controls: 'Click your piece, then click any blue-highlighted square.',
+                    proTip: 'Pawns that reach the far end of the board automatically transform into a powerful Queen!'
                 },
                 azul: {
-                    tagline: '2–4 Player Ceramic Mosaic Tile Drafting & Wall Tiling',
-                    goal: 'Score the most adjacency points and complete a 5-tile horizontal row on your 5×5 Mosaic Wall.',
-                    boards: '2–4 Player Mosaic Boards + 5/7/9 Factory Displays',
+                    tagline: 'Draft Colorful Tiles & Build a 5×5 Mosaic Wall',
+                    goal: 'Score the highest points by placing colored tiles next to each other on your 5×5 wall.',
+                    dummiesSummary: 'Pick all tiles of 1 color from any Factory tray in the top-left HUD, then click Row 1–5 to glue them onto your 3D mosaic board. Placing tiles touching existing tiles gives bonus combo points!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="48" y="15" width="24" height="24" rx="4" fill="#0284c7"/><rect x="76" y="15" width="24" height="24" rx="4" fill="#f59e0b"/><rect x="104" y="15" width="24" height="24" rx="4" fill="#e11d48"/><rect x="76" y="43" width="24" height="24" rx="4" fill="#10b981"/><text x="90" y="83" fill="#38bdf8" font-size="8.5" text-anchor="middle" font-weight="bold">TOUCHING TILES = BONUS COMBO POINTS!</text></svg>`,
+                    diagramCaption: 'Every tile placed horizontally or vertically adjacent to existing tiles scores extra points for the whole connected line.',
+                    boards: '2–4 Player 5×5 Mosaic Boards + Factory Trays',
                     size: '5 × 5 Grids (25 Tiles per Player)',
                     pieces: '5 Glazed Tile Colors (Cobalt, Amber, Crimson, Obsidian, Teal)',
                     players: '2–4 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Draft Color Batch:</strong> Click any colored tile inside a Factory Display to take all tiles of that color from that factory.',
-                        '<strong>Glaze Your Wall:</strong> Click Row 1–5 in the HUD to place that color onto your 3D mosaic board and earn combo points.'
+                        '<strong>Step 1 (Pick Color):</strong> Click a colored square inside any Factory in the top-left HUD.',
+                        '<strong>Step 2 (Place in Row):</strong> Click Row 1–5 in the HUD to place that color onto your 3D board.'
                     ],
-                    controls: 'Click a Factory color swatch in the top-left HUD, then click Row 1–5.',
-                    proTip: 'Place new tiles directly adjacent to existing horizontal and vertical tiles to trigger double adjacency scoring!'
+                    controls: 'Use the Factory swatches and Row 1–5 buttons in the top-left HUD.',
+                    proTip: 'Completing a full horizontal row of 5 tiles ends the game and gives a +5 point bonus!'
                 },
                 sevenwonders: {
-                    tagline: '2–4 Player Ancient Civilization & Wonder Drafting',
-                    goal: 'Accumulate the highest combined Victory Points across Civic, Military, Science, Commerce & Wonder stages.',
+                    tagline: 'Build an Ancient City & Raise a Golden 3D Wonder',
+                    goal: 'Earn the most Victory Points (VP) across 2 Ages of card drafting.',
+                    dummiesSummary: 'Each turn you get 3 cards in the top-left HUD. Click "Build" to add a Blue (points), Red (army), Green (science), or Yellow (coins) building to your city—or click "Wonder" to build a golden pyramid tier worth +4 points!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><polygon points="90,14 132,68 48,68" fill="#fbbf24" stroke="#78350f" stroke-width="2"/><line x1="62" y1="50" x2="118" y2="50" stroke="#78350f" stroke-width="2"/><line x1="76" y1="32" x2="104" y2="32" stroke="#78350f" stroke-width="2"/><text x="90" y="84" fill="#fbbf24" font-size="8.5" text-anchor="middle" font-weight="bold">BUILD CITY CARDS OR RAISE 3-TIER WONDER (+4 VP)</text></svg>`,
+                    diagramCaption: 'Raising all 3 tiers of your golden 3D Wonder gives +12 Victory Points, while Green Science cards multiply quadratically!',
                     boards: '2–4 Civilization Wonder Boards',
-                    size: '3-Tier Wonder Monuments + City Skylines (2 Ages × 6 Turns)',
-                    pieces: 'Civic (Blue), Military (Red), Science (Green) & Commerce (Yellow) Cards',
+                    size: '3-Tier Wonder Monuments (2 Ages × 6 Turns)',
+                    pieces: 'Civic, Military, Science & Commerce Cards',
                     players: '2–4 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Draft Structure:</strong> Click "Build" on a card in the HUD to construct a 3D city building and gain VP, Shields, Science, or Coins.',
-                        '<strong>Raise Wonder Stage:</strong> Click "Wonder" on any card to erect a golden 3D pyramid tier worth +4 VP.'
+                        '<strong>Choose 1 of 3 Cards:</strong> Read the bonuses shown on the 3 cards in the top-left HUD.',
+                        '<strong>Click Build or Wonder:</strong> Click "Build" for the card’s effect, or "Wonder" to construct a pyramid tier.'
                     ],
-                    controls: 'Click Build or Wonder on any of your 3 drafted cards in the top-left HUD.',
-                    proTip: 'Green Science points scale quadratically (n²)—collecting 3 or 4 Science icons yields huge end-game points!'
+                    controls: 'Click Build or Wonder buttons in the top-left HUD.',
+                    proTip: 'Red Military Shields beat your neighbors at the end of each Age for bonus Victory Points!'
                 },
                 hive: {
-                    tagline: 'Hexagonal Insect Swarming & Queen Bee Encirclement',
-                    goal: 'Surround all 6 sides of your opponent’s Queen Bee while keeping your own Queen Bee free.',
-                    boards: '1 Hexagonal Arena Board',
+                    tagline: 'Surround the Enemy Queen Bee on All 6 Hex Sides',
+                    goal: 'Completely surround all 6 sides of your opponent’s Queen Bee tile.',
+                    dummiesSummary: 'No board setup needed—players build a growing honeycomb of insect tiles! Pick an insect from the top-left tray and place it touching any existing tile so the swarm stays connected as one single Hive.',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><polygon points="90,32 104,40 104,56 90,64 76,56 76,40" fill="#f59e0b" stroke="#fff" stroke-width="2"/><circle cx="90" cy="18" r="6" fill="#22d3ee"/><circle cx="118" cy="34" r="6" fill="#22d3ee"/><circle cx="118" cy="62" r="6" fill="#22d3ee"/><circle cx="90" cy="78" r="6" fill="#22d3ee"/><circle cx="62" cy="62" r="6" fill="#22d3ee"/><circle cx="62" cy="34" r="6" fill="#22d3ee"/><text x="90" y="92" fill="#fbbf24" font-size="8" text-anchor="middle" font-weight="bold">FILL ALL 6 HEXES AROUND ENEMY QUEEN TO WIN</text></svg>`,
+                    diagramCaption: 'When all 6 hexagonal sides touching the gold Queen Bee are filled (by either player’s tiles), the Queen is trapped and the opponent wins!',
+                    boards: '1 61-Hexagonal Arena',
                     size: '61-Hex Grid (Radius 4)',
-                    pieces: '22 Insect Tiles (11 per Player: Queen, 2 Beetles, 3 Grasshoppers, 2 Spiders, 3 Ants)',
+                    pieces: '11 Insect Tiles per Player (Queen, Beetles, Grasshoppers, Spiders, Ants)',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>One Hive Rule:</strong> Select an insect in the HUD tray and click any open hex touching at least 1 existing tile.',
-                        '<strong>Surround the Queen:</strong> Fill all 6 hexes adjacent to the opposing Queen Bee to win!'
+                        '<strong>Pick Insect:</strong> Click an insect button in the top-left tray.',
+                        '<strong>Place Connected:</strong> Click any open hex touching at least 1 existing tile.'
                     ],
-                    controls: 'Pick an insect button in the HUD, then click a connected hex tile on the 3D board.',
-                    proTip: 'Place your Queen Bee on Turn 2 or 3 so you can immediately counter-attack around the enemy Queen.'
+                    controls: 'Select insect in HUD, then click a connected hex tile on the 3D board.',
+                    proTip: 'Place your Queen Bee within your first 3 moves so you can immediately surround the opponent’s Queen!'
                 },
                 carcassonne: {
-                    tagline: '2–4 Player Medieval Countryside Tile & Meeple Placement',
-                    goal: 'Score the highest territory points across all 36 countryside tiles using Walled Cities, Monasteries & Meeples.',
-                    boards: '1 Expandable Countryside Board',
+                    tagline: 'Build a Medieval Countryside & Station Wooden Meeples',
+                    goal: 'Score the most points by placing terrain tiles and claiming them with Meeples.',
+                    dummiesSummary: 'Each turn you draw a countryside tile (Walled City, Monastery, or Crossroads). Click any empty slot next to an existing tile to connect the map—and leave "Meeple" checked to earn +2 extra points!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="45" y="20" width="40" height="40" rx="4" fill="#15803d" stroke="#fff" stroke-width="1.5"/><rect x="95" y="20" width="40" height="40" rx="4" fill="#1e293b" stroke="#22d3ee" stroke-width="2" stroke-dasharray="4 3"/><circle cx="65" cy="40" r="7" fill="#22d3ee"/><text x="90" y="80" fill="#10b981" font-size="8.5" text-anchor="middle" font-weight="bold">PLACE NEXT TO EXISTING TILE + DEPLOY MEEPLE (+2 PTS)</text></svg>`,
+                    diagramCaption: 'New tiles must touch an existing tile side-to-side (up, down, left, or right).',
+                    boards: '1 Expandable 6×6 Countryside Grid',
                     size: '6 × 6 Landscape Grid (36 Tiles)',
-                    pieces: '36 Terrain Tiles + 7 Wooden Meeples per Player',
+                    pieces: '36 Terrain Tiles + 7 Meeples per Player',
                     players: '2–4 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Expand Landscape:</strong> Click any grid slot orthogonally adjacent to an existing tile to place your drawn terrain tile.',
-                        '<strong>Station a Meeple:</strong> Keep the "Meeple" checkbox ticked to deploy 1 of your 7 followers for +2 bonus points.'
+                        '<strong>Check Meeple Option:</strong> Keep "Meeple" checked in the HUD for +2 bonus points.',
+                        '<strong>Click Adjacent Slot:</strong> Click any empty grid square touching an existing tile.'
                     ],
-                    controls: 'Toggle Meeple checkbox or Rotate in the HUD, then click an adjacent grid slot.',
-                    proTip: 'Save your Meeples for high-value Monastery (+5 pts) and Walled City (+4 pts) tiles!'
+                    controls: 'Click Rotate or Meeple checkbox in HUD, then click an adjacent empty square.',
+                    proTip: 'Save your 7 Meeples for high-scoring Monasteries (+5 pts) and Walled Cities (+4 pts)!'
                 },
                 twixt: {
-                    tagline: 'Configurable 12×12 / 18×18 / 24×24 Knight-Bridge Network',
-                    goal: 'Connect your two opposite goal borders (Cyan: North↔South, Red: West↔East) with an unbroken bridge chain.',
-                    boards: '1 Pegboard Arena with 4 Colored Goal Borders',
-                    size: 'Small (12×12), Medium (18×18), or Real Official Size (24×24)',
-                    pieces: 'Cyan & Red Pegs + Auto-Linking Knight-Move 3D Bridges',
+                    tagline: 'Connect Your Two Borders with Knight-Move Bridges',
+                    goal: 'Build a connected chain of Cyan pegs (Top↔Bottom) or Red pegs (Left↔Right).',
+                    dummiesSummary: 'Player 1 (Cyan) tries to connect the Top border to the Bottom border. Player 2 (Red) tries to connect Left to Right. Whenever two of your pegs are spaced like an "L" (a chess knight’s move), a 3D bridge automatically snaps between them!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><line x1="25" y1="14" x2="155" y2="14" stroke="#22d3ee" stroke-width="3"/><line x1="25" y1="80" x2="155" y2="80" stroke="#22d3ee" stroke-width="3"/><circle cx="70" cy="24" r="6" fill="#22d3ee"/><circle cx="95" cy="52" r="6" fill="#22d3ee"/><circle cx="72" cy="72" r="6" fill="#22d3ee"/><line x1="70" y1="24" x2="95" y2="52" stroke="#22d3ee" stroke-width="3"/><line x1="95" y1="52" x2="72" y2="72" stroke="#22d3ee" stroke-width="3"/><text x="90" y="92" fill="#22d3ee" font-size="8" text-anchor="middle" font-weight="bold">2×1 KNIGHT MOVES AUTO-LINK ACROSS BORDERS!</text></svg>`,
+                    diagramCaption: 'Pegs placed 2 spaces over and 1 space across automatically build a bridge that blocks opponent bridges from crossing it.',
+                    boards: '1 Pegboard (Small 12×12, Medium 18×18, or Real 24×24)',
+                    size: '12×12, 18×18, or 24×24 Holes',
+                    pieces: 'Cyan & Red Pegs + Auto-Linking 3D Bridges',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Choose Board Size:</strong> Select Small (12×12), Medium (18×18), or Real Size (24×24) in the menu or HUD.',
-                        '<strong>Plant Pegs & Auto-Link:</strong> Click any open peg hole; friendly pegs spaced a chess knight’s move apart (2×1) link automatically!'
+                        '<strong>Select Board Size:</strong> Pick 12×12, 18×18, or 24×24 in the menu or HUD.',
+                        '<strong>Plant Pegs:</strong> Click any open peg hole to build your bridge network.'
                     ],
-                    controls: 'Click/tap any valid peg hole on the 3D pegboard.',
-                    proTip: 'Build parallel double-knight ladders so a single blocking peg from your opponent cannot sever your network.'
+                    controls: 'Click any open hole on the 3D pegboard.',
+                    proTip: 'Start near the middle and branch toward both of your goal borders simultaneously!'
                 },
                 startrek: {
-                    tagline: '3D Multi-Level Federation Tri-Dimensional Chess',
-                    goal: 'Capture the opponent’s King across 3 stepped 4×4 main boards and 4 suspended 2×2 attack boards.',
+                    tagline: 'Multi-Level 3D Space Chess Across 7 Floating Boards',
+                    goal: 'Capture the opponent’s King across the 7 multi-level transparent decks.',
+                    dummiesSummary: 'Classic chess elevated into 3D space! You have 3 main 4×4 levels plus 4 small 2×2 attack platforms hovering above them. Click any of your pieces, then click a square on the same deck or an overlapping upper/lower deck.',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><polygon points="45,24 115,18 130,30 60,36" fill="#38bdf8" opacity="0.7"/><polygon points="50,48 120,42 135,54 65,60" fill="#94a3b8" opacity="0.8"/><polygon points="55,72 125,66 140,78 70,84" fill="#38bdf8" opacity="0.7"/><text x="90" y="12" fill="#38bdf8" font-size="8.5" text-anchor="middle" font-weight="bold">7 MULTI-LEVEL 3D DECKS</text></svg>`,
+                    diagramCaption: 'Rotate the 3D camera by dragging so you can see all 3 main levels and 4 corner attack decks clearly.',
                     boards: '7 Multi-Level Translucent Boards',
-                    size: '3 Main Boards (4×4) + 4 Attack Boards (2×2) = 64 Squares',
-                    pieces: '24 Pieces (12 per Side: King, Queen, 2 Rooks, 2 Bishops, 2 Knights, 4 Pawns)',
+                    size: '3 Main Boards (4×4) + 4 Attack Boards (2×2)',
+                    pieces: '24 Pieces (12 White vs 12 Red)',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Select Starfleet Piece:</strong> Click any friendly piece to highlight it in glowing cyan.',
-                        '<strong>3D Vertical / Horizontal Move:</strong> Click any target square on the same deck or an overlapping upper/lower attack deck.'
+                        '<strong>Select Piece:</strong> Click any friendly piece to highlight it in cyan.',
+                        '<strong>Choose Target Square:</strong> Click any destination square on any level.'
                     ],
-                    controls: 'Rotate camera to view all 7 decks clearly; click piece then destination square.',
-                    proTip: 'Use the 4 suspended 2×2 Attack Boards to leapfrog enemy pawn walls and strike from above!'
+                    controls: 'Drag to orbit 3D view; click piece then destination square.',
+                    proTip: 'Move your Rook or Queen onto the upper 2×2 Attack Boards to bypass enemy pawns!'
                 },
                 mensch: {
-                    tagline: '2–4 Player Classic 3D Ludo Circuit & Sanctuary Race',
-                    goal: 'Race all 4 of your conical pawns around the 40-tile circuit into the central golden Home Sanctuary.',
-                    boards: '1 Circular 40-Tile Circuit + Central Sanctuary',
-                    size: '40 Outer Track Spaces + Up to 4 Starting Yards',
-                    pieces: '4 Conical Pawns per Player + 1 Six-Sided Die',
+                    tagline: 'Roll the Die, Race Around the Circle & Knock Rivals Back!',
+                    goal: 'Be the first player to move all 4 of your pawns into the golden center sanctuary.',
+                    dummiesSummary: 'Roll a 6 to bring a pawn out onto the circular track (and get a bonus roll!). Click your pawn to advance it around the 40 spaces. If you land on another player’s pawn, you knock them all the way back to their start!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><circle cx="90" cy="48" r="32" fill="none" stroke="#475569" stroke-width="4" stroke-dasharray="6 4"/><circle cx="90" cy="48" r="11" fill="#fbbf24"/><circle cx="90" cy="16" r="6" fill="#22d3ee"/><circle cx="122" cy="48" r="6" fill="#f43f5e"/><text x="90" y="91" fill="#fbbf24" font-size="8" text-anchor="middle" font-weight="bold">ROLL 6 TO ENTER → RACE INTO GOLDEN CENTER</text></svg>`,
+                    diagramCaption: 'Complete 1 full lap (40 spaces) around the ring to enter the golden center sanctuary.',
+                    boards: '1 Circular 40-Tile Track + Golden Center',
+                    size: '40 Track Spaces + 2–4 Starting Yards',
+                    pieces: '4 Conical Pawns per Player + 1 Die',
                     players: '2–4 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Roll the Die:</strong> Click "Roll Die" in the HUD. Rolling a 6 lets you deploy a pawn from your yard and grants a bonus roll.',
-                        '<strong>Advance & Capture:</strong> Click a valid pawn to advance; landing on an opponent sends them back to their yard!'
+                        '<strong>Click Roll Die:</strong> Press the orange "Roll Die" button in the top-left HUD.',
+                        '<strong>Click Your Pawn:</strong> Tap one of your glowing pawns to move it forward.'
                     ],
-                    controls: 'Click Roll Die in the HUD, then click one of your pawns on the 3D board.',
-                    proTip: 'Bring out a second pawn whenever you roll a 6 so you always have backup runners if your lead pawn is captured.'
+                    controls: 'Click Roll Die in HUD, then click your pawn on the 3D board.',
+                    proTip: 'Whenever you roll a 6, bring a new pawn out of your yard so you have more runners in play!'
                 },
                 skribbl: {
-                    tagline: '2–4 Player Real-Time Neon Sketchpad & Word Guessing',
-                    goal: 'Draw visual clues on the neon canvas and guess secret words fastest to score points.',
-                    boards: '1 Interactive Neon Sketchpad Canvas',
-                    size: '520 × 210 px Multi-Color Touch/Mouse Canvas',
-                    pieces: 'Full RGB Color Picker, Brush & Secret Word Bank',
+                    tagline: 'Draw the Secret Word & Guess Fast in English or German',
+                    goal: 'Guess the secret word being drawn on the neon canvas to score points.',
+                    dummiesSummary: 'One player sees a secret word (with a starting letter hint) and sketches it on the neon drawing pad using the mouse or finger. Everyone else types their guesses into the box below!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="25" y="15" width="130" height="65" rx="8" fill="#090d16" stroke="#22d3ee" stroke-width="1.5"/><path d="M45 60 Q75 25 105 55 T135 35" fill="none" stroke="#ec4899" stroke-width="3"/><text x="90" y="73" fill="#22d3ee" font-size="8.5" text-anchor="middle" font-weight="bold">SKETCH CLUES → TYPE GUESS BELOW</text></svg>`,
+                    diagramCaption: 'Switch between English (EN) and Deutsch (DE) plus Easy, Medium, and Hard words right in the HUD.',
+                    boards: '1 Neon Drawing Canvas',
+                    size: '520 × 210 px Touch/Mouse Pad',
+                    pieces: 'Color Picker, Brush & Bilingual Word Bank',
                     players: '2–4 Players (Human, Online, or Training Coach)',
                     steps: [
-                        '<strong>Draw the Clue:</strong> Sketch the secret word shown in the HUD using mouse or touch.',
-                        '<strong>Submit Guess:</strong> Type the secret word into the guess box and click Guess to score and advance turns.'
+                        '<strong>Draw Clues:</strong> Pick a color and draw the secret word on the canvas.',
+                        '<strong>Type & Guess:</strong> Type the word in the input box and press Guess.'
                     ],
-                    controls: 'Draw directly on the canvas; type answers in the input box and press Enter.',
-                    proTip: 'Click "Suggest" in the top HUD bar anytime for a first-and-last letter clue!'
+                    controls: 'Draw on the canvas with mouse/touch; type guesses in the box.',
+                    proTip: 'Stuck? Press "Suggest" in the top bar for a first-and-last letter clue!'
                 },
                 hangman: {
-                    tagline: '1–4 Player 3D Wooden Gallows Word Deduction',
-                    goal: 'Uncover all letters of the hidden word before all 6 parts of the 3D figure appear on the gallows.',
+                    tagline: 'Guess the Hidden Word Letter-by-Letter Before 6 Mistakes',
+                    goal: 'Reveal every letter of the secret word before all 6 parts appear on the 3D gallows.',
+                    dummiesSummary: 'Tap letters on the A–Z keyboard in the top-left HUD. Every letter that belongs in the word lights up in place; every wrong letter builds 1 part of the 3D figure on the gallows (6 mistakes = game over!).',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><path d="M35 80 H75 M50 80 V18 H95 V28" stroke="#fbbf24" stroke-width="3.5" fill="none"/><circle cx="95" cy="36" r="7" stroke="#f43f5e" stroke-width="2.5" fill="none"/><line x1="95" y1="43" x2="95" y2="62" stroke="#f43f5e" stroke-width="2.5"/><text x="135" y="50" fill="#fff" font-size="11" text-anchor="middle" font-weight="bold">S _ A R</text></svg>`,
+                    diagramCaption: 'Supports both English and German (including Ä, Ö, Ü, ß) across Easy, Medium, and Hard difficulty levels.',
                     boards: '1 3D Wooden Gallows Stage',
-                    size: '3.2 × 4.4 Unit 3D Scaffold Platform',
-                    pieces: '6-Part 3D Figure + 26-Letter Interactive Keyboard',
+                    size: '3.2 × 4.4 Unit 3D Scaffold',
+                    pieces: '6-Part 3D Figure + Bilingual Keyboard',
                     players: '1–4 Players (Human, AI, or Training Coach)',
                     steps: [
-                        '<strong>Pick a Letter:</strong> Click letters on the A–Z keyboard in the HUD.',
-                        '<strong>Solve Before 6 Mistakes:</strong> Every wrong letter adds a 3D limb to the gallows—deduce the word before mistake #6!'
+                        '<strong>Select Language & Difficulty:</strong> Choose EN/DE and Easy/Medium/Hard in the HUD.',
+                        '<strong>Click Letters:</strong> Tap letters on the keyboard to uncover the hidden word.'
                     ],
-                    controls: 'Click letters on the on-screen A–Z keyboard.',
-                    proTip: 'Start with high-frequency vowels and consonants (E, A, O, I, T, N, S, R) to reveal word structure fast.'
+                    controls: 'Click letter buttons in the top-left HUD.',
+                    proTip: 'Always guess vowels first (E, A, I, O, U) to unlock the skeleton of the word!'
                 },
                 yahtzee: {
-                    tagline: '2–4 Player 5-Dice Probability & Scorecard Strategy',
-                    goal: 'Achieve the highest cumulative total across all 8 scoring categories on your scorecard.',
-                    boards: '1 3D Dice Rolling Arena + Multi-Player Scorecards',
-                    size: '5-Die Tray & 8-Category Scorecard per Player',
-                    pieces: '5 Interactive 3D Dice (Up to 3 Rolls per Turn)',
+                    tagline: 'Roll 5 Dice Up to 3 Times & Fill Your Scorecard',
+                    goal: 'Score the highest total points across all 8 categories on your scorecard.',
+                    dummiesSummary: 'Click "Roll" to roll 5 dice. Click any dice you want to keep (they turn cyan), then click "Roll" again (up to 3 rolls total per turn). Finally, click a category on your scorecard (like Sixes, 3 of a Kind, or 50-pt Yahtzee!) to lock in your points.',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="22" y="25" width="24" height="24" rx="5" fill="#22d3ee"/><rect x="52" y="25" width="24" height="24" rx="5" fill="#22d3ee"/><rect x="82" y="25" width="24" height="24" rx="5" fill="#22d3ee"/><rect x="112" y="25" width="24" height="24" rx="5" fill="#f8fafc"/><rect x="142" y="25" width="24" height="24" rx="5" fill="#f8fafc"/><text x="90" y="72" fill="#10b981" font-size="8.5" text-anchor="middle" font-weight="bold">CLICK DICE TO HOLD (CYAN) → RE-ROLL → PICK SCORE ROW</text></svg>`,
+                    diagramCaption: '5 matching dice scores a 50-point YAHTZEE!',
+                    boards: '1 3D Dice Tray + Multi-Player Scorecards',
+                    size: '5 Dice + 8 Scoring Rows',
+                    pieces: '5 Interactive 3D Dice',
                     players: '2–4 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Roll & Lock:</strong> Click "Roll" (up to 3 times per turn) and click any die button to lock (HOLD) matching numbers.',
-                        '<strong>Bank Category:</strong> Click an open scorecard row (Ones–Sixes, 3 of a Kind, or 50-pt Yahtzee!) to lock in points.'
+                        '<strong>Step 1 (Roll):</strong> Click "Roll" in the top-left HUD.',
+                        '<strong>Step 2 (Hold & Re-Roll):</strong> Click matching dice to hold them, then roll again (up to 3 rolls).',
+                        '<strong>Step 3 (Score):</strong> Click a category row to bank your points.'
                     ],
-                    controls: 'Click Roll, click dice buttons to hold/release, then click a scorecard category.',
-                    proTip: 'If you roll three or four of a high number (5s or 6s), hold them and aim for a 50-point Yahtzee!'
+                    controls: 'Click Roll, click dice buttons to hold, then click a category row.',
+                    proTip: 'Look at the preview numbers shown inside each scorecard row before clicking so you pick the highest score!'
                 },
                 muhle: {
-                    tagline: "Nine Men's Morris — 3 Concentric Squares & Mill Captures",
-                    goal: 'Form 3-in-a-row "Mills" to capture opponent stones until they have fewer than 3 stones left.',
-                    boards: '1 Concentric Morris Board',
-                    size: '3 Concentric Squares / 24 Intersection Nodes',
+                    tagline: "Nine Men's Morris — Make 3-in-a-Row Mills to Capture Stones",
+                    goal: 'Capture opponent stones by forming 3-in-a-row lines until they have only 2 stones left.',
+                    dummiesSummary: 'First, players take turns placing 9 stones each onto the 24 dots of the 3 concentric squares. Whenever you get 3 of your stones in a straight line (a "Mill"), you get to remove 1 of your opponent’s stones! Once all 9 stones are placed, slide stones along the lines to make new Mills.',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="45" y="15" width="90" height="65" fill="none" stroke="#d97706" stroke-width="2"/><circle cx="45" cy="15" r="6" fill="#22d3ee"/><circle cx="90" cy="15" r="6" fill="#22d3ee"/><circle cx="135" cy="15" r="6" fill="#22d3ee"/><line x1="45" y1="15" x2="135" y2="15" stroke="#22d3ee" stroke-width="3"/><text x="90" y="91" fill="#fbbf24" font-size="8" text-anchor="middle" font-weight="bold">3 IN A ROW = MILL! CAPTURE 1 OPPONENT STONE</text></svg>`,
+                    diagramCaption: 'When you drop to 3 stones left, your stones can "fly" to ANY open dot on the entire board!',
+                    boards: '1 Concentric 3-Square Morris Board',
+                    size: '24 Intersection Dots',
                     pieces: '18 Stones (9 Cyan vs 9 Amber)',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Phase 1 (Place):</strong> Take turns placing your 9 stones onto any of the 24 board intersections.',
-                        '<strong>Phase 2 & 3 (Slide & Fly):</strong> Slide stones along lines to adjacent open points (or fly anywhere when down to 3 stones).',
-                        '<strong>Capture on Mill:</strong> Forming 3-in-a-row lets you click and remove an opponent’s free stone!'
+                        '<strong>Place 9 Stones:</strong> Click empty dots to place your 9 stones.',
+                        '<strong>Form a Mill:</strong> Get 3 in a row, then click an opponent stone to remove it.',
+                        '<strong>Slide Stones:</strong> Once all 9 are placed, click your stone then an adjacent open dot.'
                     ],
-                    controls: 'Click intersections to place stones; click your stone then an adjacent open node to slide.',
-                    proTip: 'Control the 4 middle cross-intersections—each one participates in 4 different possible Mills!'
+                    controls: 'Click dots on the 3D board to place, select, and slide stones.',
+                    proTip: 'Aim for the 4 middle cross-points—they connect both squares and let you form Mills in two directions!'
                 },
                 fourgewinnt: {
-                    tagline: 'Vertical 7×6 Gravity Rack 4-in-a-Line Showdown',
-                    goal: 'Connect 4 of your colored discs horizontally, vertically, or diagonally inside the standing 7×6 rack.',
+                    tagline: 'Classic Vertical Connect 4 Disc-Dropping Duel',
+                    goal: 'Be the first to line up 4 of your colored discs horizontally, vertically, or diagonally.',
+                    dummiesSummary: 'Just tap any of the 7 vertical columns! Gravity drops your disc straight down to the lowest empty slot in that column. First player to connect 4 discs in any straight line wins!',
+                    diagramSvg: `<svg viewBox="0 0 180 95" class="w-full h-full"><rect x="40" y="12" width="100" height="72" rx="6" fill="#1e3a8a" stroke="#38bdf8" stroke-width="1.5"/><circle cx="62" cy="70" r="7" fill="#22d3ee"/><circle cx="80" cy="54" r="7" fill="#22d3ee"/><circle cx="98" cy="38" r="7" fill="#22d3ee"/><circle cx="116" cy="22" r="7" fill="#22d3ee"/><line x1="62" y1="70" x2="116" y2="22" stroke="#fbbf24" stroke-width="2.5"/><text x="90" y="92" fill="#38bdf8" font-size="8" text-anchor="middle" font-weight="bold">CONNECT 4 ACROSS, DOWN, OR DIAGONALLY</text></svg>`,
+                    diagramCaption: 'Watch out for diagonal 4-in-a-row lines as well as horizontal and vertical stacks!',
                     boards: '1 Standing Vertical Gravity Rack',
                     size: '7 Columns × 6 Rows (42 Disc Slots)',
                     pieces: '42 Discs (21 Cyan vs 21 Red)',
                     players: '2 Players (Human, Online, AI, or Training Coach)',
                     steps: [
-                        '<strong>Drop a Disc:</strong> Click any column (1–7) or top funnel; gravity drops your disc to the lowest open row.',
-                        '<strong>Connect Four:</strong> Align 4 discs in any direction before your opponent does!'
+                        '<strong>Pick Column 1–7:</strong> Click any column on the standing rack to drop your disc.',
+                        '<strong>Connect Four:</strong> Block your opponent’s 3-in-a-row threats while building your own 4-in-a-line.'
                     ],
-                    controls: 'Click/tap any of the 7 vertical columns on the 3D rack.',
-                    proTip: 'Dominate Column 4 (the center column)—every horizontal and diagonal 4-in-a-line must pass through it!'
+                    controls: 'Click any column (1–7) or top funnel on the 3D rack.',
+                    proTip: 'Control the center column (Column 4) early—it is part of almost every winning combination!'
                 }
             };
 
@@ -8820,6 +8896,7 @@ function doPost(e) {
             document.getElementById('game-lobby-modal').classList.add('hidden');
             document.getElementById('game-setup-modal').classList.add('hidden');
             initGameArena();
+            recordRecentOpponents(playerNames.slice(0, numPlayers), activeGame);
             addChatSystemMessage(`Joined session "${found.name}" (${found.game.toUpperCase()}).`);
         }
 
@@ -9030,6 +9107,7 @@ function doPost(e) {
             document.getElementById('game-lobby-modal').classList.add('hidden');
             document.getElementById('game-setup-modal').classList.add('hidden');
             initGameArena();
+            recordRecentOpponents(playerNames.slice(0, numPlayers), activeGame);
             const rosterStr = Array.from({ length: numPlayers }, (_, i) =>
                 `${playerNames[i]} [${playerTypes[i] === 'ai' ? 'AI' : (playerTypes[i] === 'online' ? 'Online' : 'Human')}]`
             ).join(' vs ');

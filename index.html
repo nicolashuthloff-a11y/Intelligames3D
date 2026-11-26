@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intelligames 3D — 37-Game Strategy & Dice Arena</title>
+    <title>Intelligames 3D — 48-Game Strategy, Card, Dice & Pinball Arena</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -150,6 +150,18 @@
                             <i class="fa-solid fa-gamepad text-cyan-400 mr-2.5"></i> <span data-i18n="chooseGameTitle">Choose Your Game & Overall Hit List</span>
                         </h2>
                         <div class="flex flex-wrap items-center gap-2">
+                            <select id="lobby-graphics-theme" onchange="setGraphicsTheme(this.value)" title="Choose App Graphics Mode" class="px-2.5 py-1.5 bg-gray-900/90 border border-cyan-500/40 rounded-xl text-[11px] font-bold text-cyan-300 focus:outline-none">
+                                <option value="futuristic">🚀 Futuristic Neon</option>
+                                <option value="retro70">🕹️ Retro 70s Console</option>
+                                <option value="deco1920">🎷 1920s Art Deco</option>
+                                <option value="africa">🌍 African Savanna</option>
+                                <option value="royalwood">♟️ Royal Mahogany</option>
+                                <option value="nordic">❄️ Nordic Glacier</option>
+                                <option value="steampunk">⚙️ Steampunk Brass</option>
+                                <option value="zen">🌸 Japanese Zen</option>
+                                <option value="synthwave">🌆 80s Synthwave</option>
+                                <option value="ocean">🌊 Deep Ocean</option>
+                            </select>
                             <div class="flex items-center space-x-1 bg-gray-900/90 p-1 rounded-xl border border-gray-800 text-[10px]">
                                 <button type="button" onclick="setAppLanguage('en')" class="lang-btn-en px-2 py-0.5 rounded-lg font-extrabold bg-cyan-500 text-gray-950 transition">EN</button>
                                 <button type="button" onclick="setAppLanguage('de')" class="lang-btn-de px-2 py-0.5 rounded-lg font-semibold text-gray-400 hover:text-white transition">DE</button>
@@ -174,17 +186,17 @@
                     <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Click any game tile to enter its Game Menu (mode, difficulty, instructions & game scoreboard)</p>
                 </div>
 
-                <!-- Visual Game Tiles Gallery (All 37 Games — Click to Enter Game Menu) -->
+                <!-- Visual Game Tiles Gallery (All 48 Games — Click to Enter Game Menu) -->
                 <div class="space-y-2.5">
                     <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider" data-i18n="step1Select">Step 1: Select a Game Tile (All 37 Games)</label>
+                        <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider" data-i18n="step1Select">Step 1: Select a Game Tile (All 48 Games)</label>
                         <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Tap any game to configure & play</span>
                     </div>
                     <input type="hidden" id="select-game" value="quarto">
                     <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
                 </div>
 
-                <!-- OVERALL HIT LIST (TOTAL SCORE ACROSS ALL GAMES), SAVED GAMES & PLAYERS ONLINE -->
+                <!-- OVERALL HIT LIST (TOTAL SCORE ACROSS ALL GAMES), SAVED GAMES & PLAYERS / REQUESTS -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 bg-gray-950/65 p-3.5 rounded-2xl border border-gray-800 text-xs">
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
@@ -209,17 +221,18 @@
                     <div class="space-y-2 border-t lg:border-t-0 lg:border-l border-gray-800 pt-2.5 lg:pt-0 lg:pl-3">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-emerald-300 flex items-center">
-                                <i class="fa-solid fa-circle text-[8px] text-emerald-400 mr-1.5 animate-pulse"></i> <span data-i18n="playersOnline">Players Online</span>
+                                <i class="fa-solid fa-circle text-[8px] text-emerald-400 mr-1.5 animate-pulse"></i> <span data-i18n="playersOnline">Players & Game Requests</span>
                             </span>
                             <span id="lobby-online-count" class="text-[10px] text-gray-400">1 online</span>
                         </div>
+                        <div id="lobby-pending-invites-box" class="space-y-1"></div>
                         <div id="lobby-online-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- STEP 2: DEDICATED GAME MENU (PLAYMODE, DIFFICULTY, INSTRUCTIONS & GAME-SPECIFIC HIT LIST) -->
+        <!-- STEP 2: DEDICATED GAME MENU (PLAYMODE, DIFFICULTY, GRAPHICS SKIN, INSTRUCTIONS & GAME HIT LIST) -->
         <div id="game-setup-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/92 backdrop-blur-md hidden interactive p-3 sm:p-6 overflow-y-auto">
             <div class="glass-panel p-5 sm:p-7 rounded-2xl w-full max-w-4xl shadow-2xl border border-purple-500/40 space-y-5 my-auto max-h-[94vh] overflow-y-auto">
                 <div class="border-b border-gray-800 pb-4 flex flex-wrap items-center justify-between gap-2">
@@ -227,7 +240,7 @@
                         <div id="setup-game-icon-box" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg"></div>
                         <div>
                             <h2 id="setup-game-title" class="text-xl font-extrabold text-white tracking-wide">Quarto 3D — Game Menu</h2>
-                            <p id="setup-game-subtitle" class="text-xs text-cyan-300">Configure playmode, difficulty, instructions & view game scoreboard</p>
+                            <p id="setup-game-subtitle" class="text-xs text-cyan-300">Configure playmode, difficulty, graphics skin, instructions & scoreboard</p>
                         </div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
@@ -254,8 +267,8 @@
                     <div id="setup-game-hitlist" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
                 </div>
 
-                <!-- Playmode, Player Count, Difficulty & Display Profile -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Playmode, Player Count, Difficulty, Graphics Skin & Display Profile -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div>
                         <label class="block text-xs font-medium text-cyan-300 mb-1.5">Playmode & Player Count</label>
                         <div class="grid grid-cols-2 gap-2">
@@ -281,6 +294,32 @@
                             <option value="medium" selected>Medium (Tactical)</option>
                             <option value="hard">Hard (Grandmaster Engine)</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-amber-300 mb-1.5">Graphics Mode & Board Skin</label>
+                        <div class="space-y-1.5">
+                            <select id="setup-graphics-theme" onchange="setGraphicsTheme(this.value)" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400">
+                                <option value="futuristic">🚀 Futuristic Neon</option>
+                                <option value="retro70">🕹️ Retro 70s Console</option>
+                                <option value="deco1920">🎷 1920s Art Deco</option>
+                                <option value="africa">🌍 African Savanna</option>
+                                <option value="royalwood">♟️ Royal Mahogany</option>
+                                <option value="nordic">❄️ Nordic Glacier</option>
+                                <option value="steampunk">⚙️ Steampunk Brass</option>
+                                <option value="zen">🌸 Japanese Zen</option>
+                                <option value="synthwave">🌆 80s Synthwave</option>
+                                <option value="ocean">🌊 Deep Ocean</option>
+                            </select>
+                            <select id="setup-game-skin" onchange="setGameBoardSkin(this.value)" class="w-full px-3 py-1.5 bg-gray-900 border border-amber-500/30 rounded-xl text-[11px] text-amber-200 focus:outline-none">
+                                <option value="theme_default">Skin: Match App Graphics Mode</option>
+                                <option value="classic_wood">Skin: Handcrafted Parlor Wood</option>
+                                <option value="crystal_holo">Skin: Translucent Crystal Holo</option>
+                                <option value="obsidian_gold">Skin: 1920s Obsidian & Gold</option>
+                                <option value="savanna_earth">Skin: African Terracotta & Ebony</option>
+                                <option value="retro_arcade">Skin: 1970s Console Amber/CRT</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div>
@@ -406,6 +445,18 @@
             </div>
 
             <div class="flex items-center space-x-2 pointer-events-auto">
+                <select id="top-graphics-theme" onchange="setGraphicsTheme(this.value)" title="Switch 3D Graphics Mode" class="glass-panel px-2.5 py-2 rounded-2xl shadow-xl text-[11px] font-bold text-cyan-300 focus:outline-none hidden sm:block">
+                    <option value="futuristic">🚀 Futuristic</option>
+                    <option value="retro70">🕹️ Retro 70s</option>
+                    <option value="deco1920">🎷 1920s Deco</option>
+                    <option value="africa">🌍 Africa</option>
+                    <option value="royalwood">♟️ Mahogany</option>
+                    <option value="nordic">❄️ Nordic</option>
+                    <option value="steampunk">⚙️ Steampunk</option>
+                    <option value="zen">🌸 Zen</option>
+                    <option value="synthwave">🌆 Synthwave</option>
+                    <option value="ocean">🌊 Ocean</option>
+                </select>
                 <div class="glass-panel px-2 py-1.5 rounded-2xl shadow-xl flex items-center space-x-1 text-[10px]">
                     <button type="button" onclick="setAppLanguage('en')" class="lang-btn-en px-1.5 py-0.5 rounded font-extrabold bg-cyan-500 text-gray-950 transition">EN</button>
                     <button type="button" onclick="setAppLanguage('de')" class="lang-btn-de px-1.5 py-0.5 rounded font-semibold text-gray-400 hover:text-white transition">DE</button>
@@ -439,6 +490,9 @@
                     <div class="flex items-center space-x-2 mt-3">
                         <button id="invite-banner-accept-btn" class="flex-1 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-gray-950 font-bold rounded-lg text-xs transition">
                             Accept & Play
+                        </button>
+                        <button id="invite-banner-decline-btn" class="px-2.5 py-1.5 bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-500/40 font-semibold rounded-lg text-xs transition">
+                            Decline
                         </button>
                         <button onclick="dismissInviteBanner()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg text-xs transition">
                             Later
@@ -565,6 +619,54 @@
                 <div id="katamino-info" class="text-[10px] text-gray-300">Fill the 8×5 Penta board! Claim the last valid block placement to win!</div>
             </div>
 
+            <!-- 3D FLIPPER / PINBALL ARCADE HUD (10 SELECTABLE TABLES + TOUCH/KEYBOARD FLIPPERS) -->
+            <div id="hud-pinball" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-amber-400/50 w-full max-w-md space-y-2 text-[11px]">
+                <div class="flex flex-wrap items-center justify-between gap-1.5">
+                    <span class="font-extrabold text-amber-300"><i class="fa-solid fa-bullseye mr-1"></i> Flipper 3D — Ball <span id="pinball-balls-left">3</span>/3</span>
+                    <select id="pinball-table-select" onchange="selectPinballTable(this.value)" class="px-2 py-0.5 bg-gray-900 border border-amber-500/40 rounded text-[10px] font-bold text-cyan-300 focus:outline-none">
+                        <option value="cyber">1. Cyber Space Station</option>
+                        <option value="retro70">2. 1970s Retro Arcade</option>
+                        <option value="africa">3. African Savanna Safari</option>
+                        <option value="pirate">4. Pirate Cove Treasure</option>
+                        <option value="medieval">5. Dragon Castle Siege</option>
+                        <option value="ocean">6. Deep Ocean Atlantis</option>
+                        <option value="deco1920">7. 1920s Art Deco Casino</option>
+                        <option value="volcano">8. Volcanic Jurassic Isle</option>
+                        <option value="steampunk">9. Steampunk Foundry</option>
+                        <option value="arctic">10. Arctic Yeti Glacier</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-between bg-gray-950/80 px-3 py-1.5 rounded-xl border border-gray-800">
+                    <span id="pinball-table-desc" class="text-[10px] text-gray-300 truncate">Bumper Multiplier ×1 • Hit glowing targets!</span>
+                    <span id="pinball-live-score" class="text-sm font-extrabold text-cyan-300 shrink-0 ml-2">0 PTS</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onpointerdown="triggerPinballFlipper('left', true)" onpointerup="triggerPinballFlipper('left', false)" onpointerleave="triggerPinballFlipper('left', false)" class="py-2 bg-cyan-500/25 active:bg-cyan-400 active:text-gray-950 text-cyan-200 border border-cyan-500/40 font-extrabold rounded-xl text-xs transition">
+                        ◀ Left Flipper (A / ←)
+                    </button>
+                    <button type="button" onclick="launchPinballPlunger()" class="py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-gray-950 font-extrabold rounded-xl text-xs shadow transition">
+                        🚀 Launch (Space)
+                    </button>
+                    <button type="button" onpointerdown="triggerPinballFlipper('right', true)" onpointerup="triggerPinballFlipper('right', false)" onpointerleave="triggerPinballFlipper('right', false)" class="py-2 bg-purple-500/25 active:bg-purple-400 active:text-gray-950 text-purple-200 border border-purple-500/40 font-extrabold rounded-xl text-xs transition">
+                        Right Flipper (D / →) ▶
+                    </button>
+                </div>
+            </div>
+
+            <!-- UNIVERSAL 10-GAME CARD SUITE ARENA HUD -->
+            <div id="hud-card-suite" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-purple-500/40 w-full max-w-lg space-y-2 text-[11px]">
+                <div class="flex items-center justify-between gap-2">
+                    <span id="card-suite-title" class="font-extrabold text-purple-300"><i class="fa-solid fa-layer-group mr-1"></i> 3D Card Arena</span>
+                    <button type="button" onclick="toggleHudPanelCollapse('card-suite-body', this)" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[10px] font-semibold">Hide</button>
+                </div>
+                <div id="card-suite-body" class="space-y-2">
+                    <div id="card-suite-scoreboard" class="flex flex-wrap gap-1.5 text-[10px] font-bold text-amber-200"></div>
+                    <div id="card-suite-table-state" class="bg-gray-950/80 px-3 py-2 rounded-xl border border-cyan-500/30 text-xs text-cyan-200 font-semibold"></div>
+                    <div id="card-suite-hand" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-0.5"></div>
+                    <div id="card-suite-actions" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+
             <!-- UNIVERSAL 3D DICE & ROLL-AND-WRITE ARENA HUD (ALL 17 DICE GAMES) -->
             <div id="hud-dice-suite" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-cyan-500/40 w-full max-w-md space-y-2 text-[11px]">
                 <div class="flex items-center justify-between gap-2">
@@ -637,8 +739,8 @@
                 <div id="hangman-keyboard" class="flex flex-wrap justify-center gap-1"></div>
             </div>
 
-            <!-- Yahtzee 3D HUD (FULL 13-CATEGORY SCORECARD + ACHIEVEMENTS & PLAYER PROGRESS CHART) -->
-            <div id="hud-yahtzee" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-emerald-500/40 w-full max-w-md space-y-2">
+            <!-- Yahtzee 3D HUD (COMPLETE 13-CATEGORY SCORECARD + ACHIEVEMENTS & PLAYER PROGRESS CHART) -->
+            <div id="hud-yahtzee" class="hidden interactive glass-panel p-3.5 rounded-2xl shadow-xl border border-emerald-500/40 w-full max-w-lg space-y-2 max-h-[82vh] overflow-y-auto">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold text-emerald-300"><i class="fa-solid fa-dice mr-1"></i> Yahtzee 3D — Round <span id="yahtzee-round-num">1</span>/13 • Rolls: <span id="yahtzee-rolls-left">3</span></span>
                     <button type="button" onclick="toggleHudPanelCollapse('hud-yahtzee-body', this)" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[10px] font-semibold">Hide</button>
@@ -655,7 +757,8 @@
                         <span id="yahtzee-upper-bonus-status" class="font-bold text-amber-300">Upper: 0/63 (Need 63 for +35)</span>
                         <span id="yahtzee-achievements-bar" class="text-cyan-300 font-semibold">Badges: None yet</span>
                     </div>
-                    <div id="yahtzee-scorecard" class="grid grid-cols-2 gap-1 text-[10px] max-h-44 overflow-y-auto pr-0.5"></div>
+                    <!-- Full Official Multi-Player Yahtzee Scorecard Table -->
+                    <div id="yahtzee-scorecard" class="bg-gray-950/90 rounded-xl border border-emerald-500/30 p-2 text-[10px] space-y-1"></div>
                 </div>
             </div>
         </div>
@@ -805,7 +908,7 @@
         </div>
     </div>
 
-    <!-- PERSONAL PLAYER ACCOUNT MANAGEMENT MODAL (SCORES, FAVORITES, RECENT PLAYERS, EDIT & DELETE ACCOUNT) -->
+    <!-- PERSONAL PLAYER ACCOUNT MANAGEMENT MODAL (SCORES, FAVORITES, RECENT PLAYERS, EMAIL ALERTS, EDIT & DELETE ACCOUNT) -->
     <div id="account-profile-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden interactive p-4">
         <div class="glass-panel p-6 rounded-2xl w-full max-w-3xl shadow-2xl border border-purple-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-gray-800 pb-3">
@@ -813,7 +916,7 @@
                     <h3 class="text-base font-extrabold text-purple-300 flex items-center">
                         <i class="fa-solid fa-user-gear mr-2"></i> <span data-i18n="myAccountTitle">My Account, Scores & Social Roster</span>
                     </h3>
-                    <p id="acc-profile-subtitle" class="text-[11px] text-gray-400 mt-0.5">Manage your profile, review your victories, and connect with favorite or recent players</p>
+                    <p id="acc-profile-subtitle" class="text-[11px] text-gray-400 mt-0.5">Manage your profile, email notifications, victories, and favorite or recent players</p>
                 </div>
                 <button type="button" onclick="closeAccountProfileModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -839,8 +942,8 @@
             </div>
 
             <div class="bg-gray-950/80 p-4 rounded-2xl border border-gray-800 space-y-3 text-xs">
-                <div class="font-bold text-white"><i class="fa-solid fa-pen-to-square mr-1.5 text-cyan-400"></i> Edit Account Credentials</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div class="font-bold text-white"><i class="fa-solid fa-pen-to-square mr-1.5 text-cyan-400"></i> Edit Account Credentials & Email Notifications</div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div>
                         <label class="block text-[10px] font-semibold text-gray-400 mb-1">Username</label>
                         <input type="text" id="acc-edit-username" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
@@ -849,10 +952,20 @@
                         <label class="block text-[10px] font-semibold text-gray-400 mb-1">New Password / PIN</label>
                         <input type="text" id="acc-edit-password" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-cyan-500">
                     </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-emerald-300 mb-1"><i class="fa-solid fa-envelope mr-1"></i> Email for Game Invites</label>
+                        <input type="email" id="acc-edit-email" placeholder="player@example.com" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+                    </div>
                 </div>
-                <button type="button" onclick="saveSelfAccountUpdates()" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-extrabold rounded-xl transition">
-                    <i class="fa-solid fa-check mr-1"></i> Save Account Changes
-                </button>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <label class="flex items-center space-x-2 cursor-pointer text-gray-300 text-[11px]">
+                        <input type="checkbox" id="acc-email-notify-chk" checked class="rounded text-emerald-500">
+                        <span>Receive Email Notifications when invited to a match or when it's my turn</span>
+                    </label>
+                    <button type="button" onclick="saveSelfAccountUpdates()" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-extrabold rounded-xl transition">
+                        <i class="fa-solid fa-check mr-1"></i> Save Account & Email Settings
+                    </button>
+                </div>
             </div>
 
             <div class="bg-rose-950/30 p-3.5 rounded-2xl border border-rose-500/40 flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -948,7 +1061,7 @@
                 <button onclick="closeDriveSyncModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="space-y-3 text-xs text-gray-300">
-                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Player Flags, Hit Lists, Game Sessions, Invites, Saved Games, Match Scores, and Move History</strong> automatically sync across devices.</p>
+                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Player Flags, Hit Lists, Game Sessions, Invites, Email Alerts, Saved Games, Match Scores, and Move History</strong> automatically sync across devices.</p>
                 <div class="bg-gray-950/80 p-3.5 rounded-xl border border-emerald-500/30 space-y-2.5">
                     <div>
                         <label class="block font-semibold text-emerald-300 mb-1">Google Apps Script Web App URL</label>
@@ -990,12 +1103,24 @@
                     <div id="favored-players-list" class="max-h-48 overflow-y-auto space-y-1.5 pr-1"></div>
 
                     <div class="border-t border-gray-800 pt-3 space-y-2">
-                        <label class="block font-semibold text-cyan-300">Send Game Invite</label>
+                        <label class="block font-semibold text-cyan-300">Send Game Invite & Email Alert</label>
                         <select id="invite-target-player" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
                             <option value="">-- Select Player --</option>
                         </select>
+                        <input type="email" id="invite-target-email" placeholder="Optional: Opponent Email for instant alert" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-emerald-500">
                         <select id="invite-game-type" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
                             <option value="quarto">Quarto 3D</option>
+                            <option value="pinball">Flipper 3D (10 Tables)</option>
+                            <option value="uno">UNO 3D</option>
+                            <option value="maumau">Mau-Mau 3D</option>
+                            <option value="bohnanza">Bohnanza 3D</option>
+                            <option value="skat">Skat 3D</option>
+                            <option value="lostcities">Lost Cities 3D</option>
+                            <option value="sanjuan">San Juan 3D</option>
+                            <option value="citadels">Citadels (Ohne Furcht und Adel)</option>
+                            <option value="hearts">Hearts 3D</option>
+                            <option value="poker">Texas Hold'em Poker 3D</option>
+                            <option value="durak">Durak 3D</option>
                             <option value="yahtzee">Yahtzee 3D</option>
                             <option value="qwixx">Qwixx 3D</option>
                             <option value="clever">Ganz schön clever (That's Pretty Clever)</option>
@@ -1045,6 +1170,17 @@
                         <input type="text" id="new-session-name" placeholder="Session Name (e.g. Friday Cup)" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-cyan-500">
                         <select id="new-session-game" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white">
                             <option value="quarto">Quarto 3D</option>
+                            <option value="pinball">Flipper 3D (10 Tables)</option>
+                            <option value="uno">UNO 3D</option>
+                            <option value="maumau">Mau-Mau 3D</option>
+                            <option value="bohnanza">Bohnanza 3D</option>
+                            <option value="skat">Skat 3D</option>
+                            <option value="lostcities">Lost Cities 3D</option>
+                            <option value="sanjuan">San Juan 3D</option>
+                            <option value="citadels">Citadels (Ohne Furcht und Adel)</option>
+                            <option value="hearts">Hearts 3D</option>
+                            <option value="poker">Texas Hold'em Poker 3D</option>
+                            <option value="durak">Durak 3D</option>
                             <option value="yahtzee">Yahtzee 3D</option>
                             <option value="qwixx">Qwixx 3D</option>
                             <option value="clever">Ganz schön clever (That's Pretty Clever)</option>
@@ -1131,16 +1267,17 @@
                 </div>
                 <div class="space-y-2 border-t lg:border-t-0 lg:border-l border-gray-800 pt-2.5 lg:pt-0 lg:pl-3">
                     <div class="flex items-center justify-between">
-                        <span class="font-bold text-emerald-300"><i class="fa-solid fa-circle text-[8px] text-emerald-400 mr-1.5 animate-pulse"></i> Players Online</span>
+                        <span class="font-bold text-emerald-300"><i class="fa-solid fa-circle text-[8px] text-emerald-400 mr-1.5 animate-pulse"></i> Players & Game Requests</span>
                         <span id="menu-online-count" class="text-[10px] text-gray-400">1 online</span>
                     </div>
+                    <div id="menu-pending-invites-box" class="space-y-1"></div>
                     <div id="menu-online-players-list" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
                 </div>
             </div>
 
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                    <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Switch Game (All 37 Games)</label>
+                    <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Switch Game (All 48 Games)</label>
                     <span id="menu-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
                 </div>
                 <input type="hidden" id="menu-select-game" value="quarto">
@@ -1336,6 +1473,12 @@
         let toneSynth = null;
         let hoverCursorMesh = null;
         let realtimeChannel = null;
+        let activeGraphicsTheme = 'futuristic';
+        let activeGameSkin = 'theme_default';
+        let sceneAmbientLight = null;
+        let sceneDirLight = null;
+        let sceneRimLight = null;
+        let sceneGridHelper = null;
         const sharedGeoCache = {};
         const sharedMatCache = {};
 
@@ -1362,6 +1505,27 @@
         let muhleState = { phase: 'place', p1Unplaced: 9, p2Unplaced: 9, nodes: [], selectedNode: null, mustRemove: false };
         let connect4State = { cols: 7, rows: 6, grid: [] };
         let diceSuiteState = null;
+        let cardSuiteState = null;
+        let pinballState = {
+            tableId: 'cyber',
+            score: 0,
+            ballsLeft: 3,
+            multiplier: 1,
+            inPlay: false,
+            ballPos: { x: 2.35, z: 3.4 },
+            ballVel: { x: 0, z: 0 },
+            leftFlipperActive: false,
+            rightFlipperActive: false,
+            ballMesh: null,
+            leftFlipperMesh: null,
+            rightFlipperMesh: null,
+            bumpers: []
+        };
+
+        const CARD_SUITE_GAMES = [
+            'uno', 'maumau', 'bohnanza', 'skat', 'lostcities',
+            'sanjuan', 'citadels', 'hearts', 'poker', 'durak'
+        ];
 
         const DICE_SUITE_GAMES = [
             'qwixx', 'clever', 'farkle', 'kingoftokyo', 'dicethrone', 'eldersign',
@@ -1371,7 +1535,8 @@
 
         const MULTIPLAYER_CAPABLE_GAMES = [
             'azul', 'sevenwonders', 'carcassonne', 'mensch', 'yahtzee', 'skribbl', 'hangman', 'quoridor', 'quixo',
-            ...DICE_SUITE_GAMES
+            ...DICE_SUITE_GAMES,
+            ...CARD_SUITE_GAMES
         ];
         const TEAM_HEX_COLORS = [0x22d3ee, 0xf43f5e, 0xfbbf24, 0x10b981];
 
@@ -1386,6 +1551,86 @@
             'Ones', 'Twos', 'Threes', 'Fours', 'Fives', 'Sixes',
             '3 of a Kind', '4 of a Kind', 'Full House', 'Small Straight', 'Large Straight', 'Yahtzee', 'Chance'
         ];
+
+        const GRAPHICS_THEMES = {
+            futuristic: { name: 'Futuristic Cyber-Neon', bgHex: 0x030712, fogHex: 0x030712, gridMain: 0x1e293b, gridSub: 0x0f172a, ambientHex: 0xffffff, rimHex: 0x22d3ee, boardDark: 0x1e293b, boardLight: 0x38bdf8, piece1: 0xfef3c7, piece2: 0x78350f, panelBg: 'rgba(15, 23, 42, 0.88)', borderCol: 'rgba(56, 189, 248, 0.30)' },
+            retro70: { name: 'Retro 1970s Gaming Console', bgHex: 0x1c1208, fogHex: 0x1c1208, gridMain: 0x9a3412, gridSub: 0x431407, ambientHex: 0xffedd5, rimHex: 0xf97316, boardDark: 0x451a03, boardLight: 0xd97706, piece1: 0xfef08a, piece2: 0xea580c, panelBg: 'rgba(41, 22, 8, 0.90)', borderCol: 'rgba(249, 115, 22, 0.45)' },
+            deco1920: { name: '1920s Art Deco Gatsby', bgHex: 0x0c0a09, fogHex: 0x0c0a09, gridMain: 0xca8a04, gridSub: 0x292524, ambientHex: 0xfef9c3, rimHex: 0xfbbf24, boardDark: 0x1c1917, boardLight: 0xeab308, piece1: 0xfafaf9, piece2: 0xb45309, panelBg: 'rgba(24, 20, 18, 0.90)', borderCol: 'rgba(251, 191, 36, 0.45)' },
+            africa: { name: 'African Savanna & Ndebele', bgHex: 0x271307, fogHex: 0x271307, gridMain: 0xd97706, gridSub: 0x451a03, ambientHex: 0xfde68a, rimHex: 0xf59e0b, boardDark: 0x3b1706, boardLight: 0xc2410c, piece1: 0xfef3c7, piece2: 0x15803d, panelBg: 'rgba(46, 21, 9, 0.90)', borderCol: 'rgba(245, 158, 11, 0.45)' },
+            royalwood: { name: 'Classic Royal Mahogany', bgHex: 0x140d0a, fogHex: 0x140d0a, gridMain: 0x78350f, gridSub: 0x291811, ambientHex: 0xfffbeb, rimHex: 0xd97706, boardDark: 0x451a03, boardLight: 0xfde68a, piece1: 0xfffbeb, piece2: 0x451a03, panelBg: 'rgba(30, 18, 12, 0.90)', borderCol: 'rgba(217, 119, 6, 0.35)' },
+            nordic: { name: 'Nordic Minimalist Glacier', bgHex: 0x0f172a, fogHex: 0x0f172a, gridMain: 0x7dd3fc, gridSub: 0x1e293b, ambientHex: 0xf0f9ff, rimHex: 0xbae6fd, boardDark: 0x334155, boardLight: 0xe0f2fe, piece1: 0xf8fafc, piece2: 0x0284c7, panelBg: 'rgba(15, 23, 42, 0.85)', borderCol: 'rgba(186, 230, 253, 0.35)' },
+            steampunk: { name: 'Steampunk Brass & Copper', bgHex: 0x18130e, fogHex: 0x18130e, gridMain: 0xb45309, gridSub: 0x292018, ambientHex: 0xfef3c7, rimHex: 0x14b8a6, boardDark: 0x292018, boardLight: 0xb45309, piece1: 0xfcd34d, piece2: 0x0f766e, panelBg: 'rgba(32, 24, 18, 0.90)', borderCol: 'rgba(217, 119, 6, 0.40)' },
+            zen: { name: 'Japanese Zen & Sakura', bgHex: 0x161318, fogHex: 0x161318, gridMain: 0xf472b6, gridSub: 0x27202b, ambientHex: 0xfce7f3, rimHex: 0xf9a8d4, boardDark: 0x27202b, boardLight: 0xfbcfe8, piece1: 0xfdf2f8, piece2: 0x4d7c0f, panelBg: 'rgba(28, 22, 31, 0.88)', borderCol: 'rgba(244, 114, 182, 0.35)' },
+            synthwave: { name: '1980s Synthwave Vaporgrid', bgHex: 0x130722, fogHex: 0x130722, gridMain: 0xe879f9, gridSub: 0x2e1065, ambientHex: 0xf5d0fe, rimHex: 0xf43f5e, boardDark: 0x2e1065, boardLight: 0xd946ef, piece1: 0x22d3ee, piece2: 0xf43f5e, panelBg: 'rgba(25, 10, 46, 0.88)', borderCol: 'rgba(232, 121, 249, 0.45)' },
+            ocean: { name: 'Deep Ocean Bioluminescence', bgHex: 0x02131d, fogHex: 0x02131d, gridMain: 0x0d9488, gridSub: 0x042f2e, ambientHex: 0xccfbf1, rimHex: 0x2dd4bf, boardDark: 0x042f2e, boardLight: 0x14b8a6, piece1: 0x99f6e4, piece2: 0xf97316, panelBg: 'rgba(4, 28, 38, 0.88)', borderCol: 'rgba(45, 212, 191, 0.38)' }
+        };
+
+        const GAME_SKIN_PALETTES = {
+            classic_wood: { boardDark: 0x451a03, boardLight: 0xfde68a, piece1: 0xfffbeb, piece2: 0x78350f },
+            crystal_holo: { boardDark: 0x0f172a, boardLight: 0x38bdf8, piece1: 0xe0f2fe, piece2: 0x818cf8 },
+            obsidian_gold: { boardDark: 0x09090b, boardLight: 0xeab308, piece1: 0xfef08a, piece2: 0x27272a },
+            savanna_earth: { boardDark: 0x3b1706, boardLight: 0xd97706, piece1: 0xfef3c7, piece2: 0x166534 },
+            retro_arcade: { boardDark: 0x291506, boardLight: 0xf97316, piece1: 0xfacc15, piece2: 0xdc2626 }
+        };
+
+        function getActiveVisualPalette() {
+            const base = GRAPHICS_THEMES[activeGraphicsTheme] || GRAPHICS_THEMES.futuristic;
+            if (activeGameSkin && activeGameSkin !== 'theme_default' && GAME_SKIN_PALETTES[activeGameSkin]) {
+                return { ...base, ...GAME_SKIN_PALETTES[activeGameSkin] };
+            }
+            return base;
+        }
+
+        function initGraphicsThemePreference() {
+            const savedTheme = localStorage.getItem('intelligames_graphics_theme');
+            if (savedTheme && GRAPHICS_THEMES[savedTheme]) activeGraphicsTheme = savedTheme;
+            const savedSkin = localStorage.getItem('intelligames_game_skin');
+            if (savedSkin) activeGameSkin = savedSkin;
+            setGraphicsTheme(activeGraphicsTheme, false);
+        }
+
+        function setGraphicsTheme(themeKey, rebuildArena = true) {
+            if (!GRAPHICS_THEMES[themeKey]) return;
+            activeGraphicsTheme = themeKey;
+            localStorage.setItem('intelligames_graphics_theme', themeKey);
+
+            ['lobby-graphics-theme', 'setup-graphics-theme', 'top-graphics-theme'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = themeKey;
+            });
+
+            const t = GRAPHICS_THEMES[themeKey];
+            document.body.style.backgroundColor = '#' + t.bgHex.toString(16).padStart(6, '0');
+            document.querySelectorAll('.glass-panel').forEach(panel => {
+                panel.style.background = t.panelBg;
+                panel.style.borderColor = t.borderCol;
+            });
+
+            if (scene && typeof THREE !== 'undefined') {
+                scene.background = new THREE.Color(t.bgHex);
+                if (scene.fog) scene.fog.color.setHex(t.fogHex);
+                if (sceneAmbientLight) sceneAmbientLight.color.setHex(t.ambientHex);
+                if (sceneRimLight) sceneRimLight.color.setHex(t.rimHex);
+                if (sceneGridHelper) {
+                    scene.remove(sceneGridHelper);
+                    sceneGridHelper = new THREE.GridHelper(24, 24, t.gridMain, t.gridSub);
+                    sceneGridHelper.position.y = -0.28;
+                    scene.add(sceneGridHelper);
+                }
+            }
+
+            if (rebuildArena && document.getElementById('game-lobby-modal')?.classList.contains('hidden') && document.getElementById('auth-screen')?.style.display === 'none') {
+                initGameArena();
+            }
+            showToast(`Graphics Mode: ${t.name}`);
+        }
+
+        function setGameBoardSkin(skinKey) {
+            activeGameSkin = skinKey || 'theme_default';
+            localStorage.setItem('intelligames_game_skin', activeGameSkin);
+            const sel = document.getElementById('setup-game-skin');
+            if (sel) sel.value = activeGameSkin;
+        }
 
         // --- EXPANDED MULTILINGUAL WORD DATABASE (EN & DE • EASY / MEDIUM / HARD) ---
         const WORD_DATABASE = {
@@ -1454,14 +1699,45 @@
             const banner = document.getElementById('invite-notification-banner');
             const textEl = document.getElementById('invite-banner-text');
             const acceptBtn = document.getElementById('invite-banner-accept-btn');
+            const declineBtn = document.getElementById('invite-banner-decline-btn');
             if (!banner || !textEl || !acceptBtn || !sessionObj) return;
-            textEl.innerHTML = `<span class="font-bold text-white">${sessionObj.host}</span> invited you to play <span class="font-bold text-cyan-300">${sessionObj.game.toUpperCase()}</span>!`;
+
+            const gameName = titlesMapForStatus(sessionObj.game);
+            textEl.innerHTML = `<span class="font-bold text-white">${sessionObj.host}</span> invited you to play <span class="font-bold text-cyan-300">${gameName}</span>!`;
+
             acceptBtn.onclick = () => {
                 dismissedInviteIds.push(sessionObj.id);
                 dismissInviteBanner();
                 joinGameSession(sessionObj.id);
             };
+            if (declineBtn) {
+                declineBtn.onclick = () => {
+                    declineGameInvite(sessionObj.id);
+                };
+            }
+
             banner.classList.remove('hidden');
+            playGameSound('invite');
+            addChatSystemMessage(`🔔 Invite received: ${sessionObj.host} invited you to ${gameName}!`);
+
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
+                try {
+                    new Notification('Intelligames 3D — Game Invite!', {
+                        body: `${sessionObj.host} invited you to play ${gameName}!`
+                    });
+                } catch (e) {}
+            }
+        }
+
+        function declineGameInvite(sessionId) {
+            dismissedInviteIds.push(sessionId);
+            const updated = getSessionsRegistry().filter(s => s.id !== sessionId);
+            saveSessionsRegistry(updated);
+            broadcastLiveUpdate('invite_update');
+            dismissInviteBanner();
+            checkIncomingInvites();
+            renderSessionsHub();
+            showToast("Game invite declined.");
         }
 
         function exportLocalBackupCSV() {
@@ -1498,6 +1774,7 @@
                 }
             });
             safeRun(ensureMasterAccountExists);
+            safeRun(initGraphicsThemePreference);
             safeRun(initLanguagePreference);
             safeRun(initSoundPreference);
             safeRun(initRealtimeBroadcastSync);
@@ -1564,10 +1841,10 @@
                 appChat: "App Chat",
                 sheetSync: "Sheet Sync",
                 masterMode: "Master Mode",
-                step1Select: "Step 1: Select a Game Tile (All 37 Games)",
+                step1Select: "Step 1: Select a Game Tile (All 48 Games)",
                 overallHitlist: "Overall Hit List (All Games)",
                 savedGames: "Open & Saved Games",
-                playersOnline: "Players Online",
+                playersOnline: "Players & Game Requests",
                 chat: "Chat",
                 instructionsRules: "Instructions & Rules",
                 allGames: "All Games",
@@ -1599,10 +1876,10 @@
                 appChat: "App-Chat",
                 sheetSync: "Tabellen-Sync",
                 masterMode: "Master-Modus",
-                step1Select: "Schritt 1: Spielkachel auswählen (Alle 37 Spiele)",
+                step1Select: "Schritt 1: Spielkachel auswählen (Alle 48 Spiele)",
                 overallHitlist: "Gesamt-Bestenliste (Alle Spiele)",
                 savedGames: "Offene & Gespeicherte Spiele",
-                playersOnline: "Spieler Online",
+                playersOnline: "Spieler & Spielanfragen",
                 chat: "Chat",
                 instructionsRules: "Anleitung & Regeln",
                 allGames: "Alle Spiele",
@@ -1666,6 +1943,10 @@
             document.getElementById('acc-profile-subtitle').innerHTML = `Signed in as <strong class="text-white">${me.username}</strong> • Status: <span class="px-1.5 py-0.5 rounded border ${fMeta.cls}">${fMeta.label}</span>`;
             document.getElementById('acc-edit-username').value = me.username;
             document.getElementById('acc-edit-password').value = me.password;
+            const emailInp = document.getElementById('acc-edit-email');
+            const notifyChk = document.getElementById('acc-email-notify-chk');
+            if (emailInp) emailInp.value = me.email || '';
+            if (notifyChk) notifyChk.checked = me.emailNotify !== false;
             document.getElementById('acc-delete-confirm-input').value = '';
 
             const allWins = getHitListRegistry().filter(r => (r.player || '').toLowerCase() === currentUser.toLowerCase());
@@ -1736,6 +2017,8 @@
             if (!currentUser) return;
             const newName = (document.getElementById('acc-edit-username').value || '').trim();
             const newPass = (document.getElementById('acc-edit-password').value || '').trim();
+            const newEmail = (document.getElementById('acc-edit-email')?.value || '').trim();
+            const emailNotify = document.getElementById('acc-email-notify-chk')?.checked !== false;
             if (!newName || !newPass) {
                 showToast("Username and Password/PIN cannot be empty.");
                 return;
@@ -1749,6 +2032,8 @@
             }
             users[idx].username = newName;
             users[idx].password = newPass;
+            users[idx].email = newEmail;
+            users[idx].emailNotify = emailNotify;
             saveUsersRegistry(users);
 
             currentUser = newName;
@@ -1756,8 +2041,47 @@
             const badge = document.getElementById('user-display-badge');
             if (badge) badge.innerText = `• ${currentUser}`;
             renderSavedGamesAndOnlineUI();
-            showToast("Account profile updated!");
+            showToast(newEmail ? `Account & Email alerts saved (${newEmail})!` : "Account profile updated!");
             closeAccountProfileModal();
+        }
+
+        function triggerEmailNotificationDispatch(recipientName, recipientEmailOverride, gameId, sessionName) {
+            const users = getUsersRegistry();
+            const targetUser = users.find(u => u.username.toLowerCase() === (recipientName || '').toLowerCase());
+            const toEmail = (recipientEmailOverride || (targetUser && targetUser.email) || '').trim();
+            const wantsEmail = !targetUser || targetUser.emailNotify !== false;
+            const gameTitle = titlesMapForStatus(gameId);
+
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && toEmail && wantsEmail) {
+                try {
+                    fetch(cfg.url, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify({
+                            app: 'Intelligames 3D',
+                            action: 'SEND_EMAIL_INVITE',
+                            toEmail,
+                            recipient: recipientName,
+                            sender: currentUser,
+                            game: gameTitle,
+                            sessionName,
+                            updatedAt: new Date().toISOString()
+                        })
+                    });
+                } catch (e) {}
+            }
+
+            if (toEmail && wantsEmail) {
+                addChatSystemMessage(`📧 Email notification dispatched to ${recipientName} (${toEmail}) for ${gameTitle}.`);
+                if (!cfg.url) {
+                    const subject = encodeURIComponent(`Intelligames 3D Invite: ${currentUser} challenged you to ${gameTitle}!`);
+                    const body = encodeURIComponent(`Hi ${recipientName},\n\n${currentUser} has invited you to play a match of ${gameTitle} ("${sessionName}") in Intelligames 3D!\n\nLog in to Intelligames 3D to accept the challenge.`);
+                    const mailLink = document.createElement('a');
+                    mailLink.href = `mailto:${toEmail}?subject=${subject}&body=${body}`;
+                    mailLink.click();
+                }
+            }
         }
 
         function deleteSelfAccount() {
@@ -1817,6 +2141,11 @@
                 else if (type === 'place') toneSynth.triggerAttackRelease('C4', '16n', now);
                 else if (type === 'capture') toneSynth.triggerAttackRelease(['G4', 'C4'], '16n', now);
                 else if (type === 'undo') toneSynth.triggerAttackRelease(['E4', 'B3'], '16n', now);
+                else if (type === 'invite') {
+                    toneSynth.triggerAttackRelease('G5', '16n', now);
+                    toneSynth.triggerAttackRelease('B5', '16n', now + 0.12);
+                    toneSynth.triggerAttackRelease('D6', '8n', now + 0.24);
+                }
                 else if (type === 'win') {
                     toneSynth.triggerAttackRelease('C5', '16n', now);
                     toneSynth.triggerAttackRelease('E5', '16n', now + 0.11);
@@ -1897,7 +2226,7 @@
             if (mmEditingUsername) {
                 const idx = users.findIndex(u => u.username.toLowerCase() === mmEditingUsername.toLowerCase());
                 if (idx !== -1) {
-                    users[idx] = { username, password, role, flag };
+                    users[idx] = { ...users[idx], username, password, role, flag };
                     saveUsersRegistry(users);
                     addChatSystemMessage(`Master updated player "${username}" [Role: ${role.toUpperCase()}, Flag: ${flag.toUpperCase()}].`);
                 }
@@ -2210,6 +2539,11 @@
                 diceSuiteState.rollsLeft = snap.diceSuiteState.rollsLeft;
                 diceSuiteState.pts = [...snap.diceSuiteState.pts];
                 renderDiceSuiteHUD();
+            } else if (CARD_SUITE_GAMES.includes(activeGame) && snap.cardSuiteState) {
+                cardSuiteState.pts = [...snap.cardSuiteState.pts];
+                cardSuiteState.hands = JSON.parse(JSON.stringify(snap.cardSuiteState.hands));
+                cardSuiteState.topCard = snap.cardSuiteState.topCard;
+                renderCardSuiteHUD();
             }
 
             document.getElementById('turn-status').innerText = `Turn restored — ${getPlayerLabel(currentPlayer)}'s Turn`;
@@ -2255,6 +2589,10 @@
             } else if (activeGame === 'skribbl') {
                 const w = skribblState.currentWord || 'STAR';
                 suggestion = `Clue (${skribblState.lang.toUpperCase()}): ${w.length} letters, starts with "${w[0]}" and ends with "${w[w.length - 1]}" (Answer: ${w}).`;
+            } else if (activeGame === 'pinball') {
+                suggestion = "Press Launch (Space) to shoot the silver sphere, then time Left/Right Flippers (A/D or ←/→) to hit the glowing central bumpers!";
+            } else if (CARD_SUITE_GAMES.includes(activeGame)) {
+                suggestion = getCardSuiteSuggestion();
             } else if (DICE_SUITE_GAMES.includes(activeGame)) {
                 suggestion = getDiceSuiteSuggestion();
             }
@@ -2325,6 +2663,11 @@
                     held: [...diceSuiteState.held],
                     rollsLeft: diceSuiteState.rollsLeft,
                     pts: [...diceSuiteState.pts]
+                } : null,
+                cardSuiteState: CARD_SUITE_GAMES.includes(activeGame) && cardSuiteState ? {
+                    pts: [...cardSuiteState.pts],
+                    hands: JSON.parse(JSON.stringify(cardSuiteState.hands)),
+                    topCard: cardSuiteState.topCard
                 } : null
             };
         }
@@ -2377,11 +2720,15 @@
 
         function inviteOnlinePlayer(targetUsername) {
             const game = document.getElementById('select-game')?.value || activeGame || 'quarto';
+            const sessName = `${currentUser} vs ${targetUsername}`;
             const sessions = getSessionsRegistry();
-            sessions.push({ id: 'sess_' + Date.now(), name: `${currentUser} vs ${targetUsername}`, game, host: currentUser, invited: targetUsername, accepted: false });
+            sessions.push({ id: 'sess_' + Date.now(), name: sessName, game, host: currentUser, invited: targetUsername, accepted: false });
             saveSessionsRegistry(sessions);
-            addChatSystemMessage(`${currentUser} sent a live match invite to ${targetUsername} (${game.toUpperCase()})!`);
-            showToast(`Invite sent to ${targetUsername}!`);
+            broadcastLiveUpdate('invite_update');
+            triggerEmailNotificationDispatch(targetUsername, '', game, sessName);
+            renderPendingInvitesInline();
+            addChatSystemMessage(`${currentUser} sent a game request to ${targetUsername} (${titlesMapForStatus(game)})!`);
+            showToast(`Invite queued for ${targetUsername}!`);
         }
 
         function renderSavedGamesAndOnlineUI() {
@@ -2439,6 +2786,7 @@
                     });
                 }
             });
+            renderPendingInvitesInline();
         }
 
         function updateMultiplayerInputs(prefix) {
@@ -2652,7 +3000,7 @@
             const cfg = getDriveSyncConfig();
             if (!cfg.url) return;
             try {
-                await fetch(cfg.url, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ app: 'Intelligames 3D', updatedAt: new Date().toISOString(), users: getUsersRegistry(), hitList: getHitListRegistry() }) });
+                await fetch(cfg.url, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ app: 'Intelligames 3D', updatedAt: new Date().toISOString(), users: getUsersRegistry(), sessions: getSessionsRegistry(), hitList: getHitListRegistry() }) });
                 cfg.lastSync = new Date().toLocaleTimeString();
                 localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
                 updateDriveSyncBadge('connected', cfg.lastSync);
@@ -2667,8 +3015,21 @@
                 const res = await fetch(cfg.url);
                 const data = await res.json();
                 if (Array.isArray(data.users)) localStorage.setItem('intelligames_users_db', JSON.stringify(data.users));
+                if (Array.isArray(data.sessions)) {
+                    const localSessions = getSessionsRegistry();
+                    const merged = [...localSessions];
+                    data.sessions.forEach(remoteS => {
+                        if (!remoteS || !remoteS.id) return;
+                        const idx = merged.findIndex(ls => ls.id === remoteS.id);
+                        if (idx === -1) merged.push(remoteS);
+                        else merged[idx] = remoteS;
+                    });
+                    localStorage.setItem('intelligames_sessions_db', JSON.stringify(merged));
+                    checkIncomingInvites();
+                    renderPendingInvitesInline();
+                }
                 if (Array.isArray(data.hitList)) localStorage.setItem('intelligames_hitlist_db', JSON.stringify(data.hitList));
-                if (!silent) showToast("Pulled latest data from Google Drive Sheet!");
+                if (!silent) showToast("Pulled latest users, game requests & scores from Google Drive Sheet!");
             } catch (e) {}
         }
 
@@ -2770,7 +3131,7 @@
                 iconBox.innerHTML = gameObj.svg;
             }
             if (titleEl) titleEl.innerText = `${gameObj.name} — Game Menu`;
-            if (subEl) subEl.innerText = `${gameObj.tag} • Choose playmode, difficulty, training mode, instructions & view game scoreboard`;
+            if (subEl) subEl.innerText = `${gameObj.tag} • Choose playmode, difficulty, graphics skin, instructions & scoreboard`;
 
             const p1Inp = document.getElementById('lobby-p1-name');
             const p2Inp = document.getElementById('lobby-p2-name');
@@ -2885,7 +3246,18 @@
 
         const GAME_CATALOG = [
             { id: 'quarto', name: 'Quarto 3D', tag: '2P • Gigamic Logic', gradient: 'from-cyan-500 to-blue-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="10" y="22" width="16" height="30" rx="3" fill="#fef3c7" stroke="#0f172a" stroke-width="2"/><circle cx="18" cy="30" r="3.5" fill="#0f172a"/><rect x="34" y="12" width="18" height="40" rx="9" fill="#b45309" stroke="#fef3c7" stroke-width="2"/><circle cx="43" cy="22" r="4" fill="#0f172a"/></svg>` },
+            { id: 'pinball', name: 'Flipper 3D (10 Tables)', tag: '1–2P • 10 Arcade Pinballs', gradient: 'from-amber-400 to-rose-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="14" y="8" width="36" height="48" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5"/><circle cx="26" cy="24" r="5" fill="#22d3ee"/><circle cx="38" cy="24" r="5" fill="#f43f5e"/><circle cx="32" cy="34" r="4" fill="#e2e8f0"/><path d="M18 48 L29 52 M46 48 L35 52" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/></svg>` },
             { id: 'yahtzee', name: 'Yahtzee 3D', tag: '2–4P • 13-Row Pip Dice', gradient: 'from-emerald-500 to-teal-700', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="12" y="12" width="40" height="40" rx="8" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/><circle cx="22" cy="22" r="3.5" fill="#0f172a"/><circle cx="42" cy="22" r="3.5" fill="#0f172a"/><circle cx="32" cy="32" r="4" fill="#e11d48"/><circle cx="22" cy="42" r="3.5" fill="#0f172a"/><circle cx="42" cy="42" r="3.5" fill="#0f172a"/></svg>` },
+            { id: 'uno', name: 'UNO 3D', tag: '2–4P • Color & Action Cards', gradient: 'from-red-500 to-amber-500', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="14" y="10" width="36" height="44" rx="6" fill="#e11d48" stroke="#fff" stroke-width="2.5"/><ellipse cx="32" cy="32" rx="14" ry="9" transform="rotate(-25 32 32)" fill="#facc15"/><text x="32" y="36" fill="#0f172a" font-size="11" font-weight="extrabold" text-anchor="middle">UNO</text></svg>` },
+            { id: 'maumau', name: 'Mau-Mau 3D', tag: '2–4P • Classic 32-Card Shed', gradient: 'from-emerald-500 to-teal-700', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="12" y="12" width="24" height="36" rx="4" fill="#fff" stroke="#0f172a" stroke-width="2"/><rect x="28" y="16" width="24" height="36" rx="4" fill="#fef3c7" stroke="#0f172a" stroke-width="2"/><text x="40" y="39" fill="#e11d48" font-size="16" font-weight="bold" text-anchor="middle">♥7</text></svg>` },
+            { id: 'bohnanza', name: 'Bohnanza 3D', tag: '2–4P • Bean Planting & Gold', gradient: 'from-lime-500 to-amber-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><ellipse cx="26" cy="32" rx="9" ry="15" transform="rotate(-15 26 32)" fill="#65a30d" stroke="#fef08a" stroke-width="2"/><ellipse cx="39" cy="34" rx="9" ry="15" transform="rotate(15 39 34)" fill="#d97706" stroke="#fef08a" stroke-width="2"/></svg>` },
+            { id: 'skat', name: 'Skat 3D', tag: '3P • German Trick-Taking', gradient: 'from-amber-600 to-slate-800', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="14" y="10" width="36" height="44" rx="6" fill="#f8fafc" stroke="#d97706" stroke-width="2.5"/><text x="32" y="38" fill="#0f172a" font-size="22" font-weight="bold" text-anchor="middle">♣J</text></svg>` },
+            { id: 'lostcities', name: 'Lost Cities 3D', tag: '2P • 5-Expedition Adventure', gradient: 'from-cyan-500 to-amber-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><polygon points="32,10 54,50 10,50" fill="#0284c7" stroke="#fbbf24" stroke-width="2.5"/><circle cx="32" cy="34" r="6" fill="#fbbf24"/></svg>` },
+            { id: 'sanjuan', name: 'San Juan 3D', tag: '2–4P • Puerto Rico Card City', gradient: 'from-sky-500 to-orange-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="12" y="24" width="40" height="28" rx="4" fill="#ea580c" stroke="#fef3c7" stroke-width="2"/><polygon points="10,24 32,10 54,24" fill="#38bdf8"/></svg>` },
+            { id: 'citadels', name: 'Citadels 3D', tag: '2–4P • Ohne Furcht und Adel', gradient: 'from-purple-600 to-amber-500', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><path d="M16 48 L20 22 L32 30 L44 22 L48 48 Z" fill="#fbbf24" stroke="#581c87" stroke-width="2.5"/></svg>` },
+            { id: 'hearts', name: 'Hearts 3D', tag: '4P • Avoid Hearts & Queen ♠', gradient: 'from-rose-600 to-slate-900', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><path d="M32 50 C14 38 12 20 24 16 C30 14 32 20 32 20 C32 20 34 14 40 16 C52 20 50 38 32 50 Z" fill="#e11d48" stroke="#fff" stroke-width="2"/></svg>` },
+            { id: 'poker', name: "Texas Hold'em Poker 3D", tag: '2–4P • 5-Card Hand Showdown', gradient: 'from-emerald-700 to-slate-950', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><circle cx="32" cy="32" r="21" fill="#065f46" stroke="#fbbf24" stroke-width="3" stroke-dasharray="6 4"/><text x="32" y="38" fill="#fff" font-size="18" font-weight="bold" text-anchor="middle">♠A</text></svg>` },
+            { id: 'durak', name: 'Durak 3D', tag: '2–4P • Trump Attack & Defend', gradient: 'from-red-700 to-amber-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="14" y="10" width="36" height="44" rx="6" fill="#991b1b" stroke="#fbbf24" stroke-width="2.5"/><text x="32" y="38" fill="#fbbf24" font-size="20" font-weight="bold" text-anchor="middle">♦K</text></svg>` },
             { id: 'qwixx', name: 'Qwixx 3D', tag: '2–4P • 4-Color Row Cross', gradient: 'from-rose-500 to-indigo-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="10" y="12" width="44" height="9" rx="3" fill="#f43f5e"/><rect x="10" y="24" width="44" height="9" rx="3" fill="#facc15"/><rect x="10" y="36" width="44" height="9" rx="3" fill="#22c55e"/><rect x="10" y="48" width="44" height="9" rx="3" fill="#3b82f6"/></svg>` },
             { id: 'clever', name: 'Ganz schön clever', tag: "2–4P • That's Pretty Clever", gradient: 'from-amber-400 to-purple-600', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><polygon points="32,8 54,24 46,52 18,52 10,24" fill="#fbbf24" stroke="#fff" stroke-width="2"/><text x="32" y="38" fill="#0f172a" font-size="16" font-weight="bold" text-anchor="middle">★</text></svg>` },
             { id: 'farkle', name: 'Farkle 3D', tag: '2–4P • 6-Dice Push Your Luck', gradient: 'from-emerald-500 to-cyan-700', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><rect x="10" y="14" width="20" height="20" rx="4" fill="#fff"/><circle cx="20" cy="24" r="3" fill="#e11d48"/><rect x="34" y="30" width="20" height="20" rx="4" fill="#22d3ee"/><circle cx="40" cy="36" r="2.5" fill="#0f172a"/><circle cx="48" cy="44" r="2.5" fill="#0f172a"/></svg>` },
@@ -3112,6 +3484,17 @@
                 applyDisplayProfile();
                 if (controls) controls.target.set(0, 1.5, 0);
                 initFourGewinntGame();
+            } else if (activeGame === 'pinball') {
+                applyDisplayProfile();
+                if (camera) camera.position.set(0, 11.5, 9.5);
+                if (controls) controls.target.set(0, 0, 0.5);
+                document.getElementById('hud-pinball').classList.remove('hidden');
+                initPinballGame();
+            } else if (CARD_SUITE_GAMES.includes(activeGame)) {
+                applyDisplayProfile();
+                if (controls) controls.target.set(0, 0.4, 0);
+                document.getElementById('hud-card-suite').classList.remove('hidden');
+                initCardSuiteGame(activeGame);
             } else if (DICE_SUITE_GAMES.includes(activeGame)) {
                 applyDisplayProfile();
                 if (controls) controls.target.set(0, 0.5, 0);
@@ -3130,7 +3513,7 @@
         }
 
         function hideAllMiniGameHUDs() {
-            ['hud-training-coach', 'hud-dice-suite', 'hud-mensch', 'hud-skribbl', 'hud-hangman', 'hud-yahtzee', 'hud-azul', 'hud-sevenwonders', 'hud-hive', 'hud-carcassonne', 'hud-twixt', 'hud-quoridor', 'hud-pylos', 'hud-quixo', 'hud-qawale', 'hud-squadro', 'hud-katamino'].forEach(id => {
+            ['hud-training-coach', 'hud-pinball', 'hud-card-suite', 'hud-dice-suite', 'hud-mensch', 'hud-skribbl', 'hud-hangman', 'hud-yahtzee', 'hud-azul', 'hud-sevenwonders', 'hud-hive', 'hud-carcassonne', 'hud-twixt', 'hud-quoridor', 'hud-pylos', 'hud-quixo', 'hud-qawale', 'hud-squadro', 'hud-katamino'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
@@ -3143,7 +3526,379 @@
             if (btnEl) btnEl.innerText = isHidden ? 'Show' : 'Hide';
         }
 
-        // --- YAHTZEE 3D (SCULPTED 3D PIP DICE, TUMBLE ANIMATION, OFFICIAL 13-ROW SCORECARD & CHART) ---
+        // --- 3D FLIPPER / PINBALL ARCADE (10 DISTINCT SELECTABLE TABLES + LIVE BALL PHYSICS) ---
+        const PINBALL_TABLES = {
+            cyber: { name: 'Cyber Space Station', bedHex: 0x090d16, railHex: 0x22d3ee, bumperHex: 0x38bdf8, mult: 1, targetPts: 1500, desc: 'Orbital Neon Table • Bumper Multiplier ×1' },
+            retro70: { name: '1970s Retro Arcade', bedHex: 0x2b1608, railHex: 0xf97316, bumperHex: 0xfacc15, mult: 1.2, targetPts: 1800, desc: 'Classic Wood-Rail Pinball • Multiplier ×1.2' },
+            africa: { name: 'African Savanna Safari', bedHex: 0x3b1a08, railHex: 0xf59e0b, bumperHex: 0x16a34a, mult: 1.3, targetPts: 2000, desc: 'Baobab & Ndebele Bumpers • Multiplier ×1.3' },
+            pirate: { name: 'Pirate Cove Treasure', bedHex: 0x0c2438, railHex: 0xfbbf24, bumperHex: 0xe11d48, mult: 1.4, targetPts: 2200, desc: 'Cannonball & Dubloon Bumpers • Multiplier ×1.4' },
+            medieval: { name: 'Dragon Castle Siege', bedHex: 0x1e1b24, railHex: 0xd97706, bumperHex: 0xdc2626, mult: 1.5, targetPts: 2400, desc: 'Fireball Turret Bumpers • Multiplier ×1.5' },
+            ocean: { name: 'Deep Ocean Atlantis', bedHex: 0x032030, railHex: 0x2dd4bf, bumperHex: 0x0284c7, mult: 1.5, targetPts: 2500, desc: 'Bioluminescent Reef Bumpers • Multiplier ×1.5' },
+            deco1920: { name: '1920s Art Deco Casino', bedHex: 0x141210, railHex: 0xfbbf24, bumperHex: 0xfef08a, mult: 1.6, targetPts: 2600, desc: 'Champagne Gold Roulette Bumpers • Multiplier ×1.6' },
+            volcano: { name: 'Volcanic Jurassic Isle', bedHex: 0x290d0d, railHex: 0xef4444, bumperHex: 0xf97316, mult: 1.7, targetPts: 2800, desc: 'Magma Core Bumpers • Multiplier ×1.7' },
+            steampunk: { name: 'Steampunk Foundry', bedHex: 0x1f1812, railHex: 0xb45309, bumperHex: 0x14b8a6, mult: 1.8, targetPts: 3000, desc: 'Brass Gear & Piston Bumpers • Multiplier ×1.8' },
+            arctic: { name: 'Arctic Yeti Glacier', bedHex: 0x0f2942, railHex: 0xbae6fd, bumperHex: 0x38bdf8, mult: 2.0, targetPts: 3200, desc: 'Crystal Ice Apex Table • Multiplier ×2.0' }
+        };
+
+        function selectPinballTable(tableId) {
+            pinballState.tableId = PINBALL_TABLES[tableId] ? tableId : 'cyber';
+            if (activeGame === 'pinball') initGameArena();
+        }
+
+        function initPinballGame() {
+            const tId = document.getElementById('pinball-table-select')?.value || pinballState.tableId || 'cyber';
+            const tCfg = PINBALL_TABLES[tId] || PINBALL_TABLES.cyber;
+            pinballState = {
+                tableId: tId,
+                score: 0,
+                ballsLeft: 3,
+                multiplier: tCfg.mult,
+                inPlay: false,
+                ballPos: { x: 2.35, z: 3.4 },
+                ballVel: { x: 0, z: 0 },
+                leftFlipperActive: false,
+                rightFlipperActive: false,
+                ballMesh: null,
+                leftFlipperMesh: null,
+                rightFlipperMesh: null,
+                bumpers: []
+            };
+
+            const selEl = document.getElementById('pinball-table-select');
+            if (selEl) selEl.value = tId;
+            document.getElementById('pinball-balls-left').innerText = '3';
+            document.getElementById('pinball-table-desc').innerText = `${tCfg.desc} (Goal: ${tCfg.targetPts} pts)`;
+            document.getElementById('pinball-live-score').innerText = '0 PTS';
+
+            if (!scene || typeof THREE === 'undefined') return;
+
+            const bed = new THREE.Mesh(
+                new THREE.BoxGeometry(5.6, 0.25, 9.2),
+                new THREE.MeshStandardMaterial({ color: tCfg.bedHex, roughness: 0.3, metalness: 0.4 })
+            );
+            bed.position.y = -0.15;
+            scene.add(bed);
+            boardSquareMeshes.push(bed);
+
+            const railMat = new THREE.MeshStandardMaterial({ color: tCfg.railHex, roughness: 0.25, metalness: 0.6 });
+            const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.45, 9.2), railMat);
+            leftRail.position.set(-2.7, 0.2, 0);
+            const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.45, 9.2), railMat);
+            rightRail.position.set(2.7, 0.2, 0);
+            const topRail = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.45, 0.24), railMat);
+            topRail.position.set(0, 0.2, -4.5);
+            const laneDivider = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.4, 6.2), railMat);
+            laneDivider.position.set(2.05, 0.18, 1.3);
+            scene.add(leftRail, rightRail, topRail, laneDivider);
+            boardSquareMeshes.push(leftRail, rightRail, topRail, laneDivider);
+
+            const bumperCoords = [
+                { x: 0, z: -2.6, pts: 150 },
+                { x: -1.15, z: -1.7, pts: 120 },
+                { x: 1.05, z: -1.7, pts: 120 },
+                { x: -0.55, z: -0.6, pts: 100 },
+                { x: 0.55, z: -0.6, pts: 100 }
+            ];
+            bumperCoords.forEach(bc => {
+                const bmp = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.42, 0.46, 0.42, 20),
+                    new THREE.MeshStandardMaterial({ color: tCfg.bumperHex, emissive: tCfg.bumperHex, emissiveIntensity: 0.35 })
+                );
+                bmp.position.set(bc.x, 0.22, bc.z);
+                scene.add(bmp);
+                pieceMeshes.push(bmp);
+                pinballState.bumpers.push({ x: bc.x, z: bc.z, r: 0.46, pts: bc.pts, mesh: bmp });
+            });
+
+            const flipMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.2, metalness: 0.5 });
+            const lFlip = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.32, 0.26), flipMat);
+            lFlip.position.set(-1.15, 0.18, 3.55);
+            lFlip.rotation.y = -0.32;
+            const rFlip = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.32, 0.26), flipMat);
+            rFlip.position.set(0.75, 0.18, 3.55);
+            rFlip.rotation.y = 0.32;
+            scene.add(lFlip, rFlip);
+            pieceMeshes.push(lFlip, rFlip);
+            pinballState.leftFlipperMesh = lFlip;
+            pinballState.rightFlipperMesh = rFlip;
+
+            const ball = new THREE.Mesh(
+                new THREE.SphereGeometry(0.24, 20, 20),
+                new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.9, roughness: 0.1 })
+            );
+            ball.position.set(2.35, 0.25, 3.4);
+            scene.add(ball);
+            pieceMeshes.push(ball);
+            pinballState.ballMesh = ball;
+
+            document.getElementById('turn-status').innerText = `Flipper 3D [${tCfg.name}] — Press Launch (Space) & use Flippers (A/D or ←/→)!`;
+        }
+
+        function triggerPinballFlipper(side, isDown) {
+            if (activeGame !== 'pinball') return;
+            if (side === 'left') {
+                pinballState.leftFlipperActive = isDown;
+                if (pinballState.leftFlipperMesh) pinballState.leftFlipperMesh.rotation.y = isDown ? 0.42 : -0.32;
+            } else {
+                pinballState.rightFlipperActive = isDown;
+                if (pinballState.rightFlipperMesh) pinballState.rightFlipperMesh.rotation.y = isDown ? -0.42 : 0.32;
+            }
+            if (isDown) playGameSound('select');
+        }
+
+        function launchPinballPlunger() {
+            if (activeGame !== 'pinball' || gameOver || pinballState.inPlay) return;
+            pinballState.inPlay = true;
+            pinballState.ballPos = { x: 2.35, z: 3.4 };
+            pinballState.ballVel = { x: -0.025, z: -0.24 };
+            playGameSound('place');
+        }
+
+        function stepPinballPhysics() {
+            if (activeGame !== 'pinball' || !pinballState.inPlay || gameOver) return;
+            const tCfg = PINBALL_TABLES[pinballState.tableId] || PINBALL_TABLES.cyber;
+            const p = pinballState.ballPos;
+            const v = pinballState.ballVel;
+
+            v.z += 0.0042;
+            p.x += v.x;
+            p.z += v.z;
+
+            if (p.z < -4.15) { p.z = -4.15; v.z = Math.abs(v.z) * 0.85; v.x -= 0.04; }
+            if (p.x < -2.35) { p.x = -2.35; v.x = Math.abs(v.x) * 0.88; }
+            if (p.x > 2.35) { p.x = 2.35; v.x = -Math.abs(v.x) * 0.88; }
+
+            if (p.z > -1.6 && p.x > 1.82 && p.x < 2.08 && v.x < 0) {
+                p.x = 1.80;
+                v.x = -Math.abs(v.x) * 0.8;
+            }
+
+            pinballState.bumpers.forEach(b => {
+                const dx = p.x - b.x;
+                const dz = p.z - b.z;
+                const dist = Math.hypot(dx, dz);
+                if (dist < b.r + 0.24 && dist > 0.001) {
+                    const nx = dx / dist;
+                    const nz = dz / dist;
+                    p.x = b.x + nx * (b.r + 0.26);
+                    p.z = b.z + nz * (b.r + 0.26);
+                    v.x = nx * 0.17;
+                    v.z = nz * 0.17;
+                    const ptsEarned = Math.round(b.pts * pinballState.multiplier);
+                    pinballState.score += ptsEarned;
+                    document.getElementById('pinball-live-score').innerText = `${pinballState.score} PTS`;
+                    playGameSound('select');
+                    if (pinballState.score >= tCfg.targetPts && !gameOver) {
+                        gameOver = true;
+                        pinballState.inPlay = false;
+                        scores.p1++;
+                        updateScoreDisplay();
+                        showPostGameModal(`${getPlayerLabel(1)} Beat ${tCfg.name}!`, `High Score: ${pinballState.score} PTS!`);
+                    }
+                }
+            });
+
+            if (p.z > 3.1 && p.z < 3.85) {
+                if (p.x >= -1.85 && p.x <= -0.35 && (pinballState.leftFlipperActive || v.z > 0)) {
+                    v.z = pinballState.leftFlipperActive ? -0.23 : -Math.abs(v.z) * 0.65;
+                    v.x += pinballState.leftFlipperActive ? 0.08 : 0.02;
+                    playGameSound('place');
+                } else if (p.x >= -0.05 && p.x <= 1.55 && (pinballState.rightFlipperActive || v.z > 0)) {
+                    v.z = pinballState.rightFlipperActive ? -0.23 : -Math.abs(v.z) * 0.65;
+                    v.x -= pinballState.rightFlipperActive ? 0.08 : 0.02;
+                    playGameSound('place');
+                }
+            }
+
+            if (p.z > 4.45) {
+                pinballState.inPlay = false;
+                pinballState.ballsLeft--;
+                document.getElementById('pinball-balls-left').innerText = Math.max(0, pinballState.ballsLeft);
+                playGameSound('capture');
+                if (pinballState.ballsLeft <= 0) {
+                    gameOver = true;
+                    showPostGameModal(`Flipper Game Over!`, `Final Arcade Score on ${tCfg.name}: ${pinballState.score} PTS`);
+                } else {
+                    pinballState.ballPos = { x: 2.35, z: 3.4 };
+                    pinballState.ballVel = { x: 0, z: 0 };
+                    showToast(`Ball drained! ${pinballState.ballsLeft} ball(s) left — Press Launch!`);
+                }
+            }
+
+            if (pinballState.ballMesh) {
+                pinballState.ballMesh.position.set(pinballState.ballPos.x, 0.25, pinballState.ballPos.z);
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (activeGame !== 'pinball') return;
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') triggerPinballFlipper('left', true);
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') triggerPinballFlipper('right', true);
+            if (e.code === 'Space') { e.preventDefault(); launchPinballPlunger(); }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (activeGame !== 'pinball') return;
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') triggerPinballFlipper('left', false);
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') triggerPinballFlipper('right', false);
+        });
+
+        // --- UNIVERSAL 10-GAME CARD SUITE ---
+        const CARD_SUITE_CONFIGS = {
+            uno: { targetPts: 30, desc: 'Match Color or Number, or play Wild / +2 / Skip cards to empty your hand!', suits: ['Red', 'Yellow', 'Green', 'Blue'], vals: ['1', '2', '3', '4', '5', '7', '9', '+2', 'Skip', 'Wild'] },
+            maumau: { targetPts: 30, desc: 'Match Suit or Rank! 7 = Draw 2, 8 = Skip, Jack = Choose any Suit!', suits: ['♥ Hearts', '♦ Diamonds', '♣ Clubs', '♠ Spades'], vals: ['7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'] },
+            bohnanza: { targetPts: 15, desc: 'Plant matching Bean varieties in your fields and harvest them for Gold Coins!', suits: ['Blue Bean', 'Chili Bean', 'Stink Bean', 'Green Bean', 'Soy Bean'], vals: ['×1', '×2', '×3', 'Harvest'] },
+            skat: { targetPts: 60, desc: 'Classic German 32-Card Trick-Taking! Jacks (Buben) are highest trumps!', suits: ['♣ Kreuz', '♠ Pik', '♥ Herz', '♦ Karo'], vals: ['7', '8', '9', '10', 'Dame', 'König', 'Ass', 'Bube (Trump)'] },
+            lostcities: { targetPts: 45, desc: 'Play expedition cards in ascending order (2→10) across 5 archaeological routes!', suits: ['Desert', 'Volcano', 'Jungle', 'Ocean', 'Himalaya'], vals: ['Wager ×2', '2', '4', '6', '8', '10'] },
+            sanjuan: { targetPts: 25, desc: 'Choose Governor roles (Builder, Producer, Trader, Prospector) to construct Puerto Rico buildings!', suits: ['Indigo', 'Sugar', 'Tobacco', 'Coffee', 'Silver'], vals: ['Chapel', 'Market', 'Guild Hall', 'Palace', 'Aqueduct'] },
+            citadels: { targetPts: 25, desc: 'Draft secret Character roles (Assassin, Architect, King, Merchant) and build 8 City Districts!', suits: ['Noble', 'Religious', 'Trade', 'Military', 'Unique'], vals: ['Manor (3)', 'Cathedral (5)', 'Harbor (4)', 'Fortress (3)', 'University (6)'] },
+            hearts: { targetPts: 25, desc: 'Follow suit and avoid taking Hearts (1 pt) or the dreaded Queen of Spades (13 pts)!', suits: ['♣ Clubs', '♦ Diamonds', '♠ Spades', '♥ Hearts'], vals: ['2', '5', '8', '10', 'Jack', 'Queen ♠', 'King', 'Ace'] },
+            poker: { targetPts: 500, desc: "Texas Hold'em Showdown! Build Pairs, Straights, Flushes, or Full Houses to win the pot!", suits: ['♠ Spades', '♥ Hearts', '♦ Diamonds', '♣ Clubs'], vals: ['9', '10', 'Jack', 'Queen', 'King', 'Ace'] },
+            durak: { targetPts: 20, desc: 'Attack with low cards and defend with higher cards or the Trump suit so you are not left as the Durak!', suits: ['♠ Trump', '♥ Hearts', '♦ Diamonds', '♣ Clubs'], vals: ['6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'] }
+        };
+
+        function generateCardForSuite(gameId) {
+            const cfg = CARD_SUITE_CONFIGS[gameId] || CARD_SUITE_CONFIGS.uno;
+            const suit = cfg.suits[Math.floor(Math.random() * cfg.suits.length)];
+            const val = cfg.vals[Math.floor(Math.random() * cfg.vals.length)];
+            return { suit, val, label: `${suit} • ${val}`, power: Math.floor(Math.random() * 6) + 3 };
+        }
+
+        function initCardSuiteGame(gameId) {
+            cardSuiteState = {
+                gameId,
+                pts: [0, 0, 0, 0],
+                hands: Array.from({ length: 4 }, () => Array.from({ length: 5 }, () => generateCardForSuite(gameId))),
+                topCard: generateCardForSuite(gameId)
+            };
+
+            const titleEl = document.getElementById('card-suite-title');
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-layer-group mr-1"></i> ${titlesMapForStatus(gameId)} (${numPlayers}P)`;
+
+            if (scene && typeof THREE !== 'undefined') {
+                const tableFelt = new THREE.Mesh(
+                    new THREE.CylinderGeometry(5.2, 5.4, 0.25, 36),
+                    new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.6 })
+                );
+                tableFelt.position.y = -0.15;
+                scene.add(tableFelt);
+                boardSquareMeshes.push(tableFelt);
+
+                for (let c = 0; c < 5; c++) {
+                    const cardMesh = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.95, 0.04, 1.38),
+                        new THREE.MeshStandardMaterial({ color: c === 2 ? 0xfbbf24 : 0xf8fafc, roughness: 0.25 })
+                    );
+                    cardMesh.position.set((c - 2) * 1.15, 0.08 + c * 0.01, 1.8);
+                    cardMesh.rotation.y = (c - 2) * -0.12;
+                    scene.add(cardMesh);
+                    pieceMeshes.push(cardMesh);
+                }
+            }
+
+            renderCardSuiteHUD();
+            document.getElementById('turn-status').innerText = `${titlesMapForStatus(gameId)} — ${getPlayerLabel(1)}'s Turn!`;
+        }
+
+        function playSuiteCard(cardIdx) {
+            if (!cardSuiteState || gameOver) return;
+            const cfg = CARD_SUITE_CONFIGS[cardSuiteState.gameId] || CARD_SUITE_CONFIGS.uno;
+            const pIdx = currentPlayer - 1;
+            const hand = cardSuiteState.hands[pIdx];
+            const card = hand[cardIdx];
+            if (!card) return;
+
+            pushUndoSnapshot();
+            cardSuiteState.topCard = card;
+            hand.splice(cardIdx, 1);
+            hand.push(generateCardForSuite(cardSuiteState.gameId));
+
+            const gained = card.power;
+            cardSuiteState.pts[pIdx] += gained;
+            playGameSound('place');
+            recordMove(`${getPlayerLabel(currentPlayer)} played [${card.label}] (+${gained} pts)`);
+
+            if (cardSuiteState.pts[pIdx] >= cfg.targetPts) {
+                gameOver = true;
+                const winner = pIdx + 1;
+                scores[`p${winner}`]++;
+                updateScoreDisplay();
+                const summary = Array.from({ length: numPlayers }, (_, i) => `${getPlayerLabel(i + 1)}: ${cardSuiteState.pts[i]}`).join(' | ');
+                showPostGameModal(`${getPlayerLabel(winner)} Wins ${titlesMapForStatus(cardSuiteState.gameId)}!`, `Final Card Score — ${summary}`);
+                return;
+            }
+
+            nextTurnPlayer();
+            renderCardSuiteHUD();
+            document.getElementById('turn-status').innerText = `${titlesMapForStatus(cardSuiteState.gameId)} — ${getPlayerLabel(currentPlayer)}'s Turn`;
+            if (isTrainingMode) updateTrainingCoachGuidance();
+
+            if (isCurrentPlayerAI() && !gameOver) {
+                setTimeout(() => {
+                    if (!gameOver && CARD_SUITE_GAMES.includes(activeGame) && isCurrentPlayerAI()) playSuiteCard(0);
+                }, 750);
+            }
+        }
+
+        function drawSuiteCardAndPass() {
+            if (!cardSuiteState || gameOver) return;
+            const pIdx = currentPlayer - 1;
+            cardSuiteState.hands[pIdx].push(generateCardForSuite(cardSuiteState.gameId));
+            playGameSound('select');
+            nextTurnPlayer();
+            renderCardSuiteHUD();
+        }
+
+        function renderCardSuiteHUD() {
+            if (!cardSuiteState) return;
+            const cfg = CARD_SUITE_CONFIGS[cardSuiteState.gameId] || CARD_SUITE_CONFIGS.uno;
+            const pIdx = currentPlayer - 1;
+
+            const sb = document.getElementById('card-suite-scoreboard');
+            if (sb) {
+                sb.innerHTML = Array.from({ length: numPlayers }, (_, i) =>
+                    `<span class="px-2 py-0.5 rounded bg-gray-900 border ${i === pIdx ? 'border-cyan-400 text-cyan-300' : 'border-gray-800 text-gray-300'}">${getPlayerLabel(i + 1)}: ${cardSuiteState.pts[i]}/${cfg.targetPts}</span>`
+                ).join('');
+            }
+
+            const tbl = document.getElementById('card-suite-table-state');
+            if (tbl) {
+                tbl.innerHTML = `<div class="flex items-center justify-between"><span>Active Pile / Trick: <strong class="text-amber-300">${cardSuiteState.topCard.label}</strong></span><span class="text-[10px] text-gray-400">${cfg.desc}</span></div>`;
+            }
+
+            const handEl = document.getElementById('card-suite-hand');
+            if (handEl) {
+                handEl.innerHTML = '';
+                (cardSuiteState.hands[pIdx] || []).forEach((c, idx) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.onclick = () => playSuiteCard(idx);
+                    btn.className = "px-2.5 py-2 rounded-xl bg-gray-900 hover:bg-purple-950/80 border border-purple-400/40 text-left flex flex-col justify-between shadow transition";
+                    btn.innerHTML = `<span class="text-[10px] font-extrabold text-white">${c.label}</span><span class="text-[9px] text-emerald-300 font-bold">+${c.power} pts</span>`;
+                    handEl.appendChild(btn);
+                });
+            }
+
+            const acts = document.getElementById('card-suite-actions');
+            if (acts) {
+                acts.innerHTML = `
+                    <button type="button" onclick="drawSuiteCardAndPass()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-500/30 font-bold rounded-xl text-xs transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Draw Card & Pass
+                    </button>
+                `;
+            }
+        }
+
+        function getCardSuiteSuggestion() {
+            if (!cardSuiteState) return "Play your highest-value card to build your lead!";
+            const cfg = CARD_SUITE_CONFIGS[cardSuiteState.gameId] || CARD_SUITE_CONFIGS.uno;
+            const hand = cardSuiteState.hands[currentPlayer - 1] || [];
+            const best = hand.slice().sort((a, b) => b.power - a.power)[0];
+            return best
+                ? `${cfg.desc} Recommended play: "${best.label}" (+${best.power} pts)!`
+                : cfg.desc;
+        }
+
+        // --- YAHTZEE 3D (SCULPTED 3D PIP DICE, TUMBLE ANIMATION, COMPLETE 13-ROW SCORECARD & CHART) ---
         function getRotationForDieFaceUp(val) {
             if (val === 1) return { x: 0, z: 0 };
             if (val === 6) return { x: Math.PI, z: 0 };
@@ -3422,21 +4177,97 @@
             const card = yahtzeeState.scoreCards[pIdx] || {};
             const scEl = document.getElementById('yahtzee-scorecard');
             scEl.innerHTML = '';
-            YAHTZEE_ALL_CATEGORIES.forEach(cat => {
+
+            const upperCats = ['Ones', 'Twos', 'Threes', 'Fours', 'Fives', 'Sixes'];
+            const lowerCats = ['3 of a Kind', '4 of a Kind', 'Full House', 'Small Straight', 'Large Straight', 'Yahtzee', 'Chance'];
+            const allPlayerStats = Array.from({ length: numPlayers }, (_, idx) => getYahtzeePlayerBreakdown(idx));
+
+            const buildRowHTML = (cat, ruleHint) => {
                 const used = card[cat] !== undefined;
-                const preview = used ? card[cat] : (yahtzeeState.rollsLeft < 3 ? calculateYahtzeeCategory(cat, yahtzeeState.dice) : '-');
-                const btn = document.createElement('button');
-                btn.disabled = used;
-                btn.onclick = () => scoreYahtzeeCategory(cat);
-                btn.className = used
-                    ? "px-2 py-1 rounded-lg bg-gray-950 text-gray-500 border border-gray-800 flex justify-between"
-                    : "px-2 py-1 rounded-lg bg-gray-900 hover:bg-emerald-950 text-emerald-200 border border-emerald-500/30 flex justify-between transition";
-                btn.innerHTML = `<span>${cat}</span><strong>${preview}</strong>`;
-                scEl.appendChild(btn);
-            });
+                const previewVal = !used && yahtzeeState.rollsLeft < 3 ? calculateYahtzeeCategory(cat, yahtzeeState.dice) : null;
+                const playerCells = Array.from({ length: numPlayers }, (_, idx) => {
+                    const pCard = yahtzeeState.scoreCards[idx] || {};
+                    const isTurn = idx === pIdx;
+                    if (pCard[cat] !== undefined) {
+                        return `<td class="px-1.5 py-1 text-center font-extrabold ${isTurn ? 'text-white bg-emerald-950/50' : 'text-gray-300'}">${pCard[cat]}</td>`;
+                    }
+                    if (isTurn) {
+                        return `<td class="px-1 py-0.5 text-center bg-emerald-950/40">
+                            <button type="button" onclick="scoreYahtzeeCategory('${cat}')" class="w-full px-1.5 py-0.5 rounded bg-emerald-500/25 hover:bg-emerald-400 hover:text-gray-950 text-emerald-200 border border-emerald-400/50 font-extrabold transition">
+                                ${previewVal !== null ? `+${previewVal}` : 'Score'}
+                            </button>
+                        </td>`;
+                    }
+                    return `<td class="px-1.5 py-1 text-center text-gray-600">—</td>`;
+                }).join('');
+
+                return `<tr class="border-b border-gray-800/80 hover:bg-gray-900/70">
+                    <td class="px-1.5 py-1 font-bold text-gray-200 whitespace-nowrap">${cat} <span class="text-[9px] text-gray-500 font-normal">(${ruleHint})</span></td>
+                    ${playerCells}
+                </tr>`;
+            };
+
+            const playerHeaders = Array.from({ length: numPlayers }, (_, idx) =>
+                `<th class="px-1.5 py-1 text-center font-extrabold ${idx === pIdx ? 'text-cyan-300 bg-cyan-950/40' : 'text-gray-400'}">${getPlayerLabel(idx + 1).slice(0, 8)}</th>`
+            ).join('');
+
+            const upperSubtotalCells = allPlayerStats.map((st, idx) =>
+                `<td class="px-1.5 py-1 text-center font-bold ${idx === pIdx ? 'text-amber-200' : 'text-gray-400'}">${st.upperSum}/63</td>`
+            ).join('');
+
+            const upperBonusCells = allPlayerStats.map((st, idx) =>
+                `<td class="px-1.5 py-1 text-center font-extrabold ${st.upperBonus > 0 ? 'text-emerald-300' : (idx === pIdx ? 'text-amber-300' : 'text-gray-500')}">${st.upperBonus > 0 ? '+35' : '0'}</td>`
+            ).join('');
+
+            const yBonusCells = allPlayerStats.map((st, idx) =>
+                `<td class="px-1.5 py-1 text-center font-bold ${st.yBonus > 0 ? 'text-amber-300' : 'text-gray-500'}">${st.yBonus > 0 ? `+${st.yBonus}` : '0'}</td>`
+            ).join('');
+
+            const grandTotalCells = allPlayerStats.map((st, idx) =>
+                `<td class="px-1.5 py-1.5 text-center font-extrabold text-xs ${idx === pIdx ? 'text-cyan-300 bg-cyan-950/50' : 'text-white'}">${st.total}</td>`
+            ).join('');
+
+            const catHints = {
+                'Ones': '1s', 'Twos': '2s', 'Threes': '3s', 'Fours': '4s', 'Fives': '5s', 'Sixes': '6s',
+                '3 of a Kind': 'Sum', '4 of a Kind': 'Sum', 'Full House': '25',
+                'Small Straight': '30', 'Large Straight': '40', 'Yahtzee': '50', 'Chance': 'Sum'
+            };
+
+            scEl.innerHTML = `
+                <table class="w-full border-collapse text-left">
+                    <thead>
+                        <tr class="border-b border-gray-700 bg-gray-900">
+                            <th class="px-1.5 py-1 text-emerald-300 font-extrabold">Category</th>
+                            ${playerHeaders}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="${numPlayers + 1}" class="px-1.5 py-0.5 bg-gray-900/90 text-[9px] font-extrabold uppercase tracking-wider text-amber-300">Upper Section</td></tr>
+                        ${upperCats.map(c => buildRowHTML(c, catHints[c])).join('')}
+                        <tr class="bg-gray-900/80 border-t border-gray-700">
+                            <td class="px-1.5 py-1 font-bold text-amber-200">Upper Subtotal</td>
+                            ${upperSubtotalCells}
+                        </tr>
+                        <tr class="bg-gray-900/80 border-b border-gray-700">
+                            <td class="px-1.5 py-1 font-bold text-amber-300">Upper Bonus (+35 at 63)</td>
+                            ${upperBonusCells}
+                        </tr>
+                        <tr><td colspan="${numPlayers + 1}" class="px-1.5 py-0.5 bg-gray-900/90 text-[9px] font-extrabold uppercase tracking-wider text-cyan-300">Lower Section</td></tr>
+                        ${lowerCats.map(c => buildRowHTML(c, catHints[c])).join('')}
+                        <tr class="bg-gray-900/80 border-t border-gray-700">
+                            <td class="px-1.5 py-1 font-bold text-amber-300">Yahtzee Bonus (+100)</td>
+                            ${yBonusCells}
+                        </tr>
+                        <tr class="bg-emerald-950/60 border-t-2 border-emerald-500/50">
+                            <td class="px-1.5 py-1.5 font-extrabold text-emerald-300 text-[11px]">GRAND TOTAL</td>
+                            ${grandTotalCells}
+                        </tr>
+                    </tbody>
+                </table>
+            `;
         }
 
-        // --- HANGMAN 3D & SKRIBBL 3D (USING EXPANDED MULTILINGUAL WORD DATABASE) ---
+        // --- HANGMAN 3D & SKRIBBL 3D ---
         function initHangmanGame() {
             const langSel = document.getElementById('hangman-word-lang');
             const diffSel = document.getElementById('hangman-word-diff');
@@ -3824,10 +4655,11 @@
         // --- QUARTO 3D ---
         function buildBoardMeshes() {
             if (!scene || typeof THREE === 'undefined') return;
+            const pal = getActiveVisualPalette();
             const size = 4, spacing = 1.65;
             const baseMesh = new THREE.Mesh(
                 new THREE.BoxGeometry(size * spacing + 0.6, 0.3, size * spacing + 0.6),
-                new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.6 })
+                new THREE.MeshStandardMaterial({ color: pal.gridSub, roughness: 0.3, metalness: 0.6 })
             );
             baseMesh.position.y = -0.2;
             scene.add(baseMesh);
@@ -3838,7 +4670,7 @@
                     const isDark = (x + z) % 2 === 0;
                     const sqMesh = new THREE.Mesh(
                         new THREE.BoxGeometry(spacing * 0.92, 0.12, spacing * 0.92),
-                        new THREE.MeshStandardMaterial({ color: isDark ? 0x1e293b : 0x334155, roughness: 0.25, metalness: 0.4 })
+                        new THREE.MeshStandardMaterial({ color: isDark ? pal.boardDark : pal.boardLight, roughness: 0.25, metalness: 0.4 })
                     );
                     sqMesh.position.set((x - 1.5) * spacing, 0.02, (z - 1.5) * spacing);
                     sqMesh.userData = { type: 'board_square', deck: 0, x, z };
@@ -3864,6 +4696,7 @@
 
         function buildPerimeterPieces() {
             if (!scene || typeof THREE === 'undefined') return;
+            const pal = getActiveVisualPalette();
             perimeterPieceMeshes.forEach(m => scene.remove(m));
             perimeterPieceMeshes = [];
             const unplaced = pieces.filter(p => !p.placed);
@@ -3876,7 +4709,7 @@
                 const height = p.tall ? 1.0 : 0.6;
                 const pieceGroup = new THREE.Group();
                 const pMat = new THREE.MeshStandardMaterial({
-                    color: p.dark ? 0x78350f : 0xfef3c7,
+                    color: p.dark ? pal.piece2 : pal.piece1,
                     roughness: 0.2,
                     metalness: 0.5,
                     emissive: selectedRackPieceId === p.id ? 0x22d3ee : 0x000000,
@@ -3905,9 +4738,10 @@
             if (floatingPieceMesh && scene) { scene.remove(floatingPieceMesh); floatingPieceMesh = null; }
 
             if (scene && typeof THREE !== 'undefined') {
+                const pal = getActiveVisualPalette();
                 const height = p.tall ? 2.1 : 1.15;
                 floatingPieceMesh = new THREE.Group();
-                const pMat = new THREE.MeshStandardMaterial({ color: p.dark ? 0x78350f : 0xfef3c7, roughness: 0.2, metalness: 0.5, emissive: 0x22d3ee, emissiveIntensity: 0.75 });
+                const pMat = new THREE.MeshStandardMaterial({ color: p.dark ? pal.piece2 : pal.piece1, roughness: 0.2, metalness: 0.5, emissive: 0x22d3ee, emissiveIntensity: 0.75 });
                 if (p.square) floatingPieceMesh.add(new THREE.Mesh(new THREE.BoxGeometry(0.85, height, 0.85), pMat));
                 else floatingPieceMesh.add(new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, height, 32), pMat));
                 if (p.hollow) floatingPieceMesh.add(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, height + 0.1, 16), new THREE.MeshBasicMaterial({ color: 0x030712 })));
@@ -3943,8 +4777,9 @@
             if (floatingPieceMesh && scene) { scene.remove(floatingPieceMesh); floatingPieceMesh = null; }
 
             if (scene && typeof THREE !== 'undefined') {
+                const pal = getActiveVisualPalette();
                 const height = piece.tall ? 2.1 : 1.15;
-                const pMat = new THREE.MeshStandardMaterial({ color: piece.dark ? 0x78350f : 0xfef3c7, roughness: 0.2, metalness: 0.5 });
+                const pMat = new THREE.MeshStandardMaterial({ color: piece.dark ? pal.piece2 : pal.piece1, roughness: 0.2, metalness: 0.5 });
                 const pGroup = new THREE.Group();
                 if (piece.square) pGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, height, 0.8), pMat));
                 else pGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, height, 32), pMat));
@@ -4041,6 +4876,7 @@
 
         function buildClassicChessArena() {
             if (!scene || typeof THREE === 'undefined') return;
+            const pal = getActiveVisualPalette();
             pieces = [];
             let idCounter = 1;
             const sqSize = 1.05;
@@ -4049,7 +4885,7 @@
                     const isLight = (r + c) % 2 === 0;
                     const sq = new THREE.Mesh(
                         new THREE.BoxGeometry(sqSize * 0.98, 0.1, sqSize * 0.98),
-                        new THREE.MeshStandardMaterial({ color: isLight ? 0x38bdf8 : 0x1e293b, roughness: 0.25, metalness: 0.4 })
+                        new THREE.MeshStandardMaterial({ color: isLight ? pal.boardLight : pal.boardDark, roughness: 0.25, metalness: 0.4 })
                     );
                     sq.position.set((c - 3.5) * sqSize, 0.02, (r - 3.5) * sqSize);
                     sq.userData = { type: 'classic_chess_square', r, c };
@@ -4512,7 +5348,7 @@
         // --- POST-GAME, INSTRUCTIONS & CHAT HELPERS ---
         function showPostGameModal(title, subtitle) {
             playGameSound('win');
-            const winnerMatch = title.match(/^(.+?)\s+(?:Wins|Solved|Rules)/i);
+            const winnerMatch = title.match(/^(.+?)\s+(?:Wins|Solved|Rules|Beat)/i);
             const winnerName = winnerMatch ? winnerMatch[1].trim() : getPlayerLabel(currentPlayer);
             if (!isTrainingMode) recordVictoryInHitList(winnerName, activeGame, 1);
 
@@ -4543,6 +5379,10 @@
             lastInspectedRuleGame = gameKey || activeGame || 'quarto';
             const gameObj = GAME_CATALOG.find(g => g.id === lastInspectedRuleGame) || GAME_CATALOG[0];
             const dCfg = DICE_SUITE_CONFIGS[lastInspectedRuleGame];
+            const cCfg = CARD_SUITE_CONFIGS[lastInspectedRuleGame];
+            const summaryText = dCfg ? dCfg.tip : (cCfg ? cCfg.desc : (lastInspectedRuleGame === 'pinball'
+                ? 'Choose any of the 10 themed 3D pinball tables! Press Launch (Space) to shoot the ball and use Left/Right Flippers (A/D or ←/→) to hit the glowing bumpers!'
+                : 'Click interactive 3D pieces or board spaces to make your move. Use the Suggest (💡) button or Practice in Training Mode for live step-by-step hints!'));
             const box = document.getElementById('instruction-content-box');
             if (!box) return;
 
@@ -4553,12 +5393,12 @@
                         <div>
                             <div class="text-sm font-extrabold text-white">${gameObj.name}</div>
                             <div class="text-[11px] text-cyan-300 font-semibold">${gameObj.tag}</div>
-                            <div class="text-[10px] text-emerald-300 mt-0.5"><i class="fa-solid fa-bullseye mr-1"></i> ${dCfg ? `Reach ${dCfg.targetScore} points to win!` : 'Outsmart your opponent on the 3D arena!'}</div>
+                            <div class="text-[10px] text-emerald-300 mt-0.5"><i class="fa-solid fa-bullseye mr-1"></i> ${dCfg ? `Reach ${dCfg.targetScore} points to win!` : (cCfg ? `Reach ${cCfg.targetPts} points to win!` : 'Outsmart your opponent on the 3D arena!')}</div>
                         </div>
                     </div>
                     <div class="bg-amber-950/30 p-3.5 rounded-2xl border border-amber-400/35 space-y-1">
                         <div class="text-[11px] font-extrabold text-amber-300 uppercase tracking-wider"><i class="fa-solid fa-face-smile mr-1"></i> Beginner Summary (10-Second Guide)</div>
-                        <p class="text-[11px] text-amber-100 leading-relaxed">${dCfg ? dCfg.tip : 'Click interactive 3D pieces or board spaces to make your move. Use the Suggest (💡) button or Practice in Training Mode for live step-by-step hints!'}</p>
+                        <p class="text-[11px] text-amber-100 leading-relaxed">${summaryText}</p>
                     </div>
                 </div>
             `;
@@ -4663,17 +5503,91 @@
         }
         function saveSessionsRegistry(list) {
             localStorage.setItem('intelligames_sessions_db', JSON.stringify(list));
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && cfg.autoSync) pushToGoogleDriveSheet(true);
         }
         function openSessionsHub() { renderSessionsHub(); dismissInviteBanner(); document.getElementById('sessions-hub-modal').classList.remove('hidden'); }
         function closeSessionsHub() { document.getElementById('sessions-hub-modal').classList.add('hidden'); }
-        function startInviteNotificationListener() { setInterval(checkIncomingInvites, 3000); }
+        function startInviteNotificationListener() {
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'intelligames_sessions_db') {
+                    checkIncomingInvites();
+                    renderSavedGamesAndOnlineUI();
+                }
+            });
+            setInterval(checkIncomingInvites, 2000);
+            checkIncomingInvites();
+        }
         function checkIncomingInvites() {
             if (!currentUser) return;
             const myInvites = getSessionsRegistry().filter(s => s.invited && s.invited.toLowerCase() === currentUser.toLowerCase() && !s.accepted);
             const badge = document.getElementById('invite-badge');
-            if (badge) { badge.innerText = myInvites.length; badge.classList.toggle('hidden', myInvites.length === 0); }
+            if (badge) {
+                badge.innerText = myInvites.length;
+                badge.classList.toggle('hidden', myInvites.length === 0);
+            }
+
+            const unnotified = myInvites.filter(inv => !dismissedInviteIds.includes(inv.id));
+            if (unnotified.length > 0) {
+                const latest = unnotified[unnotified.length - 1];
+                if (lastNotifiedInviteId !== latest.id) {
+                    lastNotifiedInviteId = latest.id;
+                    showInviteBanner(latest);
+                }
+            }
+            renderPendingInvitesInline();
         }
-        function dismissInviteBanner() { const b = document.getElementById('invite-notification-banner'); if (b) b.classList.add('hidden'); }
+
+        function renderPendingInvitesInline() {
+            if (!currentUser) return;
+            const allSessions = getSessionsRegistry();
+            const incoming = allSessions.filter(s => s.invited && s.invited.toLowerCase() === currentUser.toLowerCase() && !s.accepted);
+            const outgoing = allSessions.filter(s => s.host && s.host.toLowerCase() === currentUser.toLowerCase() && s.invited && !s.accepted);
+
+            ['lobby', 'menu'].forEach(prefix => {
+                const box = document.getElementById(`${prefix}-pending-invites-box`);
+                if (!box) return;
+                box.innerHTML = '';
+
+                incoming.forEach(inv => {
+                    const card = document.createElement('div');
+                    card.className = "bg-amber-950/60 border border-amber-400/60 px-2.5 py-2 rounded-xl flex items-center justify-between gap-2 text-[11px]";
+                    card.innerHTML = `
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-amber-300 truncate"><i class="fa-solid fa-envelope-open-text mr-1"></i> Request from ${inv.host}</div>
+                            <div class="text-[10px] text-cyan-200">${titlesMapForStatus(inv.game)}</div>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button type="button" onclick="joinGameSession('${inv.id}')" class="px-2 py-1 bg-amber-400 hover:bg-amber-300 text-gray-950 font-extrabold rounded text-[10px]">Accept</button>
+                            <button type="button" onclick="declineGameInvite('${inv.id}')" class="px-2 py-1 bg-gray-800 hover:bg-rose-950 text-rose-300 rounded text-[10px]">Decline</button>
+                        </div>
+                    `;
+                    box.appendChild(card);
+                });
+
+                outgoing.forEach(out => {
+                    const card = document.createElement('div');
+                    card.className = "bg-cyan-950/40 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl flex items-center justify-between gap-2 text-[10px]";
+                    card.innerHTML = `
+                        <div class="min-w-0 truncate">
+                            <span class="text-cyan-300 font-bold">Sent → ${out.invited}:</span>
+                            <span class="text-gray-200">${titlesMapForStatus(out.game)}</span>
+                            <span class="text-amber-300 italic ml-1">(Waiting...)</span>
+                        </div>
+                        <button type="button" onclick="declineGameInvite('${out.id}')" class="text-gray-400 hover:text-rose-400 shrink-0" title="Cancel Request"><i class="fa-solid fa-xmark"></i></button>
+                    `;
+                    box.appendChild(card);
+                });
+            });
+        }
+
+        function dismissInviteBanner() {
+            if (lastNotifiedInviteId && !dismissedInviteIds.includes(lastNotifiedInviteId)) {
+                dismissedInviteIds.push(lastNotifiedInviteId);
+            }
+            const b = document.getElementById('invite-notification-banner');
+            if (b) b.classList.add('hidden');
+        }
         function renderSessionsHub() {
             const users = getUsersRegistry().filter(u => u.username.toLowerCase() !== (currentUser || '').toLowerCase());
             const favs = getFavoredPlayers();
@@ -4702,13 +5616,23 @@
         }
         function sendGameInvite() {
             const target = document.getElementById('invite-target-player').value;
+            const customEmail = (document.getElementById('invite-target-email')?.value || '').trim();
             const game = document.getElementById('invite-game-type').value;
-            if (!target) return;
+            if (!target && !customEmail) {
+                showToast("Select a player or enter an email address!");
+                return;
+            }
+            const recipientLabel = target || customEmail;
+            const sessName = `${currentUser} vs ${recipientLabel}`;
             const sessions = getSessionsRegistry();
-            sessions.push({ id: 'sess_' + Date.now(), name: `${currentUser} vs ${target}`, game, host: currentUser, invited: target, accepted: false });
+            sessions.push({ id: 'sess_' + Date.now(), name: sessName, game, host: currentUser, invited: recipientLabel, accepted: false });
             saveSessionsRegistry(sessions);
+            broadcastLiveUpdate('invite_update');
+            triggerEmailNotificationDispatch(recipientLabel, customEmail, game, sessName);
+            renderPendingInvitesInline();
+            addChatSystemMessage(`${currentUser} sent a live match invite to ${recipientLabel} (${titlesMapForStatus(game)})!`);
             renderSessionsHub();
-            showToast(`Invite sent to ${target}!`);
+            showToast(`Invite sent to ${recipientLabel}!`);
         }
         function createNewGameSession() {
             const nameInput = document.getElementById('new-session-name');
@@ -4720,13 +5644,22 @@
             joinGameSession(newSess.id);
         }
         function joinGameSession(sessionId) {
-            const found = getSessionsRegistry().find(s => s.id === sessionId);
-            if (!found) return;
+            const sessions = getSessionsRegistry();
+            const idx = sessions.findIndex(s => s.id === sessionId);
+            if (idx === -1) return;
+            const found = sessions[idx];
+            if (found.invited && currentUser && found.invited.toLowerCase() === currentUser.toLowerCase() && !found.accepted) {
+                sessions[idx].accepted = true;
+                saveSessionsRegistry(sessions);
+                broadcastLiveUpdate('invite_update');
+                checkIncomingInvites();
+            }
             activeGame = found.game;
             closeSessionsHub();
             document.getElementById('game-lobby-modal').classList.add('hidden');
             document.getElementById('game-setup-modal').classList.add('hidden');
             initGameArena();
+            addChatSystemMessage(`Joined "${found.name}" (${titlesMapForStatus(found.game)}).`);
         }
 
         function updateScoreDisplay() {
@@ -4836,7 +5769,7 @@
                 completeLogin(found.username, found.role || 'player');
             }
         }
-        function completeLogin(username, role) {
+        async function completeLogin(username, role) {
             currentUser = username; currentUserRole = role;
             localStorage.setItem('intelligames_active_session', JSON.stringify({ username, role }));
             document.getElementById('auth-screen').style.display = 'none';
@@ -4847,6 +5780,14 @@
             const authUserLabel = document.getElementById('auth-active-user-label');
             if (authUserLabel) authUserLabel.innerText = username;
             if (authLogoutField) authLogoutField.classList.remove('hidden');
+            if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+                try { Notification.requestPermission(); } catch (e) {}
+            }
+            const cfg = getDriveSyncConfig();
+            if (cfg.url && cfg.autoSync) {
+                await pullFromGoogleDriveSheet(true);
+            }
+            checkIncomingInvites();
             openGameLobby();
         }
         function checkExistingSession() {
@@ -4904,17 +5845,18 @@
                 controls.maxDistance = 30;
             }
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-            dirLight.position.set(8, 16, 10);
-            scene.add(dirLight);
-            const rimLight = new THREE.PointLight(0x22d3ee, 0.8, 30);
-            rimLight.position.set(-8, 8, -8);
-            scene.add(rimLight);
+            sceneAmbientLight = new THREE.AmbientLight(0xffffff, 0.65);
+            scene.add(sceneAmbientLight);
+            sceneDirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            sceneDirLight.position.set(8, 16, 10);
+            scene.add(sceneDirLight);
+            sceneRimLight = new THREE.PointLight(0x22d3ee, 0.8, 30);
+            sceneRimLight.position.set(-8, 8, -8);
+            scene.add(sceneRimLight);
 
-            const gridHelper = new THREE.GridHelper(24, 24, 0x1e293b, 0x0f172a);
-            gridHelper.position.y = -0.28;
-            scene.add(gridHelper);
+            sceneGridHelper = new THREE.GridHelper(24, 24, 0x1e293b, 0x0f172a);
+            sceneGridHelper.position.y = -0.28;
+            scene.add(sceneGridHelper);
 
             hoverCursorMesh = new THREE.Mesh(
                 new THREE.RingGeometry(0.32, 0.44, 28),
@@ -4998,6 +5940,7 @@
         function animate() {
             requestAnimationFrame(animate);
             if (controls) controls.update();
+            if (activeGame === 'pinball') stepPinballPhysics();
             if (floatingPieceMesh) {
                 floatingPieceMesh.rotation.y += 0.015;
                 floatingPieceMesh.position.y = 4.5 + Math.sin(Date.now() * 0.003) * 0.3;

@@ -56,7 +56,7 @@
     <!-- MAIN INTERACTIVE UI OVERLAY -->
     <div id="ui-overlay">
 
-        <!-- AUTHENTICATION GATEWAY SCREEN (LOGIN / REGISTER / QUICK PREVIEW / LOG OUT) -->
+        <!-- AUTHENTICATION GATEWAY SCREEN (LOGIN / REGISTER / LOG OUT) -->
         <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/95 backdrop-blur-lg p-4 interactive">
             <div class="glass-panel p-6 sm:p-8 rounded-2xl w-full max-w-md shadow-2xl border border-cyan-500/40 space-y-5 relative">
                 <!-- Language Toggle (EN / DE) -->
@@ -90,11 +90,11 @@
                 <div id="login-form-fields" class="space-y-3">
                     <div>
                         <label for="login-user" class="block text-xs font-medium text-gray-300 mb-1" data-i18n="usernameLabel">Username</label>
-                        <input type="text" id="login-user" autocomplete="username" placeholder="Username (e.g. master)" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <input type="text" id="login-user" autocomplete="username" placeholder="Enter your username" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
                     </div>
                     <div>
                         <label for="login-pass" class="block text-xs font-medium text-gray-300 mb-1" data-i18n="passwordLabel">Password / PIN</label>
-                        <input type="password" id="login-pass" autocomplete="current-password" onkeypress="if(event.key==='Enter') handleAuthentication()" placeholder="Password / PIN (master PIN: 123)" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <input type="password" id="login-pass" autocomplete="current-password" onkeypress="if(event.key==='Enter') handleAuthentication()" placeholder="Enter your password or PIN" class="w-full px-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
                     </div>
                 </div>
 
@@ -116,9 +116,6 @@
 
                 <button type="button" id="auth-submit-btn" onclick="handleAuthentication()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm shadow-lg glow-cyan transition">
                     Log In
-                </button>
-                <button type="button" onclick="completeLogin('master', 'master')" class="w-full py-2 bg-gray-900 hover:bg-gray-800 text-cyan-300 border border-cyan-500/30 font-semibold rounded-xl text-xs transition">
-                    <i class="fa-solid fa-bolt mr-1 text-amber-400"></i> Quick Preview (Enter as Master)
                 </button>
 
                 <div class="pt-1 border-t border-gray-800/80 flex items-center justify-between text-[11px] text-gray-400">
@@ -183,17 +180,29 @@
                             </button>
                         </div>
                     </div>
-                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Click any game tile to enter its Game Menu (mode, difficulty, instructions & game scoreboard)</p>
+                    <p id="lobby-welcome-text" class="text-xs text-cyan-300 mt-1">Filter by category (Board, Card, Dice, Word, Flipper) or click any game tile to enter its Game Menu</p>
                 </div>
 
-                <!-- Visual Game Tiles Gallery (All 48 Games — Click to Enter Game Menu) -->
+                <!-- Visual Game Tiles Gallery (All 48 Games — Filter by Category or Search) -->
                 <div class="space-y-2.5">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider" data-i18n="step1Select">Step 1: Select a Game Tile (All 48 Games)</label>
-                        <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300">Tap any game to configure & play</span>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="lobby-game-search" oninput="renderLobbyGameCards()" placeholder="🔍 Search 48 games..." class="px-3 py-1 bg-gray-900 border border-gray-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-400 w-44 sm:w-56">
+                            <span id="lobby-selected-game-label" class="text-xs font-bold text-purple-300 hidden sm:inline">Showing 48 of 48</span>
+                        </div>
+                    </div>
+                    <!-- Category Mode Selector Tabs -->
+                    <div id="lobby-category-tabs" class="flex flex-wrap gap-1.5 pb-1">
+                        <button type="button" onclick="setGameCategoryFilter('lobby', 'all')" data-cat="all" class="lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-extrabold bg-cyan-500 text-gray-950 shadow transition">All Games (48)</button>
+                        <button type="button" onclick="setGameCategoryFilter('lobby', 'board')" data-cat="board" class="lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 text-gray-300 hover:text-white border border-gray-800 transition">♟️ Board & Strategy (18)</button>
+                        <button type="button" onclick="setGameCategoryFilter('lobby', 'card')" data-cat="card" class="lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 text-gray-300 hover:text-white border border-gray-800 transition">🃏 Card Games (10)</button>
+                        <button type="button" onclick="setGameCategoryFilter('lobby', 'dice')" data-cat="dice" class="lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 text-gray-300 hover:text-white border border-gray-800 transition">🎲 Dice & Roll-Write (17)</button>
+                        <button type="button" onclick="setGameCategoryFilter('lobby', 'word')" data-cat="word" class="lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 text-gray-300 hover:text-white border border-gray-800 transition">🔤 Word & Party (2)</button>
+                        <button type="button" onclick="setGameCategoryFilter('lobby', 'arcade')" data-cat="arcade" class="lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 text-gray-300 hover:text-white border border-gray-800 transition">🕹️ Flipper / Arcade (10 Tables)</button>
                     </div>
                     <input type="hidden" id="select-game" value="quarto">
-                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                    <div id="lobby-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[46vh] overflow-y-auto pr-1"></div>
                 </div>
 
                 <!-- OVERALL HIT LIST (TOTAL SCORE ACROSS ALL GAMES), SAVED GAMES & PLAYERS / REQUESTS -->
@@ -757,7 +766,6 @@
                         <span id="yahtzee-upper-bonus-status" class="font-bold text-amber-300">Upper: 0/63 (Need 63 for +35)</span>
                         <span id="yahtzee-achievements-bar" class="text-cyan-300 font-semibold">Badges: None yet</span>
                     </div>
-                    <!-- Full Official Multi-Player Yahtzee Scorecard Table -->
                     <div id="yahtzee-scorecard" class="bg-gray-950/90 rounded-xl border border-emerald-500/30 p-2 text-[10px] space-y-1"></div>
                 </div>
             </div>
@@ -1239,7 +1247,7 @@
                     <h3 class="text-lg font-extrabold text-white flex items-center">
                         <i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> Master Game Menu
                     </h3>
-                    <p class="text-[11px] text-cyan-300 mt-0.5">Switch game tiles, configure 2–4 seats (Human / AI / Online), or manage & flag players</p>
+                    <p class="text-[11px] text-cyan-300 mt-0.5">Filter by game category, configure 2–4 seats (Human / AI / Online), or manage & flag players</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <button type="button" onclick="saveCurrentGameSnapshot(true); renderSavedGamesAndOnlineUI();" class="px-3 py-1.5 bg-amber-500/20 text-amber-300 font-semibold rounded-xl text-xs border border-amber-500/40 transition">
@@ -1276,12 +1284,23 @@
             </div>
 
             <div class="space-y-2">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-wrap items-center justify-between gap-2">
                     <label class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Switch Game (All 48 Games)</label>
-                    <span id="menu-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="menu-game-search" oninput="renderMenuGameCards()" placeholder="🔍 Search 48 games..." class="px-3 py-1 bg-gray-900 border border-gray-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-400 w-44">
+                        <span id="menu-selected-game-label" class="text-xs font-bold text-purple-300">Selected: Quarto 3D</span>
+                    </div>
+                </div>
+                <div id="menu-category-tabs" class="flex flex-wrap gap-1.5 pb-1">
+                    <button type="button" onclick="setGameCategoryFilter('menu', 'all')" data-cat="all" class="menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-extrabold bg-cyan-500 text-gray-950 transition">All (48)</button>
+                    <button type="button" onclick="setGameCategoryFilter('menu', 'board')" data-cat="board" class="menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold bg-gray-900 text-gray-300 border border-gray-800 transition">♟️ Board (18)</button>
+                    <button type="button" onclick="setGameCategoryFilter('menu', 'card')" data-cat="card" class="menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold bg-gray-900 text-gray-300 border border-gray-800 transition">🃏 Cards (10)</button>
+                    <button type="button" onclick="setGameCategoryFilter('menu', 'dice')" data-cat="dice" class="menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold bg-gray-900 text-gray-300 border border-gray-800 transition">🎲 Dice (17)</button>
+                    <button type="button" onclick="setGameCategoryFilter('menu', 'word')" data-cat="word" class="menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold bg-gray-900 text-gray-300 border border-gray-800 transition">🔤 Word (2)</button>
+                    <button type="button" onclick="setGameCategoryFilter('menu', 'arcade')" data-cat="arcade" class="menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold bg-gray-900 text-gray-300 border border-gray-800 transition">🕹️ Flipper (1)</button>
                 </div>
                 <input type="hidden" id="menu-select-game" value="quarto">
-                <div id="menu-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                <div id="menu-game-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-64 overflow-y-auto pr-1"></div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -1471,14 +1490,16 @@
         let currentLang = 'en';
         let soundEnabled = true;
         let toneSynth = null;
-        let hoverCursorMesh = null;
-        let realtimeChannel = null;
+        let lobbyCategoryFilter = 'all';
+        let menuCategoryFilter = 'all';
         let activeGraphicsTheme = 'futuristic';
         let activeGameSkin = 'theme_default';
         let sceneAmbientLight = null;
         let sceneDirLight = null;
         let sceneRimLight = null;
         let sceneGridHelper = null;
+        let hoverCursorMesh = null;
+        let realtimeChannel = null;
         const sharedGeoCache = {};
         const sharedMatCache = {};
 
@@ -1552,6 +1573,7 @@
             '3 of a Kind', '4 of a Kind', 'Full House', 'Small Straight', 'Large Straight', 'Yahtzee', 'Chance'
         ];
 
+        // --- 10 GRAPHICS THEMES & PER-GAME BOARD SKINS ---
         const GRAPHICS_THEMES = {
             futuristic: { name: 'Futuristic Cyber-Neon', bgHex: 0x030712, fogHex: 0x030712, gridMain: 0x1e293b, gridSub: 0x0f172a, ambientHex: 0xffffff, rimHex: 0x22d3ee, boardDark: 0x1e293b, boardLight: 0x38bdf8, piece1: 0xfef3c7, piece2: 0x78350f, panelBg: 'rgba(15, 23, 42, 0.88)', borderCol: 'rgba(56, 189, 248, 0.30)' },
             retro70: { name: 'Retro 1970s Gaming Console', bgHex: 0x1c1208, fogHex: 0x1c1208, gridMain: 0x9a3412, gridSub: 0x431407, ambientHex: 0xffedd5, rimHex: 0xf97316, boardDark: 0x451a03, boardLight: 0xd97706, piece1: 0xfef08a, piece2: 0xea580c, panelBg: 'rgba(41, 22, 8, 0.90)', borderCol: 'rgba(249, 115, 22, 0.45)' },
@@ -2499,7 +2521,7 @@
                 pieces = snap.piecesState.map(p => ({ ...p }));
                 pieces.filter(p => p.placed && p.position).forEach(piece => {
                     const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'board_square' && m.userData.x === piece.position.x && m.userData.z === piece.position.z);
-                    if (!sqMesh) return;
+                    if (!sqMesh || !scene || typeof THREE === 'undefined') return;
                     const height = piece.tall ? 2.1 : 1.15;
                     const pMat = new THREE.MeshStandardMaterial({ color: piece.dark ? 0x78350f : 0xfef3c7, roughness: 0.2, metalness: 0.5 });
                     const pGroup = new THREE.Group();
@@ -2513,16 +2535,13 @@
                 });
                 buildPerimeterPieces();
             } else if ((activeGame === 'chess' || activeGame === 'startrek') && Array.isArray(snap.piecesState)) {
-                pieceMeshes.forEach(m => scene.remove(m));
+                pieceMeshes.forEach(m => { if (scene) scene.remove(m); });
                 pieceMeshes = [];
                 pieces = [];
                 snap.piecesState.forEach(savedP => {
                     if (activeGame === 'chess') {
                         const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'classic_chess_square' && m.userData.r === savedP.r && m.userData.c === savedP.c);
                         if (sqMesh) createClassicChessPieceMesh(savedP.id, savedP.team, savedP.role, savedP.r, savedP.c, sqMesh);
-                    } else {
-                        const sqMesh = boardSquareMeshes.find(m => m.userData && m.userData.type === 'chess_square' && m.userData.boardId === savedP.boardId && m.userData.r === savedP.r && m.userData.c === savedP.c);
-                        if (sqMesh) createStarTrekPieceMesh(savedP.id, savedP.team, savedP.role, savedP.boardId, savedP.r, savedP.c, sqMesh);
                     }
                 });
             } else if (activeGame === 'yahtzee' && snap.yahtzeeState) {
@@ -3102,7 +3121,7 @@
             document.getElementById('game-setup-modal').classList.add('hidden');
 
             const roleBadge = isMasterPrivilege() ? ' [MASTER]' : '';
-            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Click a game tile to enter its Game Menu, or check the Overall Hit List`;
+            document.getElementById('lobby-welcome-text').innerText = `Welcome, ${currentUser}${roleBadge} — Filter by category or click any game tile to enter its Game Menu`;
             const masterBtn = document.getElementById('lobby-master-btn');
             const topMasterBtn = document.getElementById('top-master-mode-btn');
             if (isMasterPrivilege()) {
@@ -3295,6 +3314,36 @@
             { id: 'fourgewinnt', name: '4gewinnt 3D', tag: '2P • Connect 4 Arena', gradient: 'from-blue-500 to-purple-700', svg: `<svg viewBox="0 0 64 64" class="w-11 h-11"><circle cx="16" cy="48" r="5.5" fill="#22d3ee"/><circle cx="27" cy="37" r="5.5" fill="#22d3ee"/><circle cx="38" cy="26" r="5.5" fill="#22d3ee"/><circle cx="49" cy="15" r="5.5" fill="#22d3ee"/></svg>` }
         ];
 
+        function getGameCategory(gameId) {
+            if (gameId === 'pinball') return 'arcade';
+            if (CARD_SUITE_GAMES.includes(gameId)) return 'card';
+            if (gameId === 'yahtzee' || DICE_SUITE_GAMES.includes(gameId)) return 'dice';
+            if (gameId === 'skribbl' || gameId === 'hangman') return 'word';
+            return 'board';
+        }
+
+        function setGameCategoryFilter(scope, cat) {
+            if (scope === 'lobby') {
+                lobbyCategoryFilter = cat;
+                document.querySelectorAll('.lobby-cat-btn').forEach(btn => {
+                    const active = btn.getAttribute('data-cat') === cat;
+                    btn.className = active
+                        ? 'lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-extrabold bg-cyan-500 text-gray-950 shadow transition'
+                        : 'lobby-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 text-gray-300 hover:text-white border border-gray-800 transition';
+                });
+                renderLobbyGameCards();
+            } else {
+                menuCategoryFilter = cat;
+                document.querySelectorAll('.menu-cat-btn').forEach(btn => {
+                    const active = btn.getAttribute('data-cat') === cat;
+                    btn.className = active
+                        ? 'menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-extrabold bg-cyan-500 text-gray-950 transition'
+                        : 'menu-cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold bg-gray-900 text-gray-300 border border-gray-800 transition';
+                });
+                renderMenuGameCards();
+            }
+        }
+
         function selectLobbyGameCard(gameId) {
             const hiddenInput = document.getElementById('select-game');
             if (hiddenInput) hiddenInput.value = gameId;
@@ -3308,19 +3357,41 @@
             renderMenuGameCards();
         }
 
-        function renderGameCardsIntoGrid(gridId, inputId, labelId, onSelectFn) {
+        function renderGameCardsIntoGrid(gridId, inputId, labelId, onSelectFn, categoryFilter = 'all', searchInputId = '') {
             const grid = document.getElementById(gridId);
             const hiddenInput = document.getElementById(inputId);
             const labelEl = document.getElementById(labelId);
             if (!grid || !hiddenInput) return;
 
+            const query = (document.getElementById(searchInputId)?.value || '').trim().toLowerCase();
             const selectedId = hiddenInput.value || 'quarto';
             const selectedObj = GAME_CATALOG.find(g => g.id === selectedId) || GAME_CATALOG[0];
-            if (labelEl) labelEl.innerText = `Selected: ${selectedObj.name}`;
+
+            const filteredGames = GAME_CATALOG.filter(g => {
+                const catMatch = categoryFilter === 'all' || getGameCategory(g.id) === categoryFilter;
+                const textMatch = !query || g.name.toLowerCase().includes(query) || g.tag.toLowerCase().includes(query) || g.id.toLowerCase().includes(query);
+                return catMatch && textMatch;
+            });
+
+            if (labelEl) labelEl.innerText = `Showing ${filteredGames.length} of ${GAME_CATALOG.length} • Selected: ${selectedObj.name}`;
 
             grid.innerHTML = '';
-            GAME_CATALOG.forEach(game => {
+            if (filteredGames.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-gray-400">No games match your filter. Click "All Games (48)" to reset.</div>`;
+                return;
+            }
+
+            const catBadgeMap = {
+                board: '<span class="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[9px] font-bold">BOARD</span>',
+                card: '<span class="px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 text-[9px] font-bold">CARD</span>',
+                dice: '<span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-bold">DICE</span>',
+                word: '<span class="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 text-[9px] font-bold">WORD</span>',
+                arcade: '<span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[9px] font-bold">FLIPPER</span>'
+            };
+
+            filteredGames.forEach(game => {
                 const isSelected = game.id === selectedId;
+                const catBadge = catBadgeMap[getGameCategory(game.id)] || '';
                 const card = document.createElement('button');
                 card.type = 'button';
                 card.onclick = () => onSelectFn(game.id);
@@ -3329,8 +3400,9 @@
                     : "group relative flex flex-col items-center text-center p-3.5 rounded-2xl bg-gray-900/60 hover:bg-gray-900 border border-gray-800 hover:border-cyan-500/40 transition";
 
                 card.innerHTML = `
+                    <span class="absolute top-2 left-2">${catBadge}</span>
                     ${isSelected ? '<span class="absolute top-2 right-2 w-5 h-5 rounded-full bg-cyan-400 text-gray-950 flex items-center justify-center text-[10px] font-extrabold shadow"><i class="fa-solid fa-check"></i></span>' : ''}
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${game.gradient} flex items-center justify-center shadow-md mb-2.5 group-hover:scale-105 transition">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${game.gradient} flex items-center justify-center shadow-md mb-2.5 mt-2 group-hover:scale-105 transition">
                         ${game.svg}
                     </div>
                     <div class="text-xs font-extrabold text-white leading-tight">${game.name}</div>
@@ -3341,11 +3413,11 @@
         }
 
         function renderLobbyGameCards() {
-            renderGameCardsIntoGrid('lobby-game-cards-grid', 'select-game', 'lobby-selected-game-label', selectLobbyGameCard);
+            renderGameCardsIntoGrid('lobby-game-cards-grid', 'select-game', 'lobby-selected-game-label', selectLobbyGameCard, lobbyCategoryFilter, 'lobby-game-search');
         }
 
         function renderMenuGameCards() {
-            renderGameCardsIntoGrid('menu-game-cards-grid', 'menu-select-game', 'menu-selected-game-label', selectMenuGameCard);
+            renderGameCardsIntoGrid('menu-game-cards-grid', 'menu-select-game', 'menu-selected-game-label', selectMenuGameCard, menuCategoryFilter, 'menu-game-search');
         }
 
         // --- GAME ARENA SETUP ---

@@ -906,21 +906,19 @@
                 </div>
                 <div class="grid grid-cols-2 gap-1 p-0.5 bg-gray-950 rounded-lg border border-gray-800 text-[10px]">
                     <button type="button" id="chat-scope-global" onclick="switchChatScope('global')" class="py-1 rounded font-bold bg-cyan-500 text-gray-950 transition">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                    <button type="button" onclick="saveDriveSyncConfig(true)" class="py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 font-extrabold rounded-xl transition">
-                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Save & Push Now
+                        Whole App Chat
                     </button>
-                    <button type="button" onclick="triggerBuildDriveRulebookLibrary()" class="py-2 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-gray-950 font-extrabold rounded-xl transition">
-                        <i class="fa-solid fa-folder-tree mr-1"></i> Build 48-Game Drive Library
-                    </button>
-                    <button type="button" onclick="pullFromGoogleDriveSheet(false)" class="py-2 px-3 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-bold rounded-xl transition">
-                        <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Pull from Sheet
-                    </button>
-                    <button type="button" onclick="exportLocalBackupCSV()" class="py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-semibold rounded-xl transition">
-                        <i class="fa-solid fa-file-csv mr-1"></i> Download CSV
+                    <button type="button" id="chat-scope-game" onclick="switchChatScope('game')" class="py-1 rounded font-semibold text-gray-400 hover:text-white transition">
+                        This Game Only
                     </button>
                 </div>
-                <div id="drive-sync-feedback-box" class="hidden p-2.5 rounded-xl bg-gray-950 border border-emerald-500/40 text-[11px] text-emerald-300"></div>
+            </div>
+            <div id="chat-messages" class="p-3 h-48 overflow-y-auto space-y-1.5 text-xs text-gray-300 flex flex-col"></div>
+            <div class="p-2.5 bg-gray-950/90 border-t border-gray-800 flex space-x-1.5">
+                <input type="text" id="chat-input" onkeypress="if(event.key==='Enter') sendChatMessage()" placeholder="Type message..." class="flex-1 px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500">
+                <button type="button" onclick="sendChatMessage()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-xl text-xs transition">
+                    Send
+                </button>
             </div>
         </div>
     </div>
@@ -3568,6 +3566,24 @@
             if (btn) btn.innerText = willHide ? 'Show' : 'Hide';
         }
 
+        function titlesMapForStatus(gameId) {
+            const found = GAME_CATALOG.find(g => g.id === gameId);
+            return found ? found.name : (gameId || 'Quarto 3D').toUpperCase();
+        }
+
+        const WORD_DATABASE = {
+            en: {
+                easy: ['STAR', 'MOON', 'TREE', 'HOUSE', 'BOAT', 'FISH', 'BOOK', 'KING', 'CASTLE', 'BRIDGE', 'ROCKET', 'DRAGON', 'PLANET', 'ISLAND', 'CAMERA'],
+                medium: ['PYRAMID', 'COMPASS', 'VOLCANO', 'GALAXY', 'LANTERN', 'FORTRESS', 'DIAMOND', 'SUBMARINE', 'TELESCOPE', 'LABYRINTH', 'PENDULUM', 'EXPEDITION'],
+                hard: ['ARCHIPELAGO', 'KALEIDOSCOPE', 'CONSTELLATION', 'HIEROGLYPH', 'OBSERVATORY', 'CHRONOMETER', 'RENAISSANCE', 'EQUILIBRIUM']
+            },
+            de: {
+                easy: ['STERN', 'MOND', 'BAUM', 'HAUS', 'BOOT', 'FISCH', 'BUCH', 'BURG', 'SONNE', 'BLUME', 'WALD', 'SCHIFF', 'VOGEL', 'APFEL', 'WOLKE'],
+                medium: ['PYRAMIDE', 'KOMPASS', 'VULKAN', 'GALAXIE', 'LATERNE', 'FESTUNG', 'DIAMANT', 'FERNROHR', 'LABYRINTH', 'EXPEDITION', 'DRACHE', 'KRONE'],
+                hard: ['STERNWARTE', 'KALEIDOSKOP', 'STERNBILD', 'HIEROGLYPHE', 'SCHMETTERLING', 'GLEICHGEWICHT', 'ABENTEUER', 'SCHATZTRUHE']
+            }
+        };
+
         // --- GAME ARENA SETUP (ALL 48 GAMES) ---
         function initGameArena() {
             clearVictoryParticles();
@@ -5293,6 +5309,16 @@
             return { x: 0, z: 0 };
         }
 
+        function orientYahtzeeDieMesh(dieGroup, val, isHeld) {
+            if (!dieGroup) return;
+            const rot = getRotationForDieFaceUp(val);
+            dieGroup.rotation.set(rot.x, 0, rot.z);
+            dieGroup.position.y = isHeld ? 1.15 : 0.85;
+            if (dieGroup.userData && dieGroup.userData.ringMesh) {
+                dieGroup.userData.ringMesh.visible = !!isHeld;
+            }
+        }
+
         function initYahtzeeGame() {
             yahtzeeState = {
                 dice: [1, 2, 3, 4, 5],
@@ -6009,67 +6035,6 @@
             bluff: { diceCount: 5, colors: [0xfef3c7, 0xfef3c7, 0xfef3c7, 0xfef3c7, 0xfef3c7], labels: ['Cup1', 'Cup2', 'Cup3', 'Cup4', 'Cup5'], targetScore: 5, rows: ['Raise Bid (+1 Quantity)', 'Challenge: "BLUFF / LIAR!"'], tip: 'Stars (6s) are wild! Raise the quantity bid or call BLUFF!' },
             maexchen: { diceCount: 2, colors: [0xf8fafc, 0xfbbf24], labels: ['High', 'Low'], targetScore: 5, rows: ['Announce Honest Roll', 'Bluff Higher (e.g. "65" or "Mäxchen 21!")', 'Call "LÜGE / BLUFF!"'], tip: 'Highest die first! 31–65 are normal, 11–66 are Pasch, 21 is Mäxchen!' }
         };
-
-        function initDiceSuiteGame(gameId) {
-            const cfg = DICE_SUITE_CONFIGS[gameId] || DICE_SUITE_CONFIGS.qwixx;
-            diceSuiteState = {
-                gameId,
-                dice: Array.from({ length: cfg.diceCount }, () => Math.floor(Math.random() * 6) + 1),
-                held: Array(cfg.diceCount).fill(false),
-                rollsLeft: 3,
-                pts: [0, 0, 0, 0],
-                diceMeshes: []
-            };
-
-            const titleEl = document.getElementById('dice-suite-title');
-            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-dice mr-1"></i> ${titlesMapForStatus(gameId)} (${numPlayers}P)`;
-
-            if (scene && typeof THREE !== 'undefined') {
-                const spacing = cfg.diceCount > 6 ? 1.48 : 1.82;
-                for (let i = 0; i < cfg.diceCount; i++) {
-                    const dieMesh = new THREE.Mesh(
-                        new THREE.BoxGeometry(1.32, 1.32, 1.32),
-                        new THREE.MeshStandardMaterial({ color: cfg.colors[i] || 0xf8fafc, roughness: 0.22 })
-                    );
-                    dieMesh.position.set((i - (cfg.diceCount - 1) / 2) * spacing, 0.85, 0);
-                    scene.add(dieMesh);
-                    pieceMeshes.push(dieMesh);
-                    diceSuiteState.diceMeshes.push(dieMesh);
-                }
-            }
-
-            rollDiceSuiteDice(true);
-            document.getElementById('turn-status').innerText = `${titlesMapForStatus(gameId)} — ${getPlayerLabel(1)}'s Turn!`;
-        }
-
-        function toggleDiceSuiteHold(idx) {
-            if (!diceSuiteState || gameOver) return;
-            diceSuiteState.held[idx] = !diceSuiteState.held[idx];
-            renderDiceSuiteHUD();
-        }
-
-        function rollDiceSuiteDice(isInitial = false) {
-            if (!diceSuiteState || gameOver) return;
-            if (!isInitial && diceSuiteState.rollsLeft <= 0) {
-                showToast("No re-rolls left this turn — select an action or score row!");
-                return;
-            }
-            for (let i = 0; i < diceSuiteState.dice.length; i++) {
-                if (!diceSuiteState.held[i] || isInitial) {
-                    diceSuiteState.dice[i] = Math.floor(Math.random() * 6) + 1;
-                    if (diceSuiteState.diceMeshes[i]) {
-                        diceSuiteState.diceMeshes[i].rotation.x += Math.PI * (0.8 + Math.random());
-                        diceSuiteState.diceMeshes[i].rotation.y += Math.PI * (0.8 + Math.random());
-                    }
-                }
-            }
-            if (!isInitial) {
-                diceSuiteState.rollsLeft--;
-                playGameSound('place');
-            }
-            renderDiceSuiteHUD();
-            if (isTrainingMode) updateTrainingCoachGuidance();
-        }
 
         function computeDiceSuiteRowGain(rowIdx) {
             const d = diceSuiteState.dice;

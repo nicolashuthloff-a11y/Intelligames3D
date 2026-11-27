@@ -3075,6 +3075,23 @@
             catch (e) { return { url: '', autoSync: true, lastSync: null }; }
         }
 
+        function updateDriveSyncBadge(status = 'unconfigured', lastSyncTime = null) {
+            const dot = document.getElementById('drive-sync-dot');
+            const label = document.getElementById('drive-sync-hud-label');
+            const timeEl = document.getElementById('drive-last-sync-time');
+            if (dot) {
+                dot.className = status === 'connected'
+                    ? 'w-2 h-2 rounded-full bg-emerald-400'
+                    : 'w-2 h-2 rounded-full bg-amber-400';
+            }
+            if (label) {
+                label.innerText = status === 'connected' ? 'Drive Synced' : 'Drive Sync';
+            }
+            if (timeEl) {
+                timeEl.innerText = lastSyncTime ? `Last synced: ${lastSyncTime}` : 'Not synced yet';
+            }
+        }
+
         function initDriveSyncEngine() {
             const cfg = getDriveSyncConfig();
             updateDriveSyncBadge(cfg.url ? 'connected' : 'unconfigured', cfg.lastSync);

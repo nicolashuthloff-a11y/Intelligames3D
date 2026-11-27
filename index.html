@@ -4396,10 +4396,21 @@
         });
 
         // --- UNIVERSAL 10-GAME CARD SUITE ---
+        const BOHNANZA_BEAN_TYPES = {
+            'Blue Bean': { rarity: 20, meter: { 4: 1, 6: 2, 8: 3, 10: 4 }, accentColor: '#2563eb', bgColor: '#eff6ff', icon: '🔵' },
+            'Chili Bean': { rarity: 18, meter: { 3: 1, 6: 2, 8: 3, 9: 4 }, accentColor: '#dc2626', bgColor: '#fef2f2', icon: '🌶️' },
+            'Stink Bean': { rarity: 16, meter: { 3: 1, 5: 2, 7: 3, 8: 4 }, accentColor: '#16a34a', bgColor: '#f0fdf4', icon: '🟢' },
+            'Green Bean': { rarity: 14, meter: { 3: 1, 5: 2, 6: 3, 7: 4 }, accentColor: '#65a30d', bgColor: '#f7fee7', icon: '🫛' },
+            'Soy Bean': { rarity: 12, meter: { 2: 1, 4: 2, 6: 3, 7: 4 }, accentColor: '#d97706', bgColor: '#fffbeb', icon: '🟡' },
+            'Black-Eyed': { rarity: 10, meter: { 2: 1, 4: 2, 5: 3, 6: 4 }, accentColor: '#4f46e5', bgColor: '#eef2ff', icon: '🟣' },
+            'Red Bean': { rarity: 8, meter: { 2: 1, 3: 2, 4: 3, 5: 4 }, accentColor: '#e11d48', bgColor: '#fff1f2', icon: '❤️' },
+            'Garden Bean': { rarity: 6, meter: { 2: 2, 3: 3 }, accentColor: '#059669', bgColor: '#ecfdf5', icon: '🌿' }
+        };
+
         const CARD_SUITE_CONFIGS = {
             uno: { targetPts: 30, desc: 'Match Color or Number, or play Wild / +2 / Skip cards to empty your hand!', suits: ['Red', 'Yellow', 'Green', 'Blue'], vals: ['1', '2', '3', '4', '5', '7', '9', '+2', 'Skip', 'Wild'] },
             maumau: { targetPts: 30, desc: 'Match Suit or Rank! 7 = Draw 2, 8 = Skip, Jack = Choose any Suit!', suits: ['♥ Hearts', '♦ Diamonds', '♣ Clubs', '♠ Spades'], vals: ['7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'] },
-            bohnanza: { targetPts: 15, desc: 'Plant matching Bean varieties in your fields and harvest them for Gold Coins!', suits: ['Blue Bean', 'Chili Bean', 'Stink Bean', 'Green Bean', 'Soy Bean'], vals: ['×1', '×2', '×3', 'Harvest'] },
+            bohnanza: { targetPts: 15, desc: 'Plant front card(s) into your 3 Bean Fields (Field #3 unlockable for 3 Gold), harvest via Beanometer, & plant/trade the 2 flipped Market beans!', suits: Object.keys(BOHNANZA_BEAN_TYPES), vals: ['Bean'] },
             skat: { targetPts: 60, desc: 'Classic German 32-Card Trick-Taking! Jacks (Buben) are highest trumps!', suits: ['♣ Kreuz', '♠ Pik', '♥ Herz', '♦ Karo'], vals: ['7', '8', '9', '10', 'Dame', 'König', 'Ass', 'Bube (Trump)'] },
             lostcities: { targetPts: 45, desc: 'Play expedition cards in ascending order (2→10) across 5 archaeological routes!', suits: ['Desert', 'Volcano', 'Jungle', 'Ocean', 'Himalaya'], vals: ['Wager ×2', '2', '4', '6', '8', '10'] },
             sanjuan: { targetPts: 25, desc: 'Choose Governor roles (Builder, Producer, Trader, Prospector) to construct Puerto Rico buildings!', suits: ['Indigo', 'Sugar', 'Tobacco', 'Coffee', 'Silver'], vals: ['Chapel', 'Market', 'Guild Hall', 'Palace', 'Aqueduct'] },
@@ -4411,6 +4422,20 @@
 
         function generateCardForSuite(gameId) {
             const cfg = CARD_SUITE_CONFIGS[gameId] || CARD_SUITE_CONFIGS.uno;
+            if (gameId === 'bohnanza') {
+                const beanNames = Object.keys(BOHNANZA_BEAN_TYPES);
+                const suit = beanNames[Math.floor(Math.random() * beanNames.length)];
+                const bInfo = BOHNANZA_BEAN_TYPES[suit];
+                const meterStr = Object.entries(bInfo.meter).map(([cnt, g]) => `${cnt}=${g}G`).join(' ');
+                return {
+                    suit,
+                    val: `${bInfo.rarity}x`,
+                    label: `${bInfo.icon} ${suit} (${meterStr})`,
+                    power: 1,
+                    accentColor: bInfo.accentColor,
+                    bgColor: bInfo.bgColor
+                };
+            }
             const suit = cfg.suits[Math.floor(Math.random() * cfg.suits.length)];
             const val = cfg.vals[Math.floor(Math.random() * cfg.vals.length)];
             const power = Math.floor(Math.random() * 6) + 3;
@@ -4626,14 +4651,19 @@
                 ctx.fillText((card.suit || '').slice(0, 16), 160, 314);
             }
 
-            // High-visibility Point Value Footer
+            // High-visibility Point / Beanometer Footer
             ctx.fillStyle = '#0f172a';
-            ctx.fillRect(66, 396, 188, 38);
+            ctx.fillRect(46, 396, 228, 38);
             ctx.fillStyle = '#fbbf24';
-            ctx.font = '900 18px Inter, sans-serif';
+            ctx.font = '900 15px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`+${card.power} PTS`, 160, 416);
+            if (gameId === 'bohnanza' && BOHNANZA_BEAN_TYPES[card.suit]) {
+                const meterTxt = Object.entries(BOHNANZA_BEAN_TYPES[card.suit].meter).map(([c, g]) => `${c}→${g}G`).join(' ');
+                ctx.fillText(meterTxt, 160, 416);
+            } else {
+                ctx.fillText(`+${card.power} PTS`, 160, 416);
+            }
 
             const tex = new THREE.CanvasTexture(canvas);
             tex.anisotropy = 4;
@@ -4795,21 +4825,73 @@
                 pieceMeshes.push(deckCard);
             }
 
-            const pileCards = cardSuiteState.discardPile || [cardSuiteState.topCard];
-            pileCards.slice(-10).forEach((dc, idx) => {
-                const pileMesh = create3DPlayingCardMesh(dc, true, -1, idx, cardSuiteState.gameId);
-                pileMesh.position.set(1.65, 0.16 + idx * 0.052, 0);
-                pileMesh.rotation.y = ((idx % 5) - 2) * 0.15;
-                scene.add(pileMesh);
-                pieceMeshes.push(pileMesh);
-                cardSuiteState.discardMeshes.push(pileMesh);
-            });
+            if (cardSuiteState.gameId === 'bohnanza' && cardSuiteState.bohnanza) {
+                // Render the 2 Flipped Market Cards in center table
+                const mkt = cardSuiteState.bohnanza.marketCards || [];
+                mkt.forEach((mc, mIdx) => {
+                    const mMesh = create3DPlayingCardMesh(mc, true, -1, mIdx, 'bohnanza');
+                    mMesh.position.set(0.45 + mIdx * 1.55, 0.18, -0.15);
+                    mMesh.userData = { type: 'bohnanza_market_3d', mIdx };
+                    scene.add(mMesh);
+                    pieceMeshes.push(mMesh);
+                });
+
+                // Render 3 Bean Field Plots in front of every seated player!
+                for (let s = 0; s < numPlayers; s++) {
+                    const anchor = getSeatAnchor3D(s, numPlayers);
+                    const pFields = cardSuiteState.bohnanza.fields[s] || [];
+                    const has3rd = cardSuiteState.bohnanza.thirdFieldUnlocked[s];
+                    const cosR = Math.cos(anchor.rotY);
+                    const sinR = Math.sin(anchor.rotY);
+
+                    for (let fIdx = 0; fIdx < 3; fIdx++) {
+                        const localX = (fIdx - 1) * 1.48;
+                        const localZ = -1.35;
+                        const fx = anchor.x + localX * cosR + localZ * sinR;
+                        const fz = anchor.z - localX * sinR + localZ * cosR;
+                        const isLocked3rd = (fIdx === 2 && !has3rd);
+
+                        const plotMat = new THREE.MeshStandardMaterial({
+                            color: isLocked3rd ? 0x1e293b : 0x78350f,
+                            roughness: 0.65,
+                            transparent: isLocked3rd,
+                            opacity: isLocked3rd ? 0.55 : 1
+                        });
+                        const plotMesh = new THREE.Mesh(new THREE.BoxGeometry(1.32, 0.08, 1.42), plotMat);
+                        plotMesh.position.set(fx, 0.05, fz);
+                        plotMesh.rotation.y = anchor.rotY;
+                        plotMesh.userData = { type: 'bohnanza_field_3d', seatIdx: s, fieldIdx: fIdx };
+                        scene.add(plotMesh);
+                        pieceMeshes.push(plotMesh);
+
+                        const stack = pFields[fIdx] || [];
+                        stack.forEach((bCard, bIdx) => {
+                            const bMesh = create3DPlayingCardMesh(bCard, true, s, fIdx, 'bohnanza');
+                            bMesh.scale.set(0.82, 1, 0.82);
+                            bMesh.position.set(fx, 0.12 + bIdx * 0.06, fz + bIdx * 0.12 * cosR);
+                            bMesh.rotation.y = anchor.rotY;
+                            bMesh.userData = { type: 'bohnanza_field_3d', seatIdx: s, fieldIdx: fIdx };
+                            scene.add(bMesh);
+                            pieceMeshes.push(bMesh);
+                        });
+                    }
+                }
+            } else {
+                const pileCards = cardSuiteState.discardPile || [cardSuiteState.topCard];
+                pileCards.slice(-10).forEach((dc, idx) => {
+                    const pileMesh = create3DPlayingCardMesh(dc, true, -1, idx, cardSuiteState.gameId);
+                    pileMesh.position.set(1.65, 0.16 + idx * 0.052, 0);
+                    pileMesh.rotation.y = ((idx % 5) - 2) * 0.15;
+                    scene.add(pileMesh);
+                    pieceMeshes.push(pileMesh);
+                    cardSuiteState.discardMeshes.push(pileMesh);
+                });
+            }
 
             for (let s = 0; s < numPlayers; s++) {
                 const hand = cardSuiteState.hands[s] || [];
                 const anchor = getSeatAnchor3D(s, numPlayers);
                 const isActiveSeat = (s === currentPlayer - 1);
-                // Keep opponents' cards strictly face-down; only reveal the active human player's hand
                 const revealHand = isActiveSeat && playerTypes[s] !== 'ai';
                 const seatGroup = [];
 
@@ -4822,7 +4904,7 @@
                     const sinR = Math.sin(anchor.rotY);
                     const worldX = anchor.x + spread * cosR + archZ * sinR;
                     const worldZ = anchor.z - spread * sinR + archZ * cosR;
-                    const liftY = isActiveSeat ? 0.52 : 0.28;
+                    const liftY = (isActiveSeat && cardSuiteState.gameId === 'bohnanza' && idx === 0) ? 0.72 : (isActiveSeat ? 0.52 : 0.28);
 
                     cardObj.position.set(worldX, liftY + idx * 0.015, worldZ);
                     cardObj.rotation.y = anchor.rotY + (idx - (hand.length - 1) / 2) * -0.07;
@@ -4970,13 +5052,20 @@
             cardSuiteState = {
                 gameId,
                 pts: [0, 0, 0, 0],
-                hands: Array.from({ length: 4 }, () => Array.from({ length: 6 }, () => generateCardForSuite(gameId))),
+                hands: Array.from({ length: 4 }, () => Array.from({ length: gameId === 'bohnanza' ? 5 : 6 }, () => generateCardForSuite(gameId))),
                 topCard: firstCard,
                 activeSuit: firstCard.suit,
                 discardPile: [firstCard],
                 expeditions: Array.from({ length: 4 }, () => ({})),
                 builtItems: Array.from({ length: 4 }, () => []),
-                deckCount: 28,
+                bohnanza: gameId === 'bohnanza' ? {
+                    fields: Array.from({ length: 4 }, () => [[], [], []]),
+                    thirdFieldUnlocked: [false, false, false, false],
+                    phase: 'plant_hand', // 'plant_hand' -> 'market_flip' -> 'draw_end'
+                    plantedThisTurn: 0,
+                    marketCards: []
+                } : null,
+                deckCount: gameId === 'bohnanza' ? 104 : 28,
                 handMeshes: [],
                 discardMeshes: [],
                 avatarMeshes: []
@@ -5007,7 +5096,233 @@
             }
 
             renderCardSuiteHUD();
-            document.getElementById('turn-status').innerText = `${titlesMapForStatus(gameId)} — ${getPlayerLabel(1)}: Play a legal matching card or draw from the deck!`;
+            document.getElementById('turn-status').innerText = gameId === 'bohnanza'
+                ? `Bohnanza 3D — ${getPlayerLabel(1)}: Plant your front hand card into Field 1, 2, or 3!`
+                : `${titlesMapForStatus(gameId)} — ${getPlayerLabel(1)}: Play a legal matching card or draw from the deck!`;
+        }
+
+        function calculateBohnanzaHarvestGold(beanSuit, count) {
+            const bInfo = BOHNANZA_BEAN_TYPES[beanSuit];
+            if (!bInfo || count <= 0) return 0;
+            let gold = 0;
+            Object.entries(bInfo.meter).forEach(([reqStr, reward]) => {
+                if (count >= parseInt(reqStr, 10)) gold = Math.max(gold, reward);
+            });
+            return gold;
+        }
+
+        function buyBohnanzaThirdField() {
+            if (!cardSuiteState || cardSuiteState.gameId !== 'bohnanza' || gameOver) return;
+            const pIdx = currentPlayer - 1;
+            const bState = cardSuiteState.bohnanza;
+            if (bState.thirdFieldUnlocked[pIdx]) {
+                showToast("Your 3rd Bean Field is already unlocked!");
+                return;
+            }
+            if (cardSuiteState.pts[pIdx] < 3) {
+                showToast("⚠️ Need 3 Gold Coins to buy the 3rd Bean Field!");
+                return;
+            }
+            pushUndoSnapshot();
+            cardSuiteState.pts[pIdx] -= 3;
+            bState.thirdFieldUnlocked[pIdx] = true;
+            playGameSound('win');
+            recordMove(`${getPlayerLabel(currentPlayer)} spent 3 Gold to unlock Bean Field #3!`);
+            rebuildCardSuite3DTable();
+            renderCardSuiteHUD();
+            showToast("🌱 Bean Field #3 unlocked!");
+        }
+
+        function harvestBohnanzaField(fieldIdx) {
+            if (!cardSuiteState || cardSuiteState.gameId !== 'bohnanza' || gameOver) return;
+            const pIdx = currentPlayer - 1;
+            const bState = cardSuiteState.bohnanza;
+            const fieldStack = bState.fields[pIdx][fieldIdx] || [];
+            if (fieldStack.length === 0) {
+                showToast(`Field #${fieldIdx + 1} is already empty!`);
+                return;
+            }
+            // Official Bohnanza Field Protection Rule: Cannot harvest a single-bean field if another field has 2+ beans
+            const hasMultiField = bState.fields[pIdx].some((st, i) => i !== fieldIdx && st.length >= 2);
+            if (fieldStack.length === 1 && hasMultiField) {
+                showToast("⚠️ Bohnanza Rule: You cannot harvest a 1-bean field while another field has 2+ beans!");
+                return;
+            }
+
+            pushUndoSnapshot();
+            const beanSuit = fieldStack[0].suit;
+            const goldEarned = calculateBohnanzaHarvestGold(beanSuit, fieldStack.length);
+            cardSuiteState.pts[pIdx] += goldEarned;
+            bState.fields[pIdx][fieldIdx] = [];
+            playGameSound('place');
+            recordMove(`${getPlayerLabel(currentPlayer)} harvested ${fieldStack.length}× ${beanSuit} from Field #${fieldIdx + 1} for +${goldEarned} Gold!`);
+            showToast(`🪙 Harvested ${fieldStack.length}× ${beanSuit} → +${goldEarned} Gold!`);
+
+            if (cardSuiteState.pts[pIdx] >= CARD_SUITE_CONFIGS.bohnanza.targetPts) {
+                gameOver = true;
+                const winner = pIdx + 1;
+                scores[`p${winner}`]++;
+                updateScoreDisplay();
+                const summary = Array.from({ length: numPlayers }, (_, i) => `${getPlayerLabel(i + 1)}: ${cardSuiteState.pts[i]}G`).join(' | ');
+                showPostGameModal(`${getPlayerLabel(winner)} Wins Bohnanza 3D!`, `Gold Coins — ${summary}`);
+                return;
+            }
+
+            rebuildCardSuite3DTable();
+            renderCardSuiteHUD();
+        }
+
+        function plantBohnanzaFrontCardIntoField(fieldIdx) {
+            if (!cardSuiteState || cardSuiteState.gameId !== 'bohnanza' || gameOver) return;
+            const pIdx = currentPlayer - 1;
+            const bState = cardSuiteState.bohnanza;
+            if (fieldIdx === 2 && !bState.thirdFieldUnlocked[pIdx]) {
+                showToast("🔒 Field #3 is locked! Buy it for 3 Gold Coins first.");
+                return;
+            }
+            if (bState.phase !== 'plant_hand') {
+                showToast("Plant or donate the 2 flipped Market beans first!");
+                return;
+            }
+            if (bState.plantedThisTurn >= 2) {
+                showToast("You already planted the maximum of 2 hand cards this turn! Flip 2 Market cards next.");
+                return;
+            }
+            const hand = cardSuiteState.hands[pIdx] || [];
+            if (hand.length === 0) {
+                showToast("No cards left in hand — advance to Market Flip!");
+                return;
+            }
+            const frontCard = hand[0];
+            const targetStack = bState.fields[pIdx][fieldIdx];
+            if (targetStack.length > 0 && targetStack[0].suit !== frontCard.suit) {
+                showToast(`⚠️ Field #${fieldIdx + 1} already grows ${targetStack[0].suit}! Harvest it first or pick another field.`);
+                return;
+            }
+
+            pushUndoSnapshot();
+            hand.shift();
+            targetStack.push(frontCard);
+            bState.plantedThisTurn++;
+            playGameSound('place');
+            recordMove(`${getPlayerLabel(currentPlayer)} planted ${frontCard.suit} into Field #${fieldIdx + 1} (${targetStack.length} stacked)`);
+            rebuildCardSuite3DTable();
+            renderCardSuiteHUD();
+        }
+
+        function advanceBohnanzaMarketPhase() {
+            if (!cardSuiteState || cardSuiteState.gameId !== 'bohnanza' || gameOver) return;
+            const pIdx = currentPlayer - 1;
+            const bState = cardSuiteState.bohnanza;
+            const hand = cardSuiteState.hands[pIdx] || [];
+            if (bState.plantedThisTurn === 0 && hand.length > 0) {
+                showToast("⚠️ Mandatory Rule: You MUST plant your 1st hand card before flipping Market cards!");
+                return;
+            }
+            pushUndoSnapshot();
+            bState.phase = 'market_flip';
+            bState.marketCards = [generateCardForSuite('bohnanza'), generateCardForSuite('bohnanza')];
+            cardSuiteState.deckCount = Math.max(4, cardSuiteState.deckCount - 2);
+            playGameSound('select');
+            recordMove(`${getPlayerLabel(currentPlayer)} flipped 2 Market beans: [${bState.marketCards.map(c => c.suit).join(' & ')}]`);
+            rebuildCardSuite3DTable();
+            renderCardSuiteHUD();
+        }
+
+        function resolveBohnanzaMarketCard(mIdx, fieldIdx) {
+            if (!cardSuiteState || cardSuiteState.gameId !== 'bohnanza' || gameOver) return;
+            const pIdx = currentPlayer - 1;
+            const bState = cardSuiteState.bohnanza;
+            const mCard = bState.marketCards[mIdx];
+            if (!mCard) return;
+
+            if (fieldIdx === -1) {
+                // Donate / trade flipped Market card to next player's first matching or empty field
+                const nextIdx = currentPlayer % numPlayers;
+                const nextFields = bState.fields[nextIdx];
+                const nextMax = bState.thirdFieldUnlocked[nextIdx] ? 3 : 2;
+                let placedIdx = nextFields.slice(0, nextMax).findIndex(st => st.length > 0 && st[0].suit === mCard.suit);
+                if (placedIdx === -1) placedIdx = nextFields.slice(0, nextMax).findIndex(st => st.length === 0);
+                if (placedIdx === -1) placedIdx = 0;
+                if (nextFields[placedIdx].length > 0 && nextFields[placedIdx][0].suit !== mCard.suit) {
+                    const gold = calculateBohnanzaHarvestGold(nextFields[placedIdx][0].suit, nextFields[placedIdx].length);
+                    cardSuiteState.pts[nextIdx] += gold;
+                    nextFields[placedIdx] = [];
+                }
+                nextFields[placedIdx].push(mCard);
+                recordMove(`${getPlayerLabel(currentPlayer)} traded Market ${mCard.suit} to ${getPlayerLabel(nextIdx + 1)}`);
+            } else {
+                if (fieldIdx === 2 && !bState.thirdFieldUnlocked[pIdx]) {
+                    showToast("🔒 Field #3 is locked!");
+                    return;
+                }
+                const targetStack = bState.fields[pIdx][fieldIdx];
+                if (targetStack.length > 0 && targetStack[0].suit !== mCard.suit) {
+                    showToast(`⚠️ Field #${fieldIdx + 1} grows ${targetStack[0].suit}! Harvest it first or trade this bean.`);
+                    return;
+                }
+                targetStack.push(mCard);
+                recordMove(`${getPlayerLabel(currentPlayer)} planted Market ${mCard.suit} into Field #${fieldIdx + 1}`);
+            }
+
+            bState.marketCards.splice(mIdx, 1);
+            playGameSound('place');
+            if (bState.marketCards.length === 0) {
+                finishBohnanzaTurnAndDraw3();
+            } else {
+                rebuildCardSuite3DTable();
+                renderCardSuiteHUD();
+            }
+        }
+
+        function finishBohnanzaTurnAndDraw3() {
+            const pIdx = currentPlayer - 1;
+            const bState = cardSuiteState.bohnanza;
+            // Draw 3 new cards to the BACK of the player's hand (preserving hand order!)
+            for (let d = 0; d < 3; d++) {
+                cardSuiteState.hands[pIdx].push(generateCardForSuite('bohnanza'));
+            }
+            cardSuiteState.deckCount = Math.max(4, cardSuiteState.deckCount - 3);
+            bState.phase = 'plant_hand';
+            bState.plantedThisTurn = 0;
+            bState.marketCards = [];
+
+            nextTurnPlayer();
+            rebuildCardSuite3DTable();
+            renderCardSuiteHUD();
+            document.getElementById('turn-status').innerText = `Bohnanza 3D — ${getPlayerLabel(currentPlayer)}'s Turn (Plant front card!)`;
+
+            if (isCurrentPlayerAI() && !gameOver) {
+                setTimeout(triggerBohnanzaAITurn, 800);
+            }
+        }
+
+        function triggerBohnanzaAITurn() {
+            if (!cardSuiteState || cardSuiteState.gameId !== 'bohnanza' || gameOver || !isCurrentPlayerAI()) return;
+            const pIdx = currentPlayer - 1;
+            const bState = cardSuiteState.bohnanza;
+            const hand = cardSuiteState.hands[pIdx] || [];
+            const maxFields = bState.thirdFieldUnlocked[pIdx] ? 3 : 2;
+
+            if (hand.length > 0) {
+                const front = hand[0];
+                let fIdx = bState.fields[pIdx].slice(0, maxFields).findIndex(st => st.length > 0 && st[0].suit === front.suit);
+                if (fIdx === -1) fIdx = bState.fields[pIdx].slice(0, maxFields).findIndex(st => st.length === 0);
+                if (fIdx === -1) {
+                    fIdx = 0;
+                    harvestBohnanzaField(fIdx);
+                }
+                plantBohnanzaFrontCardIntoField(fIdx);
+            }
+
+            if (bState.phase === 'plant_hand') {
+                advanceBohnanzaMarketPhase();
+            }
+            while (bState.marketCards.length > 0 && !gameOver) {
+                const mc = bState.marketCards[0];
+                const matchIdx = bState.fields[pIdx].slice(0, maxFields).findIndex(st => st.length === 0 || st[0].suit === mc.suit);
+                resolveBohnanzaMarketCard(0, matchIdx !== -1 ? matchIdx : -1);
+            }
         }
 
         function getCardNumericRank(valStr) {
@@ -5096,8 +5411,50 @@
             return { ok: true, reason: 'Legal play' };
         }
 
+        function drawSuiteCardAndPass() {
+            if (!cardSuiteState || gameOver || cardAnimState) return;
+            const pIdx = currentPlayer - 1;
+            const drawn = generateCardForSuite(cardSuiteState.gameId);
+            playGameSound('select');
+
+            animateCardPickupOnly(pIdx, drawn, () => {
+                cardSuiteState.hands[pIdx].push(drawn);
+                cardSuiteState.deckCount = Math.max(4, (cardSuiteState.deckCount || 12) - 1);
+                recordMove(`${getPlayerLabel(currentPlayer)} drew [${drawn.label}] from the 3D deck & passed`);
+                nextTurnPlayer();
+                rebuildCardSuite3DTable();
+                renderCardSuiteHUD();
+                document.getElementById('turn-status').innerText = `${titlesMapForStatus(cardSuiteState.gameId)} — ${getPlayerLabel(currentPlayer)}'s Turn`;
+
+                if (isCurrentPlayerAI() && !gameOver) {
+                    setTimeout(() => {
+                        if (!gameOver && CARD_SUITE_GAMES.includes(activeGame) && isCurrentPlayerAI()) triggerCardSuiteAITurn();
+                    }, 800);
+                }
+            });
+        }
+
         function playSuiteCard(cardIdx) {
             if (!cardSuiteState || gameOver || cardAnimState) return;
+            if (cardSuiteState.gameId === 'bohnanza') {
+                if (cardIdx !== 0) {
+                    showToast("⚠️ Bohnanza Rule: You cannot reorder your hand — plant the FRONT card (#1) first!");
+                    return;
+                }
+                const pIdx = currentPlayer - 1;
+                const bState = cardSuiteState.bohnanza;
+                const maxFields = bState.thirdFieldUnlocked[pIdx] ? 3 : 2;
+                const front = cardSuiteState.hands[pIdx][0];
+                if (!front) return;
+                let targetIdx = bState.fields[pIdx].slice(0, maxFields).findIndex(st => st.length > 0 && st[0].suit === front.suit);
+                if (targetIdx === -1) targetIdx = bState.fields[pIdx].slice(0, maxFields).findIndex(st => st.length === 0);
+                if (targetIdx === -1) {
+                    showToast("⚠️ All your Bean Fields are full of other beans! Click 'Harvest' on a field first.");
+                    return;
+                }
+                plantBohnanzaFrontCardIntoField(targetIdx);
+                return;
+            }
             const cfg = CARD_SUITE_CONFIGS[cardSuiteState.gameId] || CARD_SUITE_CONFIGS.uno;
             const gId = cardSuiteState.gameId;
             const pIdx = currentPlayer - 1;
@@ -5177,10 +5534,6 @@
                         bonusPts = 4;
                         specialNotice = `👑 Mau-Mau Jack! Active suit set to ${cardSuiteState.activeSuit}!`;
                     }
-                } else if (gId === 'bohnanza' && card.val === 'Harvest') {
-                    const sameSuitCount = hand.filter(c => c.suit === card.suit).length;
-                    bonusPts = sameSuitCount * 3;
-                    specialNotice = `🫘 Bohnanza Harvest! ${sameSuitCount + 1} ${card.suit}s harvested (+${bonusPts} Gold)!`;
                 } else if (gId === 'skat' && card.val.includes('Bube')) {
                     bonusPts = 6;
                     specialNotice = `♣️ Skat Bube (Top Trump)! Sweeps the trick (+6 bonus)!`;
@@ -5235,6 +5588,10 @@
 
         function triggerCardSuiteAITurn() {
             if (!cardSuiteState || gameOver || !isCurrentPlayerAI()) return;
+            if (cardSuiteState.gameId === 'bohnanza') {
+                triggerBohnanzaAITurn();
+                return;
+            }
             const pIdx = currentPlayer - 1;
             const hand = cardSuiteState.hands[pIdx] || [];
             const playableIndices = hand.map((c, idx) => ({ idx, c, ok: isSuiteCardPlayable(c, pIdx).ok })).filter(x => x.ok);
@@ -5246,35 +5603,100 @@
             }
         }
 
-        function drawSuiteCardAndPass() {
-            if (!cardSuiteState || gameOver || cardAnimState) return;
-            const pIdx = currentPlayer - 1;
-            const drawn = generateCardForSuite(cardSuiteState.gameId);
-            playGameSound('select');
-
-            animateCardPickupOnly(pIdx, drawn, () => {
-                cardSuiteState.hands[pIdx].push(drawn);
-                cardSuiteState.deckCount = Math.max(4, (cardSuiteState.deckCount || 12) - 1);
-                recordMove(`${getPlayerLabel(currentPlayer)} drew [${drawn.label}] from the 3D deck & passed`);
-                nextTurnPlayer();
-                rebuildCardSuite3DTable();
-                renderCardSuiteHUD();
-                document.getElementById('turn-status').innerText = `${titlesMapForStatus(cardSuiteState.gameId)} — ${getPlayerLabel(currentPlayer)}'s Turn (Match: ${cardSuiteState.activeSuit})`;
-
-                if (isCurrentPlayerAI() && !gameOver) {
-                    setTimeout(() => {
-                        if (!gameOver && CARD_SUITE_GAMES.includes(activeGame) && isCurrentPlayerAI()) triggerCardSuiteAITurn();
-                    }, 800);
-                }
-            });
-        }
-
         function renderCardSuiteHUD() {
             if (!cardSuiteState) return;
             const cfg = CARD_SUITE_CONFIGS[cardSuiteState.gameId] || CARD_SUITE_CONFIGS.uno;
             const pIdx = currentPlayer - 1;
             const isSeatHuman = playerTypes[pIdx] !== 'ai';
             const activeSuit = cardSuiteState.activeSuit || (cardSuiteState.topCard && cardSuiteState.topCard.suit);
+
+            if (cardSuiteState.gameId === 'bohnanza' && cardSuiteState.bohnanza) {
+                const bState = cardSuiteState.bohnanza;
+                const sb = document.getElementById('card-suite-scoreboard');
+                if (sb) {
+                    sb.innerHTML = Array.from({ length: numPlayers }, (_, i) => {
+                        const fCount = bState.thirdFieldUnlocked[i] ? '3 Fields' : '2 Fields';
+                        return `<span class="px-2 py-0.5 rounded bg-gray-900 border ${i === pIdx ? 'border-amber-400 text-amber-300' : 'border-gray-800 text-gray-300'}">${getPlayerLabel(i + 1)}: 🪙 ${cardSuiteState.pts[i]}/${cfg.targetPts} (${fCount})</span>`;
+                    }).join('');
+                }
+
+                // Render the 3 Bean Stacking Fields + Buy 3rd Field + Harvest controls
+                const tbl = document.getElementById('card-suite-table-state');
+                if (tbl) {
+                    const pFields = bState.fields[pIdx];
+                    const has3rd = bState.thirdFieldUnlocked[pIdx];
+                    const fieldsHTML = [0, 1, 2].map(fIdx => {
+                        if (fIdx === 2 && !has3rd) {
+                            return `<div class="p-1.5 rounded-xl bg-gray-900/90 border border-dashed border-amber-500/40 flex flex-col justify-between">
+                                <span class="text-[9px] font-bold text-amber-300">Field #3 (Locked)</span>
+                                <button type="button" onclick="buyBohnanzaThirdField()" class="mt-1 px-1.5 py-1 rounded bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-[9px]">Unlock (3 🪙)</button>
+                            </div>`;
+                        }
+                        const st = pFields[fIdx] || [];
+                        const suitName = st.length > 0 ? st[0].suit : 'Empty Plot';
+                        const goldNow = st.length > 0 ? calculateBohnanzaHarvestGold(suitName, st.length) : 0;
+                        return `<div class="p-1.5 rounded-xl bg-amber-950/40 border border-amber-500/35 flex flex-col justify-between space-y-1">
+                            <div class="text-[9px] font-extrabold text-amber-200 truncate">Field #${fIdx + 1}: ${st.length > 0 ? `${st.length}× ${suitName}` : 'Empty'}</div>
+                            <div class="flex gap-1">
+                                ${isSeatHuman && bState.phase === 'plant_hand' ? `<button type="button" onclick="plantBohnanzaFrontCardIntoField(${fIdx})" class="flex-1 px-1 py-0.5 rounded bg-emerald-500/25 hover:bg-emerald-500/40 text-emerald-200 border border-emerald-400/40 font-bold text-[9px]">Plant #1</button>` : ''}
+                                ${isSeatHuman && st.length > 0 ? `<button type="button" onclick="harvestBohnanzaField(${fIdx})" class="px-1.5 py-0.5 rounded bg-amber-500/25 hover:bg-amber-500/40 text-amber-200 border border-amber-400/40 font-bold text-[9px]">Harvest (+${goldNow}🪙)</button>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('');
+
+                    tbl.innerHTML = `<div class="space-y-1.5">
+                        <div class="text-[10px] font-bold text-emerald-300">Phase: ${bState.phase === 'plant_hand' ? `1. Plant Front Hand Card (${bState.plantedThisTurn}/2 planted)` : '2. Plant or Trade 2 Flipped Market Beans'}</div>
+                        <div class="grid grid-cols-1 gap-1">${fieldsHTML}</div>
+                    </div>`;
+                }
+
+                const handEl = document.getElementById('card-suite-hand');
+                if (handEl) {
+                    handEl.innerHTML = '';
+                    if (!isSeatHuman) {
+                        handEl.innerHTML = `<div class="col-span-2 text-[11px] text-amber-300 italic py-2 px-1"><i class="fa-solid fa-eye-slash mr-1"></i> ${getPlayerLabel(currentPlayer)} is managing bean fields...</div>`;
+                    } else if (bState.phase === 'market_flip') {
+                        (bState.marketCards || []).forEach((mc, mIdx) => {
+                            const cardBox = document.createElement('div');
+                            cardBox.className = "col-span-2 p-2 rounded-xl bg-gray-900 border border-cyan-400/60 space-y-1";
+                            cardBox.innerHTML = `
+                                <div class="text-[10px] font-extrabold text-cyan-200">Market Flip #${mIdx + 1}: ${mc.label}</div>
+                                <div class="flex flex-wrap gap-1">
+                                    <button type="button" onclick="resolveBohnanzaMarketCard(${mIdx}, 0)" class="px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 text-[9px] font-bold">Plant Field 1</button>
+                                    <button type="button" onclick="resolveBohnanzaMarketCard(${mIdx}, 1)" class="px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 text-[9px] font-bold">Plant Field 2</button>
+                                    ${bState.thirdFieldUnlocked[pIdx] ? `<button type="button" onclick="resolveBohnanzaMarketCard(${mIdx}, 2)" class="px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 text-[9px] font-bold">Plant Field 3</button>` : ''}
+                                    <button type="button" onclick="resolveBohnanzaMarketCard(${mIdx}, -1)" class="px-2 py-0.5 rounded bg-purple-500/25 text-purple-200 border border-purple-400/40 text-[9px] font-bold">Gift / Trade</button>
+                                </div>
+                            `;
+                            handEl.appendChild(cardBox);
+                        });
+                    } else {
+                        (cardSuiteState.hands[pIdx] || []).forEach((c, idx) => {
+                            const isFront = (idx === 0);
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.onclick = () => playSuiteCard(idx);
+                            btn.className = isFront
+                                ? "col-span-2 px-2.5 py-1.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900 border-2 border-emerald-400 text-left flex items-center justify-between shadow transition"
+                                : "px-2 py-1 rounded-xl bg-gray-950/70 border border-gray-800 opacity-65 text-left flex flex-col justify-between cursor-not-allowed";
+                            btn.innerHTML = isFront
+                                ? `<span class="text-[10px] font-extrabold text-white">▶ #1 FRONT CARD: ${c.label}</span><span class="text-[9px] text-emerald-300 font-bold">Must Plant First</span>`
+                                : `<span class="text-[9px] font-bold text-gray-400">#${idx + 1}: ${c.suit}</span><span class="text-[8px] text-gray-500">Fixed Order</span>`;
+                            handEl.appendChild(btn);
+                        });
+                    }
+                }
+
+                const acts = document.getElementById('card-suite-actions');
+                if (acts) {
+                    acts.innerHTML = (isSeatHuman && bState.phase === 'plant_hand') ? `
+                        <button type="button" onclick="advanceBohnanzaMarketPhase()" class="w-full px-3 py-1.5 ${bState.plantedThisTurn >= 1 ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 font-extrabold' : 'bg-gray-800 text-gray-400 font-bold'} rounded-xl text-[11px] transition">
+                            <i class="fa-solid fa-shuffle mr-1"></i> Flip 2 Market Cards (Next Phase)
+                        </button>
+                    ` : '';
+                }
+                return;
+            }
 
             const sb = document.getElementById('card-suite-scoreboard');
             if (sb) {
@@ -5324,6 +5746,17 @@
 
         function getCardSuiteSuggestion() {
             if (!cardSuiteState) return "Play your highest-value legal card!";
+            if (cardSuiteState.gameId === 'bohnanza' && cardSuiteState.bohnanza) {
+                const pIdx = currentPlayer - 1;
+                const bState = cardSuiteState.bohnanza;
+                if (bState.phase === 'market_flip' && bState.marketCards.length > 0) {
+                    return `Plant Market "${bState.marketCards[0].suit}" into a matching field, or click Gift / Trade if your fields are full!`;
+                }
+                const front = (cardSuiteState.hands[pIdx] || [])[0];
+                return front
+                    ? `Plant your #1 Front Card (${front.suit}) into a matching or empty Bean Field, then click Flip 2 Market Cards!`
+                    : `Click Flip 2 Market Cards to continue your turn!`;
+            }
             const cfg = CARD_SUITE_CONFIGS[cardSuiteState.gameId] || CARD_SUITE_CONFIGS.uno;
             const pIdx = currentPlayer - 1;
             const hand = cardSuiteState.hands[pIdx] || [];
@@ -7051,11 +7484,12 @@
                     ]
                 },
                 bohnanza: {
-                    contents: '• 154 Illustrated Bean Cards (Blue, Chili, Stink, Green, Soy, Black-Eyed, Red, Garden Beans) & Gold Coin Backings.',
+                    contents: '• 154 Illustrated Bean Cards across 8 Varieties (Blue 20×, Chili 18×, Stink 16×, Green 14×, Soy 12×, Black-Eyed 10×, Red 8×, Garden 6×).\n• 2 Starting Bean Fields per player + 1 Optional 3rd Bean Field (unlockable for 3 Gold Coins) rendered in 3D in front of every seat.',
                     cardMeanings: [
-                        { card: 'Bean Variety Cards (×1, ×2, ×3)', meaning: 'Plant matching bean types in your bean fields. Higher-quantity sets convert into more Gold Coins.' },
-                        { card: 'Harvest Action Card', meaning: 'Cash in a planted bean field immediately—flipping the cards over to score Gold Coins!' },
-                        { card: 'Rare Beans (Garden / Red)', meaning: 'Require fewer cards in a field to yield maximum Gold Coins.' }
+                        { card: 'Fixed Hand Order Rule (#1 Front Card)', meaning: 'You may NEVER rearrange the cards in your hand! You must plant your #1 front card first (and optionally your #2 card) into matching or empty Bean Fields.' },
+                        { card: '3 Bean Fields (2 Free + 3rd Optional for 3 Gold)', meaning: 'Each field holds only ONE variety of bean at a time. Spend 3 Gold Coins anytime to unlock your 3rd Bean Field for extra planting flexibility!' },
+                        { card: 'Beanometer Harvest & Field Protection Rule', meaning: 'Click Harvest on a field to convert stacked beans into Gold Coins (1–4G). You cannot harvest a 1-bean field if another of your fields has 2+ beans.' },
+                        { card: 'Market Flip & Trade + Draw 3 Cards', meaning: 'After planting from hand, flip 2 cards from the deck—you must either plant them in your fields or Gift/Trade them to opponents, then draw 3 cards to the BACK of your hand.' }
                     ]
                 },
                 skat: {

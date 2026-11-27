@@ -1076,10 +1076,11 @@
                 <button onclick="closeDriveSyncModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="space-y-3 text-xs text-gray-300">
-                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Player Flags, Hit Lists, Game Sessions, Invites, Email Alerts, Saved Games, Match Scores, and Move History</strong> automatically sync across devices.</p>
+                <p>Link your <strong>Google Sheet</strong> on Google Drive so that all <strong>Registered Users, Player Flags, Hit Lists, Game Sessions, Invites, Saved Games, Match Scores, and 48-Game Rulebook Folders</strong> sync across devices.</p>
+                <div id="drive-sync-feedback-box" class="hidden p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-[11px] text-emerald-200"></div>
                 <div class="bg-gray-950/80 p-3.5 rounded-xl border border-emerald-500/30 space-y-2.5">
                     <div>
-                        <label class="block font-semibold text-emerald-300 mb-1">Google Apps Script Web App URL</label>
+                        <label class="block font-semibold text-emerald-300 mb-1">Google Apps Script Web App URL (ending in /exec)</label>
                         <input type="url" id="drive-sync-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-emerald-500">
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-2">
@@ -1090,10 +1091,11 @@
                         <span id="drive-last-sync-time" class="text-[10px] text-gray-400">Not synced yet</span>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <button onclick="saveDriveSyncConfig(true)" class="py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-gray-950 font-bold rounded-xl transition">Save & Push Now</button>
-                    <button onclick="pullFromGoogleDriveSheet(false)" class="py-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold rounded-xl transition">Pull from Sheet</button>
-                    <button onclick="exportLocalBackupCSV()" class="py-2 bg-gray-800 text-gray-200 border border-gray-700 font-semibold rounded-xl transition">Download Sheet CSV</button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    <button type="button" onclick="saveDriveSyncConfig(true)" class="py-2 px-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-gray-950 font-extrabold rounded-xl transition">Save & Push Now</button>
+                    <button type="button" onclick="pullFromGoogleDriveSheet(false)" class="py-2 px-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-bold rounded-xl transition">Pull from Sheet</button>
+                    <button type="button" onclick="triggerBuildDriveRulebookLibrary()" class="py-2 px-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold rounded-xl transition">Build 48-Game Drive</button>
+                    <button type="button" onclick="exportLocalBackupCSV()" class="py-2 px-2 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-semibold rounded-xl transition">Download CSV</button>
                 </div>
             </div>
         </div>
@@ -1710,30 +1712,44 @@
                 if (!silent) setDriveSyncFeedback("No Web App URL saved yet. Paste your /exec URL above and click Save & Push Now.", true);
                 return;
             }
-            if (!silent) setDriveSyncFeedback("Pushing Users, Sessions, Invites & Hit List to Google Sheet...");
+            if (!silent) setDriveSyncFeedback("⏳ Pushing Users, Sessions, Invites & Hit List to Google Sheet...");
             try {
-                const payload = JSON.stringify({
+                const payloadObj = {
                     app: 'Intelligames 3D',
                     updatedAt: new Date().toISOString(),
                     users: getUsersRegistry(),
                     sessions: getSessionsRegistry(),
                     hitList: getHitListRegistry()
-                });
-                await fetch(cfg.url, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: payload
-                });
+                };
+                const payloadStr = JSON.stringify(payloadObj);
+                const sep = cfg.url.includes('?') ? '&' : '?';
+                const getSyncUrl = `${cfg.url}${sep}action=PUSH_SYNC&payload=${encodeURIComponent(payloadStr)}`;
+
+                // Use GET with encoded payload so Google Apps Script's 302 redirect never drops POST body in sandboxed browsers
+                if (getSyncUrl.length < 7500) {
+                    const res = await fetch(getSyncUrl);
+                    const result = await res.json();
+                    if (!result || result.ok === false) {
+                        throw new Error((result && result.error) || 'Sheet returned an error');
+                    }
+                } else {
+                    await fetch(cfg.url, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: payloadStr
+                    });
+                }
+
                 cfg.lastSync = new Date().toLocaleTimeString();
                 localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
                 updateDriveSyncBadge('connected', cfg.lastSync);
                 if (!silent) {
-                    setDriveSyncFeedback(`✅ Synced successfully at ${cfg.lastSync}! Check your Google Sheet tabs (Users, Sessions_Invites, Dashboard).`);
+                    setDriveSyncFeedback(`✅ Synced ${payloadObj.users.length} user(s) & ${payloadObj.sessions.length} session(s) at ${cfg.lastSync}! Check your Google Sheet tabs now.`);
                     showToast("Synced to Google Drive Sheet!");
                 }
             } catch (e) {
-                if (!silent) setDriveSyncFeedback(`❌ Sync failed: ${e.message || e}. Make sure Deployment is set to 'Execute as: Me' and 'Who has access: Anyone'.`, true);
+                if (!silent) setDriveSyncFeedback(`❌ Sync failed: ${e.message || e}. Make sure you deployed a NEW VERSION of your Web App with 'Execute as: Me' and 'Who has access: Anyone'.`, true);
             }
         }
 
@@ -1747,20 +1763,17 @@
             saveDriveSyncConfig(false);
             setDriveSyncFeedback("⏳ Generating Master Folder + 48 Subfolders & Official Rulebook Google Docs on your Google Drive (takes ~15–25 seconds)...");
             try {
-                await fetch(url, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        app: 'Intelligames 3D',
-                        action: 'GENERATE_DRIVE_RULEBOOKS',
-                        updatedAt: new Date().toISOString()
-                    })
-                });
-                setDriveSyncFeedback("✅ Request sent! Open your Google Drive root folder 'Intelligames 3D - Master Games Library' and your Sheet's 'Games_Directory' tab in ~20 seconds to view all 48 subfolders & rulebooks!");
-                showToast("Building 48-Game Drive Library!");
+                const sep = url.includes('?') ? '&' : '?';
+                const res = await fetch(`${url}${sep}action=GENERATE_DRIVE_RULEBOOKS`);
+                const data = await res.json();
+                if (data && data.ok) {
+                    setDriveSyncFeedback(`✅ Created "${data.rootFolderName}" with ${data.count} game subfolders & rulebooks! Check Google Drive or your Sheet's 'Games_Directory' tab.`);
+                    showToast("48-Game Drive Library Built!");
+                } else {
+                    throw new Error('Unexpected response from Google Drive');
+                }
             } catch (e) {
-                setDriveSyncFeedback(`❌ Could not trigger Drive builder: ${e.message || e}`, true);
+                setDriveSyncFeedback(`❌ Could not build Drive library: ${e.message || e}. Re-deploy your Apps Script Web App as a New Version and authorize Drive permissions.`, true);
             }
         }
 
@@ -3067,18 +3080,73 @@
             updateDriveSyncBadge(cfg.url ? 'connected' : 'unconfigured', cfg.lastSync);
         }
 
-        function updateDriveSyncBadge(state, lastSync) {
-            const dot = document.getElementById('drive-sync-dot');
-            const label = document.getElementById('drive-sync-hud-label');
-            const timeEl = document.getElementById('drive-last-sync-time');
-            if (dot) dot.className = state === 'connected' ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-amber-400';
-            if (label) label.innerText = state === 'connected' ? 'Sheet Synced' : 'Drive Sync';
-            if (timeEl) timeEl.innerText = lastSync ? `Last synced: ${lastSync}` : 'Not synced yet';
+        function detectPhysicalDeviceAndScreen() {
+            const width = window.innerWidth || document.documentElement.clientWidth || 1280;
+            const height = window.innerHeight || document.documentElement.clientHeight || 800;
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            let type = 'desktop';
+            if (width < 640) type = 'mobile';
+            else if (width < 1024 && isTouch) type = 'tablet';
+            return { type, width, height };
+        }
+
+        function setDisplayProfile(profileVal) {
+            displayProfileSetting = profileVal || 'auto';
+            localStorage.setItem('intelligames_display_profile', displayProfileSetting);
+            ['select-display-profile', 'menu-select-display-profile'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = displayProfileSetting;
+            });
+            applyDisplayProfile();
+        }
+
+        function applyDisplayProfile() {
+            const info = detectPhysicalDeviceAndScreen();
+            const resolved = displayProfileSetting === 'auto' ? info.type : displayProfileSetting;
+            activeResolvedDisplay = resolved;
+            const hudIcon = document.getElementById('device-hud-icon');
+            const hudLabel = document.getElementById('device-hud-label');
+            const hint1 = document.getElementById('detected-device-hint');
+            const hint2 = document.getElementById('menu-detected-device-hint');
+            if (hint1) hint1.innerText = `(${info.type.toUpperCase()})`;
+            if (hint2) hint2.innerText = `(${info.type.toUpperCase()})`;
+
+            const leftDockOffset = resolved === 'mobile' ? 0 : -1.85;
+            if (resolved === 'mobile') {
+                if (hudIcon) hudIcon.className = 'fa-solid fa-mobile-screen-button text-emerald-400 text-xs';
+                if (hudLabel) hudLabel.innerText = `Mobile (${info.width}×${info.height})`;
+                if (camera) { camera.fov = 56; camera.position.set(0, 15.5, 17.5); camera.updateProjectionMatrix(); }
+            } else if (resolved === 'tablet') {
+                if (hudIcon) hudIcon.className = 'fa-solid fa-tablet-screen-button text-emerald-400 text-xs';
+                if (hudLabel) hudLabel.innerText = `Tablet (${info.width}×${info.height})`;
+                if (camera) { camera.fov = 48; camera.position.set(leftDockOffset, 13.5, 15.5); camera.updateProjectionMatrix(); }
+            } else {
+                if (hudIcon) hudIcon.className = 'fa-solid fa-desktop text-emerald-400 text-xs';
+                if (hudLabel) hudLabel.innerText = `Desktop (${info.width}×${info.height})`;
+                if (camera) { camera.fov = 45; camera.position.set(leftDockOffset, 12.2, 14.2); camera.updateProjectionMatrix(); }
+            }
+            if (controls) {
+                controls.target.set(leftDockOffset, 0, 0);
+                controls.update();
+            }
+        }
+
+        function initDeviceAndDisplayDetection() {
+            displayProfileSetting = localStorage.getItem('intelligames_display_profile') || 'auto';
+            ['select-display-profile', 'menu-select-display-profile'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = displayProfileSetting;
+            });
+            applyDisplayProfile();
+            window.addEventListener('resize', applyDisplayProfile);
         }
 
         function openDriveSyncModal() {
             const cfg = getDriveSyncConfig();
-            document.getElementById('drive-sync-url').value = cfg.url || '';
+            const urlInp = document.getElementById('drive-sync-url');
+            const autoChk = document.getElementById('drive-auto-sync');
+            if (urlInp) urlInp.value = cfg.url || '';
+            if (autoChk) autoChk.checked = cfg.autoSync !== false;
             document.getElementById('drive-sync-modal').classList.remove('hidden');
         }
 
@@ -3086,30 +3154,22 @@
             document.getElementById('drive-sync-modal').classList.add('hidden');
         }
 
-        function saveDriveSyncConfig(pushNow = false) {
-            const url = (document.getElementById('drive-sync-url').value || '').trim();
-            const autoSync = document.getElementById('drive-auto-sync').checked;
-            localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify({ url, autoSync, lastSync: null }));
-            if (pushNow && url) pushToGoogleDriveSheet(false);
-        }
-
-        async function pushToGoogleDriveSheet(silent = true) {
-            const cfg = getDriveSyncConfig();
-            if (!cfg.url) return;
-            try {
-                await fetch(cfg.url, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ app: 'Intelligames 3D', updatedAt: new Date().toISOString(), users: getUsersRegistry(), sessions: getSessionsRegistry(), hitList: getHitListRegistry() }) });
-                cfg.lastSync = new Date().toLocaleTimeString();
-                localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
-                updateDriveSyncBadge('connected', cfg.lastSync);
-                if (!silent) showToast("Synced to Google Drive Sheet!");
-            } catch (e) {}
-        }
-
         async function pullFromGoogleDriveSheet(silent = false) {
+            const urlInp = document.getElementById('drive-sync-url');
+            const liveUrl = (urlInp ? urlInp.value : '').trim();
             const cfg = getDriveSyncConfig();
-            if (!cfg.url) return;
+            const targetUrl = liveUrl || cfg.url;
+            if (!targetUrl) {
+                if (!silent) setDriveSyncFeedback("Please paste your Google Apps Script Web App '/exec' URL first before pulling.", true);
+                return;
+            }
+            if (liveUrl && liveUrl !== cfg.url) {
+                cfg.url = liveUrl;
+                localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
+            }
+            if (!silent) setDriveSyncFeedback("Pulling latest users, sessions & Hit List from Google Sheet...");
             try {
-                const res = await fetch(cfg.url);
+                const res = await fetch(targetUrl);
                 const data = await res.json();
                 if (Array.isArray(data.users)) localStorage.setItem('intelligames_users_db', JSON.stringify(data.users));
                 if (Array.isArray(data.sessions)) {
@@ -3126,57 +3186,15 @@
                     renderPendingInvitesInline();
                 }
                 if (Array.isArray(data.hitList)) localStorage.setItem('intelligames_hitlist_db', JSON.stringify(data.hitList));
-                if (!silent) showToast("Pulled latest users, game requests & scores from Google Drive Sheet!");
-            } catch (e) {}
-        }
-
-        // --- DEVICE & DISPLAY DETECTION ---
-        function detectPhysicalDeviceAndScreen() {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            let detectedType = 'desktop';
-            if (w < 640) detectedType = 'mobile';
-            else if (w < 1024) detectedType = 'tablet';
-            return { type: detectedType, width: w, height: h, orientation: w >= h ? 'Landscape' : 'Portrait' };
-        }
-
-        function initDeviceAndDisplayDetection() {
-            const savedProfile = localStorage.getItem('intelligames_display_profile');
-            if (savedProfile && ['auto', 'mobile', 'tablet', 'desktop'].includes(savedProfile)) displayProfileSetting = savedProfile;
-            applyDisplayProfile();
-            window.addEventListener('resize', () => applyDisplayProfile());
-        }
-
-        function setDisplayProfile(profileValue) {
-            displayProfileSetting = profileValue;
-            localStorage.setItem('intelligames_display_profile', profileValue);
-            applyDisplayProfile();
-        }
-
-        function applyDisplayProfile() {
-            const info = detectPhysicalDeviceAndScreen();
-            const resolved = displayProfileSetting === 'auto' ? info.type : displayProfileSetting;
-            activeResolvedDisplay = resolved;
-            const hudIcon = document.getElementById('device-hud-icon');
-            const hudLabel = document.getElementById('device-hud-label');
-            // Shift camera target left on wide screens so the 3D board/table/dice sits cleanly in the open center-right area beside the left HUD dock
-            const leftDockOffset = resolved === 'mobile' ? 0 : -1.85;
-            if (resolved === 'mobile') {
-                if (hudIcon) hudIcon.className = 'fa-solid fa-mobile-screen-button text-emerald-400 text-xs';
-                if (hudLabel) hudLabel.innerText = `Mobile (${info.width}×${info.height})`;
-                if (camera) { camera.fov = 52; camera.position.set(0, 12.8, 14.5); camera.updateProjectionMatrix(); }
-            } else if (resolved === 'tablet') {
-                if (hudIcon) hudIcon.className = 'fa-solid fa-tablet-screen-button text-emerald-400 text-xs';
-                if (hudLabel) hudLabel.innerText = `Tablet (${info.width}×${info.height})`;
-                if (camera) { camera.fov = 46; camera.position.set(leftDockOffset, 11.2, 12.8); camera.updateProjectionMatrix(); }
-            } else {
-                if (hudIcon) hudIcon.className = 'fa-solid fa-desktop text-emerald-400 text-xs';
-                if (hudLabel) hudLabel.innerText = `Desktop (${info.width}×${info.height})`;
-                if (camera) { camera.fov = 44; camera.position.set(leftDockOffset, 10.2, 11.8); camera.updateProjectionMatrix(); }
-            }
-            if (controls) {
-                controls.target.x = leftDockOffset;
-                controls.update();
+                cfg.lastSync = new Date().toLocaleTimeString();
+                localStorage.setItem('intelligames_drive_sync_cfg', JSON.stringify(cfg));
+                updateDriveSyncBadge('connected', cfg.lastSync);
+                if (!silent) {
+                    setDriveSyncFeedback(`✅ Pulled latest data from Google Sheet at ${cfg.lastSync}!`);
+                    showToast("Pulled latest users, game requests & scores from Google Drive Sheet!");
+                }
+            } catch (e) {
+                if (!silent) setDriveSyncFeedback(`❌ Pull failed: ${e.message || e}. Make sure your Web App deployment has 'Who has access: Anyone'.`, true);
             }
         }
 
